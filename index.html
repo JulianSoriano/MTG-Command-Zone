@@ -617,7 +617,6 @@
         <button id="lsClearBtn" type="button" class="secondary">Clear</button>
       </div>
       <label class="ls-inline"><input type="checkbox" id="lsHideClean" checked> Hide cards that aren't on the ban list</label>
-      <p class="hint">Try an example: <a href="#" data-ls-ex="salty">a salty list</a> &middot; <a href="#" data-ls-ex="clean">a clean casual list</a></p>
       <div id="lsResults" aria-live="polite"></div>
     </div>
 
@@ -2445,27 +2444,6 @@
         out.innerHTML = html;
       }
 
-      const EXAMPLES = {
-        salty: {
-          cmd: "Atraxa, Praetors' Voice",
-          deck: ["Demonic Tutor", "Vampiric Tutor", "Rhystic Study", "Smothering Tithe", "Sol Ring", "Mana Crypt",
-            "Jeweled Lotus", "Armageddon", "Cyclonic Rift", "Time Warp", "Expropriate", "Avacyn, Angel of Hope",
-            "Thassa's Oracle", "Edgar Markov", "Llanowar Elves", "10 Forest"].join("\n")
-        },
-        clean: {
-          cmd: "Tymna the Weaver",
-          deck: ["Lightning Greaves", "Cultivate", "Eternal Witness", "Beast Within", "Arcane Signet",
-            "Birds of Paradise", "Command Tower", "10 Forest", "8 Island"].join("\n")
-        }
-      };
-      $("#lowSodiumPage").addEventListener("click", ev => {
-        const ex = ev.target.closest("[data-ls-ex]");
-        if (!ex) return;
-        ev.preventDefault();
-        const e = EXAMPLES[ex.dataset.lsEx];
-        $("#lsCmd").value = e.cmd; $("#lsDeck").value = e.deck;
-        runCheck();
-      });
       $("#lsCheckBtn").addEventListener("click", runCheck);
       $("#lsHideClean").addEventListener("change", () => { if ($("#lsResults").innerHTML) runCheck(); });
       $("#lsClearBtn").addEventListener("click", () => {
