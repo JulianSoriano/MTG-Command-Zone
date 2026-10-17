@@ -2525,6 +2525,11 @@
 
     const hasArt = c => !!(c && (cardImageUrl(c, "png") || cardImageUrl(c, "large") || cardImageUrl(c, "normal")));
 
+    // Art Series cards (and other "memorabilia" products) share a name with the real
+    // card but aren't gameplay cards, so they never belong in the print choices.
+    const isGameplayPrint = c => !!c && c.layout !== "art_series" && c.set_type !== "memorabilia";
+    const usablePrint = c => hasArt(c) && isGameplayPrint(c) && !c.digital;
+
     async function fetchStylePrints(cards, style) {
       const result = new Map();   // lowercase front-face name -> best matching print
       const names = [...new Set(cards.map(c => primaryLookupName(c.name)))];
@@ -2532,7 +2537,7 @@
       for (let i = 0; i < names.length; i += CHUNK) {
         const chunk = names.slice(i, i + CHUNK);
         const nameQ = "(" + chunk.map(n => `!"${n.replace(/["\\]/g, "\\$&")}"`).join(" or ") + ")";
-        const q = [nameQ, "lang:en", "game:paper", "-is:digital", "-is:oversized", style.q].filter(Boolean).join(" ");
+        const q = [nameQ, "lang:en", "game:paper", "-is:digital", "-is:oversized", "-layout:art_series", "-st:memorabilia", style.q].filter(Boolean).join(" ");
         let url = `${SCRYFALL_SEARCH}?q=${encodeURIComponent(q)}&unique=prints&order=released&dir=${style.dir || "desc"}`;
         for (let page = 0; url && page < 4; page++) {
           const res = await fetch(url);
@@ -2541,7 +2546,7 @@
           const data = await res.json();
           for (const c of data.data || []) {
             const k = primaryLookupName(c.name).toLowerCase();
-            if (!result.has(k) && hasArt(c)) result.set(k, c);
+            if (!result.has(k) && usablePrint(c)) result.set(k, c);
           }
           url = chunk.every(n => result.has(n.toLowerCase())) ? null : (data.has_more ? data.next_page : null);
           await sleep(BATCH_DELAY_MS);
@@ -2605,7 +2610,7 @@
         url = data.has_more ? data.next_page : null;
         if (url) await sleep(BATCH_DELAY_MS);
       }
-      let list = out.filter(c => !c.digital && hasArt(c));
+      let list = out.filter(usablePrint);
       const english = list.filter(c => !c.lang || c.lang === "en");
       if (english.length) list = english;
       printsCache.set(key, list);

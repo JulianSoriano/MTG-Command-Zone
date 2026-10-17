@@ -11,7 +11,7 @@ The app has four tabs, in this order:
 ### Print Proxy Sheets
 Paste a decklist and print it at **genuine card size** (2.5″ × 3.5″), 9 cards per US Letter page in a 3×3 grid with cut guides — ready to save as a PDF via your browser's print dialog (set scale to 100%, paper size to Letter) for playtesting/proxying. Includes options to skip basic lands and to include/exclude the commander.
 
-**Print style** — a dropdown that picks a matching printing for every card on the sheet: default, oldest (original), newest, borderless, extended art, showcase, full art, retro frame (1993/1997), promo, or textless. Cards with no printing in that style keep their default art, and the sheet tells you which ones. After generating, hover (or tap) any card to pick a specific printing of just that card from a list of every set it's been printed in. Changed cards get a purple outline on screen; the pickers and outlines never appear on the printed page.
+**Print style** — a dropdown that picks a matching printing for every card on the sheet: default, oldest (original), newest, borderless, extended art, showcase, full art, retro frame (1993/1997), promo, or textless. Cards with no printing in that style keep their default art, and the sheet tells you which ones. After generating, hover (or tap) any card to pick a specific printing of just that card from a list of every set it's been printed in. Art Series cards and other non-gameplay "memorabilia" printings are never offered. Changed cards get a purple outline on screen; the pickers and outlines never appear on the printed page.
 
 ### Low Sodium
 Everything about the Low Sodium 2.0 house format in one place (the list is built in, so it all works instantly with no card lookup):
