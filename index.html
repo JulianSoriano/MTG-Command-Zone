@@ -509,16 +509,16 @@
 <body>
 <div class="wrap">
   <h1>MTG Command Zone</h1>
-  <p class="sub">Analyze a Commander decklist, print actual-size proxy sheets, and roll dice &amp; track life, mana, and counters during the game &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
+  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, and analyze a Commander decklist &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
-    <button type="button" id="navAnalyzer" class="active">Deck Analyzer</button>
-    <button type="button" id="navPrint">Print Proxy Sheets</button>
-    <button type="button" id="navGame">Game Tools</button>
+    <button type="button" id="navPrint" class="active">Print Proxy Sheets</button>
     <button type="button" id="navLowSodium">Low Sodium</button>
+    <button type="button" id="navGame">Game Tools</button>
+    <button type="button" id="navAnalyzer">Deck Analyzer</button>
   </div>
 
-  <div id="analyzerPage" class="page active">
+  <div id="analyzerPage" class="page">
   <div class="panel">
     <div class="field">
       <label for="commanderInput">Commander (or Commander + Partner/Background) &mdash; one per line</label>
@@ -553,7 +553,7 @@
   </footer>
   </div><!-- /analyzerPage -->
 
-  <div id="printPage" class="page">
+  <div id="printPage" class="page active">
     <div class="panel">
       <div class="field">
         <label for="printCommanderInput">Commander (or Commander + Partner/Background) &mdash; one per line</label>
@@ -2043,10 +2043,10 @@
    * ------------------------------------------------------------------- */
   (function wirePageNav() {
     const pages = {
-      analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
       print: { nav: $("#navPrint"), page: $("#printPage") },
+      lowsodium: { nav: $("#navLowSodium"), page: $("#lowSodiumPage") },
       game: { nav: $("#navGame"), page: $("#gamePage") },
-      lowsodium: { nav: $("#navLowSodium"), page: $("#lowSodiumPage") }
+      analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") }
     };
     function showPage(which) {
       for (const key of Object.keys(pages)) {
