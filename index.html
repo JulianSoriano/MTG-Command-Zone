@@ -419,20 +419,58 @@
   }
   .ls-tile:hover, .ls-tile:focus-visible { border-color: var(--accent); }
   .ls-tile .c { font-size: 0.78rem; font-weight: 500; color: var(--text-dim); }
-  .ls-cat { border: 1px solid var(--border); border-radius: 10px; margin: 8px 0; background: var(--panel); }
-  .ls-cat > summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
-  .ls-cat > summary .hint { display: inline; margin-left: 6px; font-weight: 400; }
-  .ls-cat-body { padding: 0 14px 12px; }
-  .ls-rule { border-top: 1px solid var(--border); padding: 10px 0; }
-  .ls-rule p { margin: 0 0 6px; }
-  .ls-rule details > summary { cursor: pointer; font-size: 0.85rem; color: var(--accent); }
-  .ls-cards { font-size: 0.85rem; color: var(--text-dim); line-height: 1.7; margin: 6px 0 4px; }
-  .ls-cards-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-dim); margin-top: 8px; }
   .ls-filters { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 4px; }
   @media (min-width: 640px) { .ls-filters { grid-template-columns: 2fr 1fr 1fr; } }
   .ls-note { border-left: 3px solid var(--warn); background: var(--warn-bg); color: var(--text); padding: 8px 12px; border-radius: 0 8px 8px 0; font-size: 0.85rem; margin: 10px 0; }
   .ls-link-row { margin-top: 10px; }
   @media (max-width: 520px) { .ls-row { flex-direction: column; gap: 4px; } .ls-row .chipcol { min-width: 0; } }
+
+  /* Ban list as a card grid, grouped by rule */
+  .ls-section h3 { margin: 26px 0 2px; display: flex; align-items: baseline; gap: 8px; scroll-margin-top: 12px; }
+  .ls-section h3 .hint { margin: 0; font-weight: 400; }
+  .ls-ruleblock { margin: 6px 0 14px; }
+  .ls-ruletext {
+    font-size: 0.88rem; margin: 10px 0 10px; padding: 8px 12px; border-left: 3px solid var(--accent);
+    background: var(--accent-dim); border-radius: 0 8px 8px 0;
+  }
+  .ls-ruletext .hint { display: inline; margin: 0; }
+  .ls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px 10px; }
+  .ls-card {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%;
+    background: none; border: 0; padding: 0; margin: 0; box-shadow: none; min-height: 0;
+    color: var(--text); text-align: left; cursor: pointer; font-weight: 500; font-size: 0.78rem; line-height: 1.25;
+  }
+  .ls-art {
+    position: relative; display: block; width: 100%; aspect-ratio: 488 / 680; overflow: hidden;
+    border-radius: 5% / 3.6%; background: var(--accent-dim); border: 1px solid var(--border);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .ls-card:hover .ls-art, .ls-card:focus-visible .ls-art { transform: translateY(-2px); border-color: var(--accent); }
+  .ls-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 0.25s ease; }
+  .ls-art.loaded img { opacity: 1; }
+  .ls-art.loaded .ls-ph { display: none; }
+  .ls-ph, .ls-ph-lg {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 8px; font-size: 0.74rem; color: var(--text-dim);
+  }
+  .ls-ph-lg { position: static; min-height: 200px; font-size: 1rem; }
+  .ls-lightbox {
+    position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, 0.72);
+    display: flex; align-items: center; justify-content: center; padding: 16px; overflow-y: auto;
+  }
+  .ls-lightbox[hidden] { display: none; }
+  .ls-lb-inner {
+    position: relative; background: var(--panel); color: var(--text); border-radius: 14px;
+    padding: 16px; max-width: 760px; width: 100%; display: grid; grid-template-columns: 1fr; gap: 14px;
+  }
+  @media (min-width: 640px) { .ls-lb-inner { grid-template-columns: 300px 1fr; } }
+  .ls-lb-art img { width: 100%; max-width: 300px; display: block; margin: 0 auto; border-radius: 5% / 3.6%; }
+  .ls-lb-info h3 { margin: 0 0 8px; padding-right: 36px; }
+  .ls-lb-close {
+    position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; min-height: 0; padding: 0;
+    border-radius: 999px; background: var(--accent-dim); color: var(--accent); border: 0; font-size: 1.3rem; line-height: 1; cursor: pointer;
+  }
+  @media (max-width: 520px) { .ls-grid { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 10px 8px; } }
 </style>
 </head>
 <body>
@@ -538,7 +576,7 @@
       <h2>The Low Sodium rules</h2>
       <p class="ls-lede">Low Sodium is a Commander house format built to keep multiplayer games free of the play patterns that tend to sour a table. Rather than capping power level, it bans specific <em>kinds of effects</em> &mdash; and every card that does them &mdash; so whatever is left can be played freely. Decks can still range from slow and silly to fast and focused.</p>
       <h3>What's banned</h3>
-      <p class="hint">Tap a rule to jump to its exact wording and the cards it bans. Counts are cards on the list.</p>
+      <p class="hint">Tap a rule to jump to the cards it bans. Counts are cards on the list.</p>
       <ul class="ls-tiles" id="lsTiles"></ul>
       <h3>How the two lists work</h3>
       <ul>
@@ -548,14 +586,11 @@
       </ul>
       <div class="ls-note">The &ldquo;locks&rdquo; and &ldquo;severe resource imbalances&rdquo; rules involve judgment calls &mdash; they exist to catch the most one-sided engines (think Rhystic Study or Smothering Tithe) and game-ending locks (think Avacyn, Angel of Hope or Constant Mists), so expect the exact wording to be broader than it looks.</div>
       <p class="hint" id="lsSnapshot"></p>
-      <h3>Every rule, word for word</h3>
-      <p class="hint">Open a category to see each rule as written on the list, how many cards it catches, and which ones.</p>
-      <div id="lsCats"></div>
     </div>
 
     <div class="panel" id="lsBrowsePanel">
-      <h2>Browse the ban list</h2>
-      <p class="hint">Search by card name or by words in the rule.</p>
+      <h2>The ban list, by rule</h2>
+      <p class="hint">Every banned card, grouped under the exact rule that bans it. Search by card name or by words in a rule. Card art loads from Scryfall as you scroll.</p>
       <div class="ls-filters">
         <input type="text" id="lsSearch" placeholder="Search cards or rule text&hellip;" aria-label="Search the ban list">
         <select id="lsScope" aria-label="Which list">
@@ -2003,7 +2038,7 @@
         ["Game Changers", ["Game Changer"]]
       ];
       const SMALL_WORDS = / (Of|The|A|An|And|In|On|To|For|With|From|At|By|Or|As|But|Nor)(?= )/g;
-      const catId = c => "ls-cat-" + c.replace(/\W+/g, "-").toLowerCase();
+      const catId = c => "lsg-" + c.replace(/\W+/g, "-").toLowerCase();
       const plural = (n, w) => `${n.toLocaleString()} ${w}${n === 1 ? "" : "s"}`;
 
       function displayName(key) {
@@ -2042,71 +2077,115 @@
         return index;
       }
 
-      /* ---------------- rules breakdown ---------------- */
+      /* ---------------- rule tiles (jump links) ---------------- */
       function renderRules() {
         const { byCat } = getIndex();
         $("#lsTiles").innerHTML = GENERAL.map(([label, cats]) => {
           const n = cats.reduce((s, c) => s + (byCat[c] ? byCat[c].cards.size : 0), 0);
           return `<li><button type="button" class="ls-tile" data-ls-cat="${esc(cats.join("|"))}">${esc(label)}<span class="c">${plural(n, "card")}</span></button></li>`;
         }).join("");
-
-        $("#lsCats").innerHTML = GENERAL.flatMap(g => g[1]).filter(c => byCat[c]).map(c => {
-          const cat = byCat[c];
-          return `<details class="ls-cat" id="${catId(c)}" data-cat="${esc(c)}">
-            <summary>${esc(c)}<span class="hint">${plural(cat.cards.size, "card")} &middot; ${plural(cat.rules.size, "rule")}</span></summary>
-            <div class="ls-cat-body"></div></details>`;
-        }).join("");
-
         const meta = LOW_SODIUM_2.meta || {};
         $("#lsSnapshot").textContent = meta.updated
           ? `Built-in list snapshot: ${meta.updated} · ${(meta.cards || 0).toLocaleString()} cards. The list is maintained by the format's owners and changes over time.`
           : "";
       }
 
-      function fillCategory(detailsEl) {
-        const body = detailsEl.querySelector(".ls-cat-body");
-        if (!body || body.dataset.filled) return;
-        const cat = getIndex().byCat[detailsEl.dataset.cat];
-        if (!cat) return;
-        const rules = [...cat.rules.entries()].sort((a, b) =>
-          (b[1].deck.length + b[1].commander.length) - (a[1].deck.length + a[1].commander.length));
-        body.innerHTML = rules.map(([text, groups]) => {
-          const total = groups.deck.length + groups.commander.length;
-          const list = (label, names) => names.length
-            ? `<div class="ls-cards-label">${label} (${names.length.toLocaleString()})</div><div class="ls-cards">${names.map(esc).join(" &middot; ")}</div>` : "";
-          return `<div class="ls-rule"><p>${esc(text)}</p>
-            <details><summary>${plural(total, "card")}</summary>
-            ${list("Banned everywhere", groups.deck)}${list("Banned as commander only", groups.commander)}</details></div>`;
-        }).join("");
-        body.dataset.filled = "1";
+      /* ---------------- ban list: grouped by rule, shown as a card grid ---------------- */
+      const PER_GROUP = 24;            // tiles shown per rule before "Show all"
+      const entryByKey = new Map();    // "key|scope" -> entry (for the enlarge view)
+      const groupData = new Map();     // group id -> entries not yet rendered
+      const imgCache = new Map();      // card key -> small image URL, or null when there is no art
+      const imgTries = new Map();
+      const imgQueue = [];
+      let imgBusy = false;
+
+      // Card art comes from Scryfall, fetched only for tiles that scroll into view
+      // and requested in batches (not one request per card) so a 2,900-card list
+      // never floods their API.
+      const observer = "IntersectionObserver" in window
+        ? new IntersectionObserver(entries => entries.forEach(en => {
+            if (en.isIntersecting) { observer.unobserve(en.target); wantImage(en.target); }
+          }), { rootMargin: "400px 0px" })
+        : null;
+
+      function paintImage(el, url) {
+        const art = el.querySelector(".ls-art");
+        if (!art || art.dataset.painted) return;
+        art.dataset.painted = "1";
+        if (!url) { art.classList.add("noart"); return; }
+        const img = new Image();
+        img.alt = "";
+        img.decoding = "async";
+        img.onload = () => art.classList.add("loaded");
+        img.onerror = () => art.classList.add("noart");
+        img.src = url;
+        art.appendChild(img);
       }
 
-      $("#lsCats").addEventListener("toggle", ev => {
-        if (ev.target.matches && ev.target.matches("details.ls-cat") && ev.target.open) fillCategory(ev.target);
-      }, true);
-
-      $("#lsTiles").addEventListener("click", ev => {
-        const btn = ev.target.closest("[data-ls-cat]");
-        if (!btn) return;
-        const els = btn.dataset.lsCat.split("|").map(c => document.getElementById(catId(c))).filter(Boolean);
-        els.forEach(el => { el.open = true; fillCategory(el); });
-        if (els[0]) els[0].scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-
-      /* ---------------- ban list browser ---------------- */
-      const PAGE = 60;
-      let browseLimit = PAGE;
-
-      function entryRow(e) {
-        return `<div class="ls-row">
-          <div class="chipcol"><span class="ls-chip ${e.scope === "deck" ? "bad" : "warn"}">${e.scope === "deck" ? "Banned" : "Cmdr only"}</span></div>
-          <div class="main"><div class="ls-name">${esc(e.name)}</div>
-            ${e.reasons.map(r => `<div class="ls-why"><span class="ls-chip cat">${esc(r.c)}</span> ${esc(r.t)}</div>`).join("")}
-          </div></div>`;
+      function wantImage(el) {
+        const key = el.dataset.name.toLowerCase();
+        if (imgCache.has(key)) { paintImage(el, imgCache.get(key)); return; }
+        imgQueue.push(el);
+        pumpImages();
       }
 
-      function renderBrowse(reset) {
-        if (reset) browseLimit = PAGE;
+      async function pumpImages() {
+        if (imgBusy) return;
+        imgBusy = true;
+        try {
+          while (imgQueue.length) {
+            const batch = [];
+            while (imgQueue.length && batch.length < 75) {
+              const el = imgQueue.shift();
+              if (!el.isConnected) continue;
+              const key = el.dataset.name.toLowerCase();
+              if (imgCache.has(key)) { paintImage(el, imgCache.get(key)); continue; }
+              batch.push(el);
+            }
+            if (!batch.length) continue;
+            const names = [...new Set(batch.map(el => el.dataset.name))];
+            try {
+              const { found } = await fetchCollection(names);
+              batch.forEach(el => {
+                const lc = el.dataset.name.toLowerCase();
+                const card = found.get(lc) || found.get(primaryLookupName(el.dataset.name).toLowerCase());
+                const url = card ? cardImageUrl(card, "small") : null;
+                imgCache.set(lc, url);
+                paintImage(el, url);
+              });
+            } catch (err) {
+              // Transient failure (offline, rate limit): retry a couple of times, then
+              // leave those tiles as text so the list stays fully usable.
+              await sleep(1500);
+              batch.forEach(el => {
+                const lc = el.dataset.name.toLowerCase();
+                const n = (imgTries.get(lc) || 0) + 1;
+                imgTries.set(lc, n);
+                if (n < 3) imgQueue.push(el); else { imgCache.set(lc, null); paintImage(el, null); }
+              });
+            }
+            await sleep(120);
+          }
+        } finally {
+          imgBusy = false;
+        }
+      }
+
+      function tileHtml(e) {
+        return `<button type="button" class="ls-card" data-key="${esc(e.key)}" data-scope="${e.scope}" data-name="${esc(e.name)}" aria-label="${esc(e.name)}">
+          <span class="ls-art"><span class="ls-ph">${esc(e.name)}</span></span>
+          <span class="ls-cn">${esc(e.name)}</span>${e.scope === "commander" ? `<span class="ls-chip warn">Cmdr only</span>` : ""}</button>`;
+      }
+
+      function addTiles(gridEl, list) {
+        const frag = document.createElement("div");
+        frag.innerHTML = list.map(tileHtml).join("");
+        const tiles = [...frag.children];
+        tiles.forEach(t => gridEl.appendChild(t));
+        tiles.forEach(t => (observer ? observer.observe(t) : wantImage(t)));
+      }
+
+      function renderBrowse() {
         const { entries } = getIndex();
         const terms = normalizePunctuation($("#lsSearch").value).toLowerCase().split(/\s+/).filter(Boolean);
         const scope = $("#lsScope").value, cat = $("#lsCatFilter").value;
@@ -2114,12 +2193,44 @@
           (scope === "all" || e.scope === scope) &&
           (cat === "all" || e.reasons.some(r => r.c === cat)) &&
           terms.every(t => e.hay.includes(t)));
-        const shown = matches.slice(0, browseLimit);
-        $("#lsBrowse").innerHTML =
-          `<p class="hint">${plural(matches.length, "card")} match${matches.length === 1 ? "es" : ""}.</p>` +
-          (shown.length ? shown.map(entryRow).join("") : `<div class="ls-empty">Nothing matches that search.</div>`) +
-          (matches.length > browseLimit
-            ? `<div class="ls-link-row"><button type="button" class="secondary" id="lsMore">Show ${Math.min(PAGE, matches.length - browseLimit)} more</button></div>` : "");
+
+        // category -> rule text -> cards, in the format's own order of rules, biggest rules first
+        const tree = new Map();
+        for (const e of matches) {
+          entryByKey.set(e.key + "|" + e.scope, e);
+          for (const r of e.reasons) {
+            if (cat !== "all" && r.c !== cat) continue;
+            if (!tree.has(r.c)) tree.set(r.c, new Map());
+            const rules = tree.get(r.c);
+            if (!rules.has(r.t)) rules.set(r.t, []);
+            rules.get(r.t).push(e);
+          }
+        }
+        const order = GENERAL.flatMap(g => g[1]).filter(c => tree.has(c));
+        groupData.clear();
+        let html = `<p class="hint">${plural(matches.length, "card")} match${matches.length === 1 ? "es" : ""}. Tap a card to enlarge it.</p>`;
+        if (!matches.length) html += `<div class="ls-empty">Nothing matches that search.</div>`;
+        order.forEach(c => {
+          const rules = [...tree.get(c).entries()].sort((a, b) => b[1].length - a[1].length);
+          const total = new Set(rules.flatMap(([, list]) => list.map(e => e.key + "|" + e.scope))).size;
+          html += `<section class="ls-section" id="${catId(c)}"><h3>${esc(c)} <span class="hint">${plural(total, "card")}</span></h3>`;
+          rules.forEach(([text, list], i) => {
+            const gid = `${catId(c)}-${i}`;
+            groupData.set(gid, list.slice(PER_GROUP));
+            html += `<div class="ls-ruleblock" data-gid="${gid}">
+              <div class="ls-ruletext">${esc(text)} <span class="hint">&middot; ${plural(list.length, "card")}</span></div>
+              <div class="ls-grid"></div>
+              ${list.length > PER_GROUP ? `<div class="ls-link-row"><button type="button" class="secondary" data-more="${gid}">Show all ${list.length.toLocaleString()}</button></div>` : ""}
+            </div>`;
+          });
+          html += `</section>`;
+        });
+        const host = $("#lsBrowse");
+        host.innerHTML = html;
+        order.forEach(c => [...tree.get(c).values()].forEach((list, i) => {
+          const grid = host.querySelector(`[data-gid="${catId(c)}-${i}"] .ls-grid`);
+          if (grid) addTiles(grid, list.slice(0, PER_GROUP));
+        }));
       }
 
       const catSelect = $("#lsCatFilter");
@@ -2128,11 +2239,64 @@
         o.value = c; o.textContent = c; catSelect.appendChild(o);
       });
       let searchTimer = null;
-      $("#lsSearch").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => renderBrowse(true), 120); });
-      $("#lsScope").addEventListener("change", () => renderBrowse(true));
-      catSelect.addEventListener("change", () => renderBrowse(true));
+      $("#lsSearch").addEventListener("input", () => { clearTimeout(searchTimer); searchTimer = setTimeout(renderBrowse, 150); });
+      $("#lsScope").addEventListener("change", renderBrowse);
+      catSelect.addEventListener("change", renderBrowse);
+
+      $("#lsTiles").addEventListener("click", ev => {
+        const btn = ev.target.closest("[data-ls-cat]");
+        if (!btn) return;
+        if ($("#lsSearch").value || $("#lsScope").value !== "all" || catSelect.value !== "all") {
+          $("#lsSearch").value = ""; $("#lsScope").value = "all"; catSelect.value = "all";
+          renderBrowse();
+        }
+        const target = document.getElementById(catId(btn.dataset.lsCat.split("|")[0]));
+        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      /* ---------------- enlarge view ---------------- */
+      const lightbox = document.createElement("div");
+      lightbox.className = "ls-lightbox";
+      lightbox.hidden = true;
+      lightbox.innerHTML = `<div class="ls-lb-inner" role="dialog" aria-modal="true" aria-label="Card detail">
+        <button type="button" class="ls-lb-close" aria-label="Close">&times;</button>
+        <div class="ls-lb-art"></div><div class="ls-lb-info"></div></div>`;
+      document.body.appendChild(lightbox);
+      const closeLightbox = () => { lightbox.hidden = true; };
+      lightbox.addEventListener("click", ev => {
+        if (ev.target === lightbox || ev.target.closest(".ls-lb-close")) closeLightbox();
+      });
+      document.addEventListener("keydown", ev => { if (ev.key === "Escape" && !lightbox.hidden) closeLightbox(); });
+
+      function openLightbox(tile) {
+        const e = entryByKey.get(tile.dataset.key + "|" + tile.dataset.scope);
+        if (!e) return;
+        const small = imgCache.get(e.name.toLowerCase());
+        const art = lightbox.querySelector(".ls-lb-art");
+        art.innerHTML = small
+          ? `<img alt="${esc(e.name)}" src="${esc(small.replace("/small/", "/normal/"))}">`
+          : `<div class="ls-ph-lg">${esc(e.name)}</div>`;
+        lightbox.querySelector(".ls-lb-info").innerHTML =
+          `<h3>${esc(e.name)}</h3>
+           <p><span class="ls-chip ${e.scope === "deck" ? "bad" : "warn"}">${e.scope === "deck" ? "Banned everywhere" : "Banned as commander only"}</span></p>
+           ${e.reasons.map(r => `<div class="ls-why"><span class="ls-chip cat">${esc(r.c)}</span> ${esc(r.t)}</div>`).join("")}`;
+        lightbox.hidden = false;
+        lightbox.querySelector(".ls-lb-close").focus();
+      }
+
       $("#lsBrowse").addEventListener("click", ev => {
-        if (ev.target.id === "lsMore") { browseLimit += PAGE; renderBrowse(false); }
+        const more = ev.target.closest("[data-more]");
+        if (more) {
+          const gid = more.dataset.more;
+          const block = $("#lsBrowse").querySelector(`[data-gid="${gid}"] .ls-grid`);
+          const rest = groupData.get(gid) || [];
+          groupData.set(gid, []);
+          if (block) addTiles(block, rest);
+          more.parentElement.remove();
+          return;
+        }
+        const tile = ev.target.closest(".ls-card");
+        if (tile) openLightbox(tile);
       });
 
       /* ---------------- instant check ---------------- */
@@ -2253,7 +2417,7 @@
       });
 
       renderRules();
-      renderBrowse(true);
+      renderBrowse();
     } catch (err) {
       // The Low Sodium tab is additive; never let a problem here take down the rest of the app.
       console.error("Low Sodium tab failed to initialise:", err);
