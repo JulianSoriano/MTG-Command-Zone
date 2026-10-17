@@ -36,7 +36,7 @@ Everything you need at the table during a game, with state that survives a page 
 Everything about the Low Sodium 2.0 house format in one place (the list is built in, so it all works instantly with no card lookup):
 - **Instant check** — paste a commander and a list (Moxfield/Archidekt exports work as-is) and get a verdict, a per-rule tally, and the reason each banned card is banned. Commander-only bans are marked "OK in 99". One click hands the same list to the full analyzer, which also catches misspelled names.
 - **Rules breakdown** — the twelve headline rules (no tutors, no mass land denial, no extra turns, no discard, no fast mana, no free interaction, no stax or taxes, no mind control, no commander denial, no removal engines, no locks, no severe resource imbalances) with live card counts, plus how the 99 and command-zone lists differ.
-- **The ban list, by rule** — every banned card (~2,900) shown as a card-art grid, grouped by category and then under the exact wording of the rule that bans it. Tap a card to enlarge it and read its rule; search by name or rule text; filter by category or "banned everywhere" vs "commander only". Card art loads from Scryfall as you scroll, in batches.
+- **The ban list, by rule** — every banned card (~2,900) shown as a card-art grid, in collapsible sections by category (closed until you click one, with Expand all / Collapse all), then under the exact wording of the rule that bans it. Tap a card to enlarge it and read its rule; search by name or rule text; filter by category or "banned everywhere" vs "commander only". Card art loads from Scryfall as you scroll, in batches.
 
 The embedded list is a dated snapshot (shown in the app); refresh it by regenerating the `LOW_SODIUM_2` block in `index.html`.
 

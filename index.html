@@ -443,8 +443,24 @@
   @media (max-width: 520px) { .ls-row { flex-direction: column; gap: 4px; } .ls-row .chipcol { min-width: 0; } }
 
   /* Ban list as a card grid, grouped by rule */
-  .ls-section h3 { margin: 26px 0 2px; display: flex; align-items: baseline; gap: 8px; scroll-margin-top: 12px; }
-  .ls-section h3 .hint { margin: 0; font-weight: 400; }
+  .ls-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0 10px; }
+  .ls-toolbar .hint { margin: 0; }
+  .ls-toolbtns { display: flex; gap: 6px; }
+  .ls-toolbtns button { min-height: 0; padding: 5px 12px; font-size: 0.8rem; }
+  .ls-section { border: 1px solid var(--border); border-radius: 10px; margin: 8px 0; background: var(--panel); scroll-margin-top: 12px; }
+  .ls-section > summary {
+    display: flex; align-items: baseline; gap: 10px; cursor: pointer; padding: 12px 14px;
+    list-style: none; user-select: none;
+  }
+  .ls-section > summary::-webkit-details-marker { display: none; }
+  .ls-section > summary::before {
+    content: "\25B8"; color: var(--accent); font-size: 0.95rem; transition: transform 0.15s ease; flex: 0 0 auto;
+  }
+  .ls-section[open] > summary::before { transform: rotate(90deg); }
+  .ls-section > summary:hover { background: var(--accent-dim); border-radius: 10px; }
+  .ls-sec-name { font-weight: 700; font-size: 1rem; }
+  .ls-section > summary .hint { margin: 0; font-weight: 400; }
+  .ls-sec-body { padding: 0 14px 12px; }
   .ls-ruleblock { margin: 6px 0 14px; }
   .ls-ruletext {
     font-size: 0.88rem; margin: 10px 0 10px; padding: 8px 12px; border-left: 3px solid var(--accent);
@@ -2127,6 +2143,7 @@
       const PER_GROUP = 24;            // tiles shown per rule before "Show all"
       const entryByKey = new Map();    // "key|scope" -> entry (for the enlarge view)
       const groupData = new Map();     // group id -> entries not yet rendered
+      const sectionData = new Map();   // section id -> its rules (rendered when first opened)
       const imgCache = new Map();      // card key -> small image URL, or null when there is no art
       const imgTries = new Map();
       const imgQueue = [];
@@ -2241,30 +2258,50 @@
         }
         const order = GENERAL.flatMap(g => g[1]).filter(c => tree.has(c));
         groupData.clear();
-        let html = `<p class="hint">${plural(matches.length, "card")} match${matches.length === 1 ? "es" : ""}. Tap a card to enlarge it.</p>`;
+        sectionData.clear();
+        // Sections start collapsed so the page stays short; searching or filtering
+        // opens the sections that matched so results are never hidden.
+        const filtering = terms.length > 0 || scope !== "all" || cat !== "all";
+        let html = `<div class="ls-toolbar"><span class="hint">${plural(matches.length, "card")} match${matches.length === 1 ? "es" : ""}. Tap a section to open it, then tap a card to enlarge it.</span>
+          ${order.length ? `<span class="ls-toolbtns"><button type="button" class="secondary" data-ls-all="open">Expand all</button><button type="button" class="secondary" data-ls-all="close">Collapse all</button></span>` : ""}</div>`;
         if (!matches.length) html += `<div class="ls-empty">Nothing matches that search.</div>`;
         order.forEach(c => {
           const rules = [...tree.get(c).entries()].sort((a, b) => b[1].length - a[1].length);
           const total = new Set(rules.flatMap(([, list]) => list.map(e => e.key + "|" + e.scope))).size;
-          html += `<section class="ls-section" id="${catId(c)}"><h3>${esc(c)} <span class="hint">${plural(total, "card")}</span></h3>`;
-          rules.forEach(([text, list], i) => {
-            const gid = `${catId(c)}-${i}`;
-            groupData.set(gid, list.slice(PER_GROUP));
-            html += `<div class="ls-ruleblock" data-gid="${gid}">
-              <div class="ls-ruletext">${esc(text)} <span class="hint">&middot; ${plural(list.length, "card")}</span></div>
-              <div class="ls-grid"></div>
-              ${list.length > PER_GROUP ? `<div class="ls-link-row"><button type="button" class="secondary" data-more="${gid}">Show all ${list.length.toLocaleString()}</button></div>` : ""}
-            </div>`;
-          });
-          html += `</section>`;
+          sectionData.set(catId(c), rules);
+          html += `<details class="ls-section" id="${catId(c)}"${filtering ? " open" : ""}>
+            <summary><span class="ls-sec-name">${esc(c)}</span><span class="hint">${plural(total, "card")} &middot; ${plural(rules.length, "rule")}</span></summary>
+            <div class="ls-sec-body"></div></details>`;
         });
         const host = $("#lsBrowse");
         host.innerHTML = html;
-        order.forEach(c => [...tree.get(c).values()].forEach((list, i) => {
-          const grid = host.querySelector(`[data-gid="${catId(c)}-${i}"] .ls-grid`);
-          if (grid) addTiles(grid, list.slice(0, PER_GROUP));
-        }));
+        if (filtering) host.querySelectorAll("details.ls-section").forEach(fillSection);
       }
+
+      // Build a section's rule blocks and card tiles the first time it is opened.
+      function fillSection(sec) {
+        const body = sec.querySelector(".ls-sec-body");
+        const rules = sectionData.get(sec.id);
+        if (!body || !rules || body.dataset.filled) return;
+        body.dataset.filled = "1";
+        body.innerHTML = rules.map(([text, list], i) => {
+          const gid = `${sec.id}-${i}`;
+          groupData.set(gid, list.slice(PER_GROUP));
+          return `<div class="ls-ruleblock" data-gid="${gid}">
+            <div class="ls-ruletext">${esc(text)} <span class="hint">&middot; ${plural(list.length, "card")}</span></div>
+            <div class="ls-grid"></div>
+            ${list.length > PER_GROUP ? `<div class="ls-link-row"><button type="button" class="secondary" data-more="${gid}">Show all ${list.length.toLocaleString()}</button></div>` : ""}
+          </div>`;
+        }).join("");
+        rules.forEach(([, list], i) => {
+          const grid = body.querySelector(`[data-gid="${sec.id}-${i}"] .ls-grid`);
+          if (grid) addTiles(grid, list.slice(0, PER_GROUP));
+        });
+      }
+
+      $("#lsBrowse").addEventListener("toggle", ev => {
+        if (ev.target.matches && ev.target.matches("details.ls-section") && ev.target.open) fillSection(ev.target);
+      }, true);
 
       const catSelect = $("#lsCatFilter");
       GENERAL.flatMap(g => g[1]).forEach(c => {
@@ -2283,8 +2320,9 @@
           $("#lsSearch").value = ""; $("#lsScope").value = "all"; catSelect.value = "all";
           renderBrowse();
         }
-        const target = document.getElementById(catId(btn.dataset.lsCat.split("|")[0]));
-        if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        const targets = btn.dataset.lsCat.split("|").map(c => document.getElementById(catId(c))).filter(Boolean);
+        targets.forEach(t => { t.open = true; fillSection(t); });
+        if (targets[0]) targets[0].scrollIntoView({ behavior: "smooth", block: "start" });
       });
 
       /* ---------------- enlarge view ---------------- */
@@ -2318,6 +2356,12 @@
       }
 
       $("#lsBrowse").addEventListener("click", ev => {
+        const all = ev.target.closest("[data-ls-all]");
+        if (all) {
+          const open = all.dataset.lsAll === "open";
+          $("#lsBrowse").querySelectorAll("details.ls-section").forEach(d => { d.open = open; if (open) fillSection(d); });
+          return;
+        }
         const more = ev.target.closest("[data-more]");
         if (more) {
           const gid = more.dataset.more;
