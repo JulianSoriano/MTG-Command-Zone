@@ -21,6 +21,8 @@ Paste a commander and a decklist to get:
 ### Print Proxy Sheets
 Paste a decklist and print it at **genuine card size** (2.5″ × 3.5″), 9 cards per US Letter page in a 3×3 grid with cut guides — ready to save as a PDF via your browser's print dialog (set scale to 100%, paper size to Letter) for playtesting/proxying. Includes options to skip basic lands and to include/exclude the commander.
 
+**Print style** — a dropdown that picks a matching printing for every card on the sheet: default, oldest (original), newest, borderless, extended art, showcase, full art, retro frame (1993/1997), promo, or textless. Cards with no printing in that style keep their default art, and the sheet tells you which ones. After generating, hover (or tap) any card to pick a specific printing of just that card from a list of every set it's been printed in. Changed cards get a purple outline on screen; the pickers and outlines never appear on the printed page.
+
 ### Game Tools
 Everything you need at the table during a game, with state that survives a page reload:
 - **Dice roller** — d4, d6, d8, d10, d12, d20, d100, or a custom side count; roll up to 20 dice at once, see each face plus the total, and a scrollable history of recent rolls

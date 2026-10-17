@@ -302,7 +302,20 @@
     .proxy-page:last-child { break-after: auto; page-break-after: auto; }
     .proxy-page-label { display: none; }
     .proxy-card { break-inside: avoid; page-break-inside: avoid; }
+    .proxy-print-pick { display: none !important; }
+    .proxy-card.proxy-changed { outline: none; }
   }
+
+  /* Print style + per-card print picker (screen only) */
+  .proxy-style-field { margin: 12px 0 4px; }
+  .proxy-print-pick {
+    position: absolute; left: 6px; right: 6px; bottom: 6px; width: auto; min-height: 0;
+    padding: 5px 6px; font-size: 0.72rem; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--panel); color: var(--text); opacity: 0; transition: opacity 0.15s ease;
+  }
+  .proxy-card:hover .proxy-print-pick, .proxy-card:focus-within .proxy-print-pick { opacity: 0.96; }
+  @media (hover: none) { .proxy-print-pick { opacity: 0.88; } }
+  .proxy-card.proxy-changed { outline: 2px solid var(--accent); outline-offset: -2px; }
   @page { size: letter; margin: 0.2in 0.5in; }
 
   /* ---------------------------------------------------------------------
@@ -530,6 +543,22 @@
         <label for="printDecklistInput">Decklist (99 cards, one per line &mdash; qty is optional, e.g. "1 Sol Ring" or just "Sol Ring")</label>
         <textarea id="printDecklistInput" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;1 Cultivate&#10;..."></textarea>
         <div class="hint">Paste the same list you'd use in the analyzer &mdash; set/collector-number decorations and Archidekt-style tags are stripped automatically.</div>
+      </div>
+      <div class="field proxy-style-field">
+        <label for="printStyle">Print style</label>
+        <select id="printStyle">
+          <option value="default">Default printing</option>
+          <option value="oldest">Oldest printing (original)</option>
+          <option value="newest">Newest printing</option>
+          <option value="borderless">Borderless</option>
+          <option value="extended">Extended art</option>
+          <option value="showcase">Showcase</option>
+          <option value="full">Full art</option>
+          <option value="retro">Retro frame (1993 / 1997)</option>
+          <option value="promo">Promo</option>
+          <option value="textless">Textless</option>
+        </select>
+        <div class="hint">Picks a matching printing for every card on the sheet. Cards with no printing in that style keep their default art. After generating, hover (or tap) any card to choose a specific printing of just that card.</div>
       </div>
       <div class="proxy-options">
         <label class="checkbox-row"><input type="checkbox" id="printSkipBasics" checked> Skip basic lands (Plains/Island/Swamp/Mountain/Forest/Wastes) &mdash; most people already own these</label>
@@ -2449,29 +2478,197 @@
     const printBtnEl = $("#printBtn");
     const printGenerateBtnEl = $("#printGenerateBtn");
 
-    function proxyCardTileHtml(name, card) {
+    // ---- Print styles --------------------------------------------------
+    // Each style is a Scryfall search filter. One query covers a whole chunk of
+    // cards at once, so styling a 100-card sheet takes a handful of requests.
+    const PRINT_STYLES = {
+      default:    { label: "default printing", q: "" },
+      oldest:     { label: "oldest printing", q: "", dir: "asc" },
+      newest:     { label: "newest printing", q: "", dir: "desc" },
+      borderless: { label: "borderless", q: "is:borderless" },
+      extended:   { label: "extended art", q: "is:extended" },
+      showcase:   { label: "showcase", q: "is:showcase" },
+      full:       { label: "full art", q: "is:full" },
+      retro:      { label: "retro frame", q: "(frame:1993 or frame:1997)" },
+      promo:      { label: "promo", q: "is:promo" },
+      textless:   { label: "textless", q: "is:textless" }
+    };
+
+    let printTiles = [];      // { name, base, card, prints?, loadingPrints? }
+    let styleToken = 0;       // guards against overlapping style lookups
+
+    const hasArt = c => !!(c && (cardImageUrl(c, "png") || cardImageUrl(c, "large") || cardImageUrl(c, "normal")));
+
+    async function fetchStylePrints(cards, style) {
+      const result = new Map();   // lowercase front-face name -> best matching print
+      const names = [...new Set(cards.map(c => primaryLookupName(c.name)))];
+      const CHUNK = 10;
+      for (let i = 0; i < names.length; i += CHUNK) {
+        const chunk = names.slice(i, i + CHUNK);
+        const nameQ = "(" + chunk.map(n => `!"${n.replace(/["\\]/g, "\\$&")}"`).join(" or ") + ")";
+        const q = [nameQ, "lang:en", "game:paper", "-is:digital", "-is:oversized", style.q].filter(Boolean).join(" ");
+        let url = `${SCRYFALL_SEARCH}?q=${encodeURIComponent(q)}&unique=prints&order=released&dir=${style.dir || "desc"}`;
+        for (let page = 0; url && page < 4; page++) {
+          const res = await fetch(url);
+          if (res.status === 404) break;   // Scryfall's way of saying "no matches"
+          if (!res.ok) throw new Error("Scryfall search failed (" + res.status + ")");
+          const data = await res.json();
+          for (const c of data.data || []) {
+            const k = primaryLookupName(c.name).toLowerCase();
+            if (!result.has(k) && hasArt(c)) result.set(k, c);
+          }
+          url = chunk.every(n => result.has(n.toLowerCase())) ? null : (data.has_more ? data.next_page : null);
+          await sleep(BATCH_DELAY_MS);
+        }
+      }
+      return result;
+    }
+
+    // Swap every tile to the chosen style, falling back to its default print.
+    async function applyPrintStyle(styleId) {
+      const style = PRINT_STYLES[styleId] || PRINT_STYLES.default;
+      const token = ++styleToken;
+      if (styleId === "default") {
+        printTiles.forEach(t => { t.card = t.base; t.changed = false; });
+        return { note: "" };
+      }
+      const unique = [...new Map(printTiles.filter(t => t.base).map(t => [t.base.name, t.base])).values()];
+      const map = await fetchStylePrints(unique, style);
+      if (token !== styleToken) return null;   // a newer choice superseded this one
+      const lacking = new Set();
+      printTiles.forEach(t => {
+        if (!t.base) return;
+        const alt = map.get(primaryLookupName(t.base.name).toLowerCase());
+        t.card = alt || t.base;
+        t.changed = !!alt;
+        if (!alt) lacking.add(t.base.name);
+      });
+      const note = lacking.size
+        ? `${lacking.size} card${lacking.size === 1 ? " has" : "s have"} no ${style.label} printing and kept the default art${lacking.size <= 6 ? " (" + [...lacking].join(", ") + ")" : ""}.`
+        : `Every card is in ${style.label}.`;
+      return { note };
+    }
+
+    // ---- Per-card print picker ------------------------------------------
+    const printsCache = new Map();   // oracle id -> all English paper printings
+
+    function printLabel(c) {
+      const bits = [];
+      const fx = c.frame_effects || [];
+      if (c.border_color === "borderless") bits.push("borderless");
+      if (fx.includes("extendedart")) bits.push("extended art");
+      if (fx.includes("showcase")) bits.push("showcase");
+      if (c.full_art) bits.push("full art");
+      if (c.textless) bits.push("textless");
+      if (c.promo) bits.push("promo");
+      if (c.frame === "1993" || c.frame === "1997") bits.push("retro frame");
+      const year = c.released_at ? " · " + c.released_at.slice(0, 4) : "";
+      return `${c.set_name} (${(c.set || "").toUpperCase()}) #${c.collector_number}${bits.length ? " · " + bits.join(", ") : ""}${year}`;
+    }
+
+    async function fetchAllPrints(card) {
+      const key = card.oracle_id || card.name;
+      if (printsCache.has(key)) return printsCache.get(key);
+      let url = card.prints_search_uri;
+      const out = [];
+      for (let page = 0; url && page < 3; page++) {
+        const res = await fetch(url);
+        if (!res.ok) break;
+        const data = await res.json();
+        out.push(...(data.data || []));
+        url = data.has_more ? data.next_page : null;
+        if (url) await sleep(BATCH_DELAY_MS);
+      }
+      let list = out.filter(c => !c.digital && hasArt(c));
+      const english = list.filter(c => !c.lang || c.lang === "en");
+      if (english.length) list = english;
+      printsCache.set(key, list);
+      return list;
+    }
+
+    function pickHtml(tile) {
+      if (!tile.card) return "";
+      const label = esc(`Change print of ${tile.name}`);
+      let opts;
+      if (tile.prints && tile.prints.length) {
+        opts = tile.prints.map((c, i) =>
+          `<option value="${i}"${c.id === tile.card.id ? " selected" : ""}>${esc(printLabel(c))}</option>`).join("");
+      } else {
+        opts = `<option value="">${esc(tile.loadingPrints ? "Loading prints…" : "Change print…")}</option>`;
+      }
+      return `<select class="proxy-print-pick" aria-label="${label}">${opts}</select>`;
+    }
+
+    function proxyCardTileHtml(tile, idx) {
+      const card = tile.card;
       // Prefer the highest-quality art Scryfall has on file: "png" is the
       // sharpest (and has transparent rounded corners, which actually reads
       // nicely against the dashed cut-guide rectangle below), falling back
       // to progressively lower-res formats if a card has no PNG on record.
       const url = card ? (cardImageUrl(card, "png") || cardImageUrl(card, "large") || cardImageUrl(card, "normal")) : null;
       const inner = url
-        ? `<img src="${url}" alt="${esc(name)}" loading="eager">`
-        : `<div class="proxy-missing">${esc(name)}</div>`;
-      return `<div class="proxy-card">${inner}</div>`;
+        ? `<img src="${url}" alt="${esc(tile.name)}" loading="eager">`
+        : `<div class="proxy-missing">${esc(tile.name)}</div>`;
+      return `<div class="proxy-card${tile.changed ? " proxy-changed" : ""}" data-idx="${idx}">${inner}${pickHtml(tile)}</div>`;
     }
 
-    function renderProxyPreview(tiles) {
+    function renderProxyPreview() {
+      const tiles = printTiles;
       const pages = [];
-      for (let i = 0; i < tiles.length; i += 9) pages.push(tiles.slice(i, i + 9));
+      for (let i = 0; i < tiles.length; i += 9) pages.push(tiles.slice(i, i + 9).map((t, j) => ({ t, idx: i + j })));
       if (!pages.length) { printPreviewWrapEl.innerHTML = ""; return; }
       printPreviewWrapEl.innerHTML = pages.map((page, i) => `
         <div class="proxy-page-label">Page ${i + 1} of ${pages.length}</div>
         <div class="proxy-preview-scroll">
-          <div class="proxy-page">${page.map(t => proxyCardTileHtml(t.name, t.card)).join("")}</div>
+          <div class="proxy-page">${page.map(({ t, idx }) => proxyCardTileHtml(t, idx)).join("")}</div>
         </div>
       `).join("");
     }
+
+    function rerenderTile(idx) {
+      const el = printPreviewWrapEl.querySelector(`.proxy-card[data-idx="${idx}"]`);
+      if (!el) return;
+      const tmp = document.createElement("div");
+      tmp.innerHTML = proxyCardTileHtml(printTiles[idx], idx);
+      el.replaceWith(tmp.firstElementChild);
+    }
+
+    // Load a card's printings the first time someone reaches for its picker.
+    async function ensurePrints(idx) {
+      const tile = printTiles[idx];
+      if (!tile || !tile.card || tile.prints || tile.loadingPrints) return;
+      tile.loadingPrints = true;
+      rerenderTile(idx);
+      try {
+        const list = await fetchAllPrints(tile.card);
+        // Make sure the print currently shown is among the options.
+        tile.prints = list.some(c => c.id === tile.card.id) ? list : [tile.card, ...list];
+      } catch (e) {
+        tile.prints = [tile.card];
+      }
+      tile.loadingPrints = false;
+      rerenderTile(idx);
+    }
+
+    ["mouseover", "focusin", "touchstart"].forEach(evt => {
+      printPreviewWrapEl.addEventListener(evt, ev => {
+        const el = ev.target.closest && ev.target.closest(".proxy-card");
+        if (el) ensurePrints(Number(el.dataset.idx));
+      }, { passive: true });
+    });
+
+    printPreviewWrapEl.addEventListener("change", ev => {
+      const sel = ev.target.closest && ev.target.closest(".proxy-print-pick");
+      if (!sel) return;
+      const idx = Number(sel.closest(".proxy-card").dataset.idx);
+      const tile = printTiles[idx];
+      const chosen = tile && tile.prints && tile.prints[Number(sel.value)];
+      if (!chosen) return;
+      tile.card = chosen;
+      tile.changed = !!(tile.base && chosen.id !== tile.base.id);
+      rerenderTile(idx);
+      printStatusEl.textContent = `${tile.name}: now ${printLabel(chosen)}.`;
+    });
 
     async function runPrintGenerate() {
       const decklistText = $("#printDecklistInput").value;
@@ -2533,16 +2730,29 @@
       if (includeCommander) {
         for (const name of parsed.commanders) {
           const card = found.get(name.toLowerCase());
-          if (card) tiles.push({ name: card.name, card });
+          if (card) tiles.push({ name: card.name, base: card, card });
         }
       }
       for (const { name, qty } of cardEntries) {
         const card = found.get(name.toLowerCase());
         if (!card) continue;
-        for (let i = 0; i < qty; i++) tiles.push({ name: card.name, card });
+        for (let i = 0; i < qty; i++) tiles.push({ name: card.name, base: card, card });
       }
 
-      renderProxyPreview(tiles);
+      // Apply the chosen print style (one batched lookup, not one per card).
+      printTiles = tiles;
+      let styleNote = "";
+      const styleId = $("#printStyle").value;
+      if (styleId !== "default" && tiles.length) {
+        printStatusEl.textContent = `Finding ${PRINT_STYLES[styleId].label} prints…`;
+        try {
+          const r = await applyPrintStyle(styleId);
+          if (r) styleNote = r.note;
+        } catch (err) {
+          styleNote = "Couldn't look up that print style (" + err.message + "), so the default prints are shown.";
+        }
+      }
+      renderProxyPreview();
 
       if (notFound.length) {
         printMissingEl.innerHTML = `<div class="panel" style="border-color:#c0392b">
@@ -2557,6 +2767,7 @@
         ? `Done. ${tiles.length} card${tiles.length === 1 ? "" : "s"} across ${pageCount} page${pageCount === 1 ? "" : "s"}.${notFound.length ? ` ${notFound.length} name${notFound.length === 1 ? "" : "s"} couldn't be found.` : ""}`
         : "No printable cards resolved — check the decklist and try again.";
 
+      if (styleNote && tiles.length) printStatusEl.textContent += " " + styleNote;
       printBtnEl.disabled = !tiles.length;
       printGenerateBtnEl.disabled = false;
     }
@@ -2573,8 +2784,29 @@
       printPreviewWrapEl.innerHTML = "";
       printMissingEl.innerHTML = "";
       printStatusEl.textContent = "";
+      printTiles = [];
       printBtnEl.disabled = true;
       try { localStorage.removeItem("mtgAnalyzer.printDecklist"); localStorage.removeItem("mtgAnalyzer.printCommander"); } catch (e) {}
+    });
+    $("#printStyle").addEventListener("change", async () => {
+      const styleId = $("#printStyle").value;
+      try { localStorage.setItem("mtgAnalyzer.printStyle", styleId); } catch (e) {}
+      if (!printTiles.length) return;
+      // Re-style the sheet that's already on screen without re-looking-up the deck.
+      // (A manual per-card choice is replaced, since the style now decides.)
+      printGenerateBtnEl.disabled = true; printBtnEl.disabled = true;
+      printStatusEl.textContent = styleId === "default" ? "Restoring default prints…" : `Finding ${PRINT_STYLES[styleId].label} prints…`;
+      let note = "";
+      try {
+        const r = await applyPrintStyle(styleId);
+        if (!r) return;
+        note = r.note;
+      } catch (err) {
+        note = "Couldn't look up that print style (" + err.message + "), so the sheet was left as it was.";
+      }
+      renderProxyPreview();
+      printStatusEl.textContent = `Updated. ${printTiles.length} card${printTiles.length === 1 ? "" : "s"} across ${Math.ceil(printTiles.length / 9)} page${Math.ceil(printTiles.length / 9) === 1 ? "" : "s"}. ${note}`.trim();
+      printGenerateBtnEl.disabled = false; printBtnEl.disabled = !printTiles.length;
     });
     $("#printSkipBasics").addEventListener("change", () => {
       try { localStorage.setItem("mtgAnalyzer.printSkipBasics", $("#printSkipBasics").checked ? "1" : "0"); } catch (e) {}
@@ -2588,6 +2820,8 @@
       const savedPrintCmd = localStorage.getItem("mtgAnalyzer.printCommander");
       const savedSkipBasics = localStorage.getItem("mtgAnalyzer.printSkipBasics");
       const savedIncludeCommander = localStorage.getItem("mtgAnalyzer.printIncludeCommander");
+      const savedStyle = localStorage.getItem("mtgAnalyzer.printStyle");
+      if (savedStyle && PRINT_STYLES[savedStyle]) $("#printStyle").value = savedStyle;
       if (savedPrintList) $("#printDecklistInput").value = savedPrintList;
       if (savedPrintCmd) $("#printCommanderInput").value = savedPrintCmd;
       if (savedSkipBasics === "0") $("#printSkipBasics").checked = false;
