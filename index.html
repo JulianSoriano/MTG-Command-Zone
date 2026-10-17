@@ -302,7 +302,7 @@
     .proxy-page:last-child { break-after: auto; page-break-after: auto; }
     .proxy-page-label { display: none; }
     .proxy-card { break-inside: avoid; page-break-inside: avoid; }
-    .proxy-print-pick { display: none !important; }
+    .proxy-print-pick, .proxy-tip { display: none !important; }
     .proxy-card.proxy-changed { outline: none; }
   }
 
@@ -311,10 +311,14 @@
   .proxy-print-pick {
     position: absolute; left: 6px; right: 6px; bottom: 6px; width: auto; min-height: 0;
     padding: 5px 6px; font-size: 0.72rem; border-radius: 6px; border: 1px solid var(--border);
-    background: var(--panel); color: var(--text); opacity: 0; transition: opacity 0.15s ease;
+    background: var(--panel); color: var(--text); opacity: 0.94; cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.35); font-weight: 600;
   }
-  .proxy-card:hover .proxy-print-pick, .proxy-card:focus-within .proxy-print-pick { opacity: 0.96; }
-  @media (hover: none) { .proxy-print-pick { opacity: 0.88; } }
+  .proxy-print-pick:hover, .proxy-print-pick:focus { opacity: 1; border-color: var(--accent); }
+  .proxy-tip {
+    font-size: 0.85rem; background: var(--accent-dim); color: var(--text); border-radius: 8px;
+    padding: 8px 12px; margin: 0 0 12px; text-align: center;
+  }
   .proxy-card.proxy-changed { outline: 2px solid var(--accent); outline-offset: -2px; }
   @page { size: letter; margin: 0.2in 0.5in; }
 
@@ -2617,7 +2621,7 @@
       const pages = [];
       for (let i = 0; i < tiles.length; i += 9) pages.push(tiles.slice(i, i + 9).map((t, j) => ({ t, idx: i + j })));
       if (!pages.length) { printPreviewWrapEl.innerHTML = ""; return; }
-      printPreviewWrapEl.innerHTML = pages.map((page, i) => `
+      printPreviewWrapEl.innerHTML = `<div class="proxy-tip"><strong>Want a different print?</strong> Use the <em>Change print…</em> dropdown at the bottom of any card to pick a specific printing of it. (The dropdowns don't appear on the printed page.)</div>` + pages.map((page, i) => `
         <div class="proxy-page-label">Page ${i + 1} of ${pages.length}</div>
         <div class="proxy-preview-scroll">
           <div class="proxy-page">${page.map(({ t, idx }) => proxyCardTileHtml(t, idx)).join("")}</div>
@@ -2633,12 +2637,22 @@
       el.replaceWith(tmp.firstElementChild);
     }
 
+    // Fill the existing dropdown in place (replacing the element could close it
+    // while someone has it open).
+    function refreshPick(idx) {
+      const el = printPreviewWrapEl.querySelector(`.proxy-card[data-idx="${idx}"] .proxy-print-pick`);
+      if (!el) return;
+      const tmp = document.createElement("div");
+      tmp.innerHTML = pickHtml(printTiles[idx]);
+      el.innerHTML = tmp.firstElementChild.innerHTML;
+    }
+
     // Load a card's printings the first time someone reaches for its picker.
     async function ensurePrints(idx) {
       const tile = printTiles[idx];
       if (!tile || !tile.card || tile.prints || tile.loadingPrints) return;
       tile.loadingPrints = true;
-      rerenderTile(idx);
+      refreshPick(idx);
       try {
         const list = await fetchAllPrints(tile.card);
         // Make sure the print currently shown is among the options.
@@ -2647,7 +2661,7 @@
         tile.prints = [tile.card];
       }
       tile.loadingPrints = false;
-      rerenderTile(idx);
+      refreshPick(idx);
     }
 
     ["mouseover", "focusin", "touchstart"].forEach(evt => {
