@@ -504,18 +504,198 @@
     border-radius: 999px; background: var(--accent-dim); color: var(--accent); border: 0; font-size: 1.3rem; line-height: 1; cursor: pointer;
   }
   @media (max-width: 520px) { .ls-grid { grid-template-columns: repeat(auto-fill, minmax(98px, 1fr)); gap: 10px 8px; } }
+
+  /* ---------------------------------------------------------------------
+   * cEDH guide
+   * ------------------------------------------------------------------- */
+  .ce-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0 16px; }
+  .ce-tabs button {
+    min-height: 0; padding: 7px 13px; border-radius: 999px; font-size: 0.86rem; font-weight: 600;
+    background: var(--panel); color: var(--text); border: 1px solid var(--border); cursor: pointer;
+  }
+  .ce-tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .ce-panel { display: none; }
+  .ce-panel.active { display: block; }
+  .ce-asof { font-size: 0.8rem; color: var(--text-dim); margin: 0 0 10px; }
+  .ce-grid2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin: 10px 0; }
+  .ce-box { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; background: var(--panel); }
+  .ce-box h4 { margin: 0 0 4px; font-size: 0.98rem; }
+  .ce-box p { margin: 0 0 6px; font-size: 0.88rem; }
+  .ce-box p:last-child { margin-bottom: 0; }
+  .ce-tier { margin: 18px 0 0; }
+  .ce-tier-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+  .ce-tier-head .lab {
+    font-weight: 800; font-size: 0.95rem; padding: 2px 12px; border-radius: 8px; color: #fff;
+  }
+  .ce-tier.t1 .lab { background: var(--good); }
+  .ce-tier.t2 .lab { background: var(--accent); }
+  .ce-tier.t3 .lab { background: var(--warn); }
+  .ce-cmds { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .ce-cmd { border: 1px solid var(--border); border-radius: 10px; padding: 8px; display: flex; gap: 10px; background: var(--panel); }
+  .ce-cmd .arts { display: flex; flex: 0 0 auto; }
+  .ce-cmd .arts .ls-art { width: 54px; }
+  .ce-cmd .arts .ls-art + .ls-art { margin-left: -14px; }
+  .ce-cmd .info { min-width: 0; flex: 1 1 auto; }
+  .ce-cmd .nm { font-weight: 600; font-size: 0.86rem; line-height: 1.25; }
+  .ce-cmd .st { font-size: 0.76rem; color: var(--text-dim); margin: 2px 0 4px; }
+  .ce-bar { position: relative; height: 6px; border-radius: 3px; background: var(--border); }
+  .ce-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--accent); }
+  .ce-bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); opacity: 0.6; }
+  .ce-combo { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 10px 0; background: var(--panel); }
+  .ce-combo h4 { margin: 0 0 6px; font-size: 0.98rem; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .ce-pills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .ce-pill {
+    font-size: 0.8rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--accent-dim);
+    color: var(--accent); text-decoration: none; border: 1px solid transparent;
+  }
+  .ce-pill:hover { border-color: var(--accent); }
+  .ce-pill.banned { background: var(--bad-bg); color: var(--bad); text-decoration: line-through; }
+  .ce-combo p { margin: 0 0 4px; font-size: 0.88rem; }
+  .ce-combo .need { color: var(--text-dim); }
+  .ce-staples { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px 10px; margin: 10px 0 18px; }
+  .ce-staple { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--text); font-size: 0.76rem; line-height: 1.25; font-weight: 500; }
+  .ce-staple:hover .ls-art { border-color: var(--accent); transform: translateY(-2px); }
+  .ce-staple .role { color: var(--text-dim); font-weight: 400; }
+  .ce-gloss dt { font-weight: 700; margin-top: 10px; }
+  .ce-gloss dd { margin: 2px 0 0; font-size: 0.9rem; }
+  .ce-src li { margin: 6px 0; font-size: 0.9rem; }
+  .ce-cmd .ls-art, .ce-staple .ls-art { display: block; }
+  .ce-status { font-size: 0.8rem; color: var(--text-dim); margin: 6px 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>MTG Command Zone</h1>
-  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, and analyze a Commander decklist &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
+  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, and read a cEDH guide &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
     <button type="button" id="navPrint" class="active">Print Proxy Sheets</button>
     <button type="button" id="navLowSodium">Low Sodium</button>
     <button type="button" id="navGame">Game Tools</button>
     <button type="button" id="navAnalyzer">Deck Analyzer</button>
+    <button type="button" id="navCedh">cEDH Guide</button>
+  </div>
+
+  <div id="cedhPage" class="page">
+    <div class="panel">
+      <h2>cEDH guide</h2>
+      <p class="hint">Competitive EDH (cEDH) is Commander played to win: optimized 100-card singleton decks, four-player pods, and games that routinely end in a few turns. This guide covers the metagame, combos, staples, and the vocabulary. Metagame numbers are a dated snapshot; card legality is checked live against Scryfall.</p>
+      <div class="ce-tabs" role="tablist" id="ceTabs">
+        <button type="button" class="active" data-ce="start">Start here</button>
+        <button type="button" data-ce="meta">Meta &amp; tier list</button>
+        <button type="button" data-ce="arch">Archetypes</button>
+        <button type="button" data-ce="combos">Combos</button>
+        <button type="button" data-ce="staples">Staples</button>
+        <button type="button" data-ce="rules">Banlist &amp; brackets</button>
+        <button type="button" data-ce="gloss">Glossary &amp; sources</button>
+      </div>
+
+      <div class="ce-panel active" id="ce-start">
+        <h3>What makes cEDH different</h3>
+        <div class="ce-grid2">
+          <div class="ce-box"><h4>Everyone is trying to win early</h4><p>Decks run fast mana, cheap tutors, and compact win conditions, so the question each turn is &ldquo;can someone win now, and can I stop it?&rdquo;</p></div>
+          <div class="ce-box"><h4>Interaction is the game</h4><p>Counterspells, free spells, and removal are held for the moment someone tries to win. Most games are decided by who has an answer ready, not who has the biggest board.</p></div>
+          <div class="ce-box"><h4>The commander is a tool</h4><p>It is a repeatable engine, tutor, or mana source you can always access. Many top commanders are cheap partners that simply let you pick your colors.</p></div>
+          <div class="ce-box"><h4>Politics are lighter than casual</h4><p>You still talk, but threats are judged mostly on who is closest to winning. Pods tend to gang up on whoever has just resolved a game-ending engine.</p></div>
+        </div>
+        <h3>How a typical game plays out</h3>
+        <ol>
+          <li><strong>Mulligans.</strong> Keep hands with a land or fast mana, a way to dig or tutor, and ideally one piece of protection. A slow &ldquo;fair&rdquo; hand is usually a mulligan.</li>
+          <li><strong>Turns 1&ndash;2: accelerate and set up.</strong> Mana rocks, rituals, and cheap engines. Holding up free counterspells is common.</li>
+          <li><strong>Turns 3&ndash;5: the windows.</strong> Someone assembles a win (often a combo) while the rest of the table decides whether to stop it. Pass priority carefully and watch the stack.</li>
+          <li><strong>Protect your win.</strong> A win attempt that can be countered or answered is just a bluff. Keep protection up if you can.</li>
+        </ol>
+        <h3>Tips for your first pod</h3>
+        <ul>
+          <li>Play the same four-person pod a few times. Learning what each deck does matters more than raw deck power.</li>
+          <li>Announce what you are doing step by step; unclear stack actions cause most disputes.</li>
+          <li>Agree beforehand on rules for tournaments or casual play: proxies, turn timers, and draw rules. Sanctioned events differ from kitchen-table pods.</li>
+          <li>Start from a known list from the <a href="https://cedh-decklist-database.com/" target="_blank" rel="noopener">cEDH Decklist Database</a> rather than building from scratch.</li>
+        </ul>
+      </div>
+
+      <div class="ce-panel" id="ce-meta">
+        <h3>Metagame snapshot</h3>
+        <p class="ce-asof" id="ceMetaAsOf"></p>
+        <p>Entries show how often a commander is played; <strong>PPG</strong> (points per game) shows how well it does: 5 points for a win, 1 for a draw, 0 for a loss, divided by games. A neutral deck sits near the baseline marked on each bar. Tiers below are drawn from PPG relative to that baseline.</p>
+        <div id="ceTiers"></div>
+        <div class="ce-note ls-note">Read these numbers carefully. PPG is not adjusted for player skill, pod makeup, or sample size, so a commander with fewer entries can look better or worse than it really is. Popular commanders attract many different pilots, which pulls PPG toward the baseline. Use tiers as a guide to what you will face, not a verdict on which deck to buy.</div>
+        <div class="ce-status" id="ceStatus"></div>
+      </div>
+
+      <div class="ce-panel" id="ce-arch">
+        <h3>The main ways cEDH decks win</h3>
+        <div class="ce-grid2">
+          <div class="ce-box"><h4>Turbo / combo</h4><p>Maximum fast mana and tutors to assemble a win on turn 1&ndash;3. Strengths: speed. Weaknesses: needs the opening hand to work, folds to early disruption.</p></div>
+          <div class="ce-box"><h4>Midrange / &ldquo;good stuff&rdquo;</h4><p>Strong card advantage engines plus a couple of combo lines. The pod favourite for flexibility: it can disrupt, grind, or go for the win depending on the table. Many blue-based partner decks play this way.</p></div>
+          <div class="ce-box"><h4>Spellslinger / storm</h4><p>Chains many cheap spells to build resources, then ends the game with a storm-style finisher. Strong with rituals and free spells; punished by hard counters and graveyard hate.</p></div>
+          <div class="ce-box"><h4>Stax</h4><p>Taxes or shuts off resources (mana, lands, spells) so opponents cannot function while you keep an engine going. Slower, and many tables hate it. Strong against decks that need to set up.</p></div>
+          <div class="ce-box"><h4>Creature combo / value</h4><p>Wins with creature engines such as infinite mana plus an outlet, or ETB loops. Vulnerable to sweepers and removal but hard for blue decks to stop with only counterspells.</p></div>
+          <div class="ce-box"><h4>Voltron / aggro</h4><p>Wins through combat damage with one protected threat. Rare at the top tables, but it dodges combo hate.</p></div>
+        </div>
+        <h3>Choosing a deck</h3>
+        <ul>
+          <li><strong>Want to learn the format?</strong> A midrange partner deck teaches the most: every important card type shows up.</li>
+          <li><strong>Like fast, decisive games?</strong> Turbo/combo, but expect mulligans and misplays to cost games.</li>
+          <li><strong>Like interaction puzzles?</strong> Spellslinger or blue-based midrange.</li>
+          <li><strong>Strict budget?</strong> Many lists lean on expensive fast mana and dual lands, so check prices before committing; the decklist database shows budget-friendly options for some commanders.</li>
+        </ul>
+      </div>
+
+      <div class="ce-panel" id="ce-combos">
+        <h3>Common win lines</h3>
+        <p>Cards are checked live against Scryfall&rsquo;s Commander legality, and a banned card turns red and struck through. For a much larger searchable database, use <a href="https://commanderspellbook.com/" target="_blank" rel="noopener">Commander Spellbook</a>. The Deck Analyzer tab also scans your list against a smaller built-in combo list.</p>
+        <div id="ceCombos"></div>
+      </div>
+
+      <div class="ce-panel" id="ce-staples">
+        <h3>Cards you will see everywhere</h3>
+        <p>Click a card to open it on Scryfall. A red badge means a card is banned in Commander right now; &ldquo;Low Sodium&rdquo; marks cards that format bans.</p>
+        <div id="ceStaples"></div>
+      </div>
+
+      <div class="ce-panel" id="ce-rules">
+        <h3>Banlist and what it means for cEDH</h3>
+        <ul>
+          <li>The official Commander banlist is maintained by Wizards of the Coast and changes a few times a year. Check the <a href="https://magic.wizards.com/en/banned-restricted-list" target="_blank" rel="noopener">official page</a> before building.</li>
+          <li>September 2024 was a landmark: Mana Crypt, Jeweled Lotus, Dockside Extortionist, and Nadu, Winged Wisdom were banned, which removed some of the format&rsquo;s fastest mana and engines.</li>
+          <li>Bans tend to hit the most consistent turbo cards, so older metagame articles can name cards that are no longer legal. The staples and combos tabs flag any banned card live, but still double-check older decklists.</li>
+          <li>Tournament organizers may add their own rules, such as proxy policies or custom banlists. Read the event page.</li>
+        </ul>
+        <h3>Brackets</h3>
+        <p>Wizards&rsquo; Commander Brackets rank decks from 1 to 5. <strong>Bracket 5 is cEDH</strong>: decks built for maximum competitive power, where the Game Changers list and other restrictions of lower brackets no longer apply. If you are not sure whether a table wants cEDH, ask first and tell them which bracket your deck is.</p>
+        <h3>Low Sodium vs cEDH</h3>
+        <p>The Low Sodium format on the other tab is almost the opposite design: it bans many of the cards this guide calls staples. The Staples tab marks which ones.</p>
+      </div>
+
+      <div class="ce-panel" id="ce-gloss">
+        <h3>Glossary</h3>
+        <dl class="ce-gloss">
+          <dt>Fast mana</dt><dd>Permanents or spells that give more mana than they cost: Sol Ring, Mana Vault, Lotus Petal, Chrome Mox.</dd>
+          <dt>Free spell</dt><dd>A spell you can cast without paying its mana cost, usually by exiling a card or paying life: Force of Will, Fierce Guardianship, Deflecting Swat.</dd>
+          <dt>Tutor</dt><dd>A card that searches your library for another card.</dd>
+          <dt>Win-con</dt><dd>The way a deck ends the game: a combo, an infinite loop, combat damage, or a mill-out.</dd>
+          <dt>Combo</dt><dd>A group of cards that together do something game-ending, usually a loop that repeats infinitely.</dd>
+          <dt>Stack</dt><dd>The zone where spells and abilities wait to resolve. Interaction happens here.</dd>
+          <dt>Pod</dt><dd>The four players at a table.</dd>
+          <dt>Partner</dt><dd>A keyword that lets you have two commanders. Many top cEDH commanders are partners, which gives access to more colors.</dd>
+          <dt>PPG</dt><dd>Points per game, a tournament-based measure of how well a commander performs; see the meta tab.</dd>
+          <dt>Stax</dt><dd>A strategy that taxes or locks opponents&rsquo; resources.</dd>
+          <dt>Storm</dt><dd>A mechanic and strategy that rewards casting many spells in a turn.</dd>
+          <dt>Turbo</dt><dd>Aggressively fast combo decks that try to win before opponents can set up.</dd>
+        </dl>
+        <h3>Sources and where to go next</h3>
+        <ul class="ce-src">
+          <li><a href="https://cedhstats.org" target="_blank" rel="noopener">cEDH Stats</a> &mdash; tournament data from Topdeck.gg; source of the PPG numbers in the meta tab.</li>
+          <li><a href="https://edhtop16.com" target="_blank" rel="noopener">EDH Top 16</a> &mdash; tournament results and top-finishing lists.</li>
+          <li><a href="https://cedh-decklist-database.com/" target="_blank" rel="noopener">cEDH Decklist Database</a> &mdash; community-curated lists by commander.</li>
+          <li><a href="https://commanderspellbook.com/" target="_blank" rel="noopener">Commander Spellbook</a> &mdash; searchable combo database.</li>
+          <li><a href="https://magic.wizards.com/en/banned-restricted-list" target="_blank" rel="noopener">Wizards banned &amp; restricted list</a> &mdash; the official Commander banlist.</li>
+          <li><a href="https://topdeck.gg" target="_blank" rel="noopener">Topdeck.gg</a> &mdash; tournament hosting and results.</li>
+        </ul>
+        <p class="hint">Written 2026-10-17 from the sources above and general format knowledge. The metagame shifts constantly, so use this as a starting point and check the live sources for the latest.</p>
+      </div>
+    </div>
   </div>
 
   <div id="analyzerPage" class="page">
@@ -2045,7 +2225,8 @@
       print: { nav: $("#navPrint"), page: $("#printPage") },
       lowsodium: { nav: $("#navLowSodium"), page: $("#lowSodiumPage") },
       game: { nav: $("#navGame"), page: $("#gamePage") },
-      analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") }
+      analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
+      cedh: { nav: $("#navCedh"), page: $("#cedhPage") }
     };
     function showPage(which) {
       for (const key of Object.keys(pages)) {
@@ -2058,7 +2239,152 @@
     pages.print.nav.addEventListener("click", () => showPage("print"));
     pages.game.nav.addEventListener("click", () => showPage("game"));
     pages.lowsodium.nav.addEventListener("click", () => showPage("lowsodium"));
+    pages.cedh.nav.addEventListener("click", () => showPage("cedh"));
   })();
+
+  /* ---------------------------------------------------------------------
+   * cEDH guide tab
+   * ------------------------------------------------------------------- */
+  (function wireCedh() {
+    try {
+      // Snapshot from cedhstats.org (Topdeck.gg tournament data), read 2026-10-17.
+      const META = {
+        asOf: "2026-10-17", baseline: 1.194, source: "https://cedhstats.org",
+        rows: [
+          { names: ["Kraum, Ludevic's Opus", "Tymna the Weaver"], label: "Kraum / Tymna", entries: 2965, ppg: 1.37 },
+          { names: ["Kinnan, Bonder Prodigy"], label: "Kinnan, Bonder Prodigy", entries: 2908, ppg: 1.33 },
+          { names: ["Rograkh, Son of Rohgahh", "Thrasios, Triton Hero"], label: "Rograkh / Thrasios", entries: 2118, ppg: 1.34 },
+          { names: ["Rograkh, Son of Rohgahh", "Silas Renn, Seeker Adept"], label: "Rograkh / Silas Renn", entries: 1871, ppg: 1.25 },
+          { names: ["Sisay, Weatherlight Captain"], label: "Sisay, Weatherlight Captain", entries: 1591, ppg: 1.35 },
+          { names: ["Thrasios, Triton Hero", "Tymna the Weaver"], label: "Thrasios / Tymna", entries: 1169, ppg: 1.28 },
+          { names: ["Ral, Monsoon Mage // Ral, Leyline Prodigy"], label: "Ral, Monsoon Mage", entries: 908, ppg: 1.26 },
+          { names: ["Dargo, the Shipwrecker", "Tymna the Weaver"], label: "Dargo / Tymna", entries: 892, ppg: 1.19 },
+          { names: ["Ishai, Ojutai Dragonspeaker", "Rograkh, Son of Rohgahh"], label: "Ishai / Rograkh", entries: 844, ppg: 1.35 },
+          { names: ["Vivi Ornitier"], label: "Vivi Ornitier", entries: 843, ppg: 1.17 }
+        ]
+      };
+      const TIER_RULES = [
+        { id: "t1", label: "Tier 1", min: 1.33, blurb: "Clearly above baseline in the sample." },
+        { id: "t2", label: "Tier 2", min: 1.25, blurb: "Above baseline; solid and well represented." },
+        { id: "t3", label: "Tier 3", min: 0, blurb: "Near or below baseline in the sample." }
+      ];
+
+      const COMBOS = [
+        { title: "Empty-library win", cards: ["Thassa's Oracle", "Demonic Consultation"], need: "Name a card that is not in your library with Consultation (it exiles the whole library), then cast Oracle.", how: "Oracle's trigger sees an empty library and you win. The classic two-card win." },
+        { title: "Empty-library win (Pact)", cards: ["Thassa's Oracle", "Tainted Pact"], need: "Works only if your library contains no repeated card names (so no stacks of basic lands).", how: "Tainted Pact exiles cards until a duplicate shows up; with none it exiles everything, then Oracle wins." },
+        { title: "Ad Nauseam finish", cards: ["Ad Nauseam", "Angel's Grace", "Thassa's Oracle"], need: "Win the same turn you cast it.", how: "Angel's Grace keeps you from losing this turn while Ad Nauseam draws your deck; then Oracle or another empty-library card wins." },
+        { title: "Infinite mana with Kinnan", cards: ["Kinnan, Bonder Prodigy", "Basalt Monolith"], need: "Kinnan on the battlefield, plus Monolith untapped.", how: "Kinnan adds an extra mana when you tap Monolith, so tapping for 6 and paying 3 to untap nets mana each loop. Infinite colorless mana." },
+        { title: "Monolith + Rings", cards: ["Basalt Monolith", "Rings of Brighthearth"], need: "Both on the battlefield.", how: "Rings copies Monolith's untap ability, so each activation refunds itself with surplus. Infinite colorless mana." },
+        { title: "Scepter loop", cards: ["Isochron Scepter", "Dramatic Reversal"], need: "Mana rocks that produce at least three mana in total.", how: "Imprint Reversal, cast the copy, and untap your rocks to repeat. Infinite mana." },
+        { title: "Food Chain engine", cards: ["Food Chain", "Misthollow Griffin"], need: "Food Chain mana only pays for creature spells.", how: "Exile Griffin to Food Chain for mana, then recast it from exile for free each loop. Infinite creature mana; pair with Walking Ballista or a large creature." },
+        { title: "Copy-creature loop", cards: ["Kiki-Jiki, Mirror Breaker", "Deceiver Exarch"], need: "Kiki-Jiki must be able to tap (summoning sickness matters).", how: "The Exarch copy&rsquo;s untap trigger untaps Kiki-Jiki, giving infinite hasty Exarch copies for a lethal attack." },
+        { title: "Blink for mana", cards: ["Deadeye Navigator", "Peregrine Drake"], need: "Enough mana to activate Navigator&rsquo;s soulbond blink.", how: "Blink Drake repeatedly to untap lands for net positive mana and infinite ETB triggers." },
+        { title: "Mill the table", cards: ["Grindstone", "Painter's Servant"], need: "Name a color so every card shares it with the next one.", how: "Grindstone keeps milling while cards share a color, emptying a library in one activation." },
+        { title: "Breach storm", cards: ["Underworld Breach", "Lion's Eye Diamond", "Brain Freeze"], need: "A graveyard full of cheap spells; everything exiled by Breach is gone at end of turn.", how: "Cast spells from the graveyard through Breach, use Diamond for mana, and finish with a storm payoff." }
+      ];
+
+      const STAPLES = [
+        { group: "Fast mana", cards: [["Sol Ring", "Two colorless mana for one"], ["Mana Vault", "Burst mana, large"], ["Chrome Mox", "Free mana, card cost"], ["Mox Diamond", "Free mana, land cost"], ["Lotus Petal", "One-shot burst"], ["Grim Monolith", "Mana + combo piece"], ["Ancient Tomb", "Two mana from a land"]] },
+        { group: "Free and cheap interaction", cards: [["Force of Will", "Counter, free"], ["Fierce Guardianship", "Free counter for non-creatures"], ["Deflecting Swat", "Redirect, free"], ["Flusterstorm", "Cheap, scales with storm"], ["Pact of Negation", "Free counter, pay later"], ["Mental Misstep", "Counter one-drops"], ["Mana Drain", "Counter plus mana"], ["Swan Song", "Counter, cheap"]] },
+        { group: "Tutors", cards: [["Demonic Tutor", "Any card"], ["Vampiric Tutor", "Top of library"], ["Imperial Seal", "Top of library, sorcery"], ["Mystical Tutor", "Instant or sorcery"], ["Enlightened Tutor", "Artifact or enchantment"], ["Worldly Tutor", "Creature"], ["Gamble", "Random, cheap"]] },
+        { group: "Engines and win conditions", cards: [["Rhystic Study", "Draw engine"], ["Mystic Remora", "Early draw engine"], ["Necropotence", "Pay life for cards"], ["Ad Nauseam", "Draw your deck"], ["Underworld Breach", "Recast the graveyard"], ["Smothering Tithe", "Mana engine"], ["Opposition Agent", "Hoses tutors"]] },
+        { group: "Board interaction", cards: [["Cyclonic Rift", "Mass bounce"], ["Toxic Deluge", "Sweeper"], ["Pernicious Deed", "Flexible sweeper"], ["Force of Vigor", "Free artifact/enchantment hate"]] }
+      ];
+
+      const all = () => {
+        const s = new Set();
+        META.rows.forEach(r => r.names.forEach(n => s.add(n)));
+        COMBOS.forEach(c => c.cards.forEach(n => s.add(n)));
+        STAPLES.forEach(g => g.cards.forEach(c => s.add(c[0])));
+        return [...s];
+      };
+
+      const cache = new Map(); // lowercase name -> card (or null)
+      const lookup = n => cache.get(n.toLowerCase());
+      const scryUrl = n => "https://scryfall.com/search?q=" + encodeURIComponent('!"' + n + '"');
+      const isBanned = n => { const c = lookup(n); return !!(c && c.legalities && c.legalities.commander === "banned"); };
+      const lowSodium = n => { try { return !!lowSodiumLookup(n, "deck"); } catch (e) { return false; } };
+      const fmt = n => n.toLocaleString();
+
+      function artHtml(n) {
+        const c = lookup(n);
+        const url = c ? cardImageUrl(c, "small") : null;
+        return `<span class="ls-art${url ? " loaded" : ""}"><span class="ls-ph">${esc(n)}</span>${url ? `<img alt="" src="${esc(url)}">` : ""}</span>`;
+      }
+
+      function renderTiers() {
+        $("#ceMetaAsOf").innerHTML = `Source: <a href="${META.source}" target="_blank" rel="noopener">cedhstats.org</a> (Topdeck.gg tournament data), read ${META.asOf}. Baseline PPG ${META.baseline}. Top ten commanders by entries.`;
+        const top = Math.max(...META.rows.map(r => r.ppg), 1.5);
+        const rows = META.rows.slice().sort((a, b) => b.ppg - a.ppg);
+        $("#ceTiers").innerHTML = TIER_RULES.map((t, ti) => {
+          const next = TIER_RULES[ti - 1];
+          const list = rows.filter(r => r.ppg >= t.min && (!next || r.ppg < next.min));
+          if (!list.length) return "";
+          return `<div class="ce-tier ${t.id}"><div class="ce-tier-head"><span class="lab">${t.label}</span><span class="hint">${esc(t.blurb)}</span></div>
+            <div class="ce-cmds">${list.map(r => `<div class="ce-cmd"><span class="arts">${r.names.map(artHtml).join("")}</span>
+              <span class="info"><div class="nm">${esc(r.label)}</div><div class="st">${fmt(r.entries)} entries &middot; PPG ${r.ppg.toFixed(2)}</div>
+              <div class="ce-bar" title="PPG ${r.ppg.toFixed(2)} vs baseline ${META.baseline}"><i style="width:${(r.ppg / top * 100).toFixed(1)}%"></i><b style="left:${(META.baseline / top * 100).toFixed(1)}%"></b></div></span></div>`).join("")}</div></div>`;
+        }).join("");
+      }
+
+      function pill(n) {
+        const b = isBanned(n);
+        return `<a class="ce-pill${b ? " banned" : ""}" href="${scryUrl(n)}" target="_blank" rel="noopener" title="${b ? "Banned in Commander" : "Open on Scryfall"}">${esc(n)}</a>`;
+      }
+
+      function renderCombos() {
+        $("#ceCombos").innerHTML = COMBOS.map(c => {
+          const banned = c.cards.filter(isBanned);
+          return `<div class="ce-combo"><h4>${esc(c.title)}${banned.length ? ` <span class="ls-chip bad">Banned: ${esc(banned.join(", "))}</span>` : ""}</h4>
+            <div class="ce-pills">${c.cards.map(pill).join("")}</div>
+            <p>${c.how}</p><p class="need">${c.need}</p></div>`;
+        }).join("");
+      }
+
+      function renderStaples() {
+        $("#ceStaples").innerHTML = STAPLES.map(g => `<h3>${esc(g.group)}</h3><div class="ce-staples">${g.cards.map(([n, role]) => {
+          const ban = isBanned(n), ls = lowSodium(n);
+          return `<a class="ce-staple" href="${scryUrl(n)}" target="_blank" rel="noopener">${artHtml(n)}<span>${esc(n)}</span><span class="role">${esc(role)}</span>${ban ? `<span class="ls-chip bad">Banned</span>` : ""}${ls ? `<span class="ls-chip warn">Low Sodium</span>` : ""}</a>`;
+        }).join("")}</div>`).join("");
+      }
+
+      function renderAll() { renderTiers(); renderCombos(); renderStaples(); }
+
+      let loading = false, loaded = false;
+      async function load() {
+        if (loading || loaded) return;
+        loading = true;
+        $("#ceStatus").textContent = "Loading card art and legality from Scryfall…";
+        try {
+          const names = all();
+          const { found } = await fetchCollection(names);
+          names.forEach(n => {
+            const c = found.get(n.toLowerCase()) || found.get(primaryLookupName(n).toLowerCase());
+            cache.set(n.toLowerCase(), c || null);
+          });
+          loaded = true;
+          $("#ceStatus").textContent = "";
+          renderAll();
+        } catch (err) {
+          $("#ceStatus").textContent = "Couldn't reach Scryfall, so card art and live legality checks are unavailable. The guide still works; reload to retry.";
+        } finally {
+          loading = false;
+        }
+      }
+
+      renderAll();
+      $("#ceTabs").addEventListener("click", ev => {
+        const b = ev.target.closest("[data-ce]");
+        if (!b) return;
+        document.querySelectorAll("#ceTabs button").forEach(x => x.classList.toggle("active", x === b));
+        document.querySelectorAll("#cedhPage .ce-panel").forEach(p => p.classList.toggle("active", p.id === "ce-" + b.dataset.ce));
+      });
+      $("#navCedh").addEventListener("click", load);
+    } catch (err) {
+      console.error("cEDH tab failed to initialise", err);
+    }
+  })();
+
 
   /* ---------------------------------------------------------------------
    * Low Sodium tab (instant check, rules breakdown, ban-list browser)

@@ -40,6 +40,9 @@ Paste a commander and a decklist to get:
 - Card suggestions pulled from what's popular in your color identity, each with an explanation of why it was suggested
 - A generated markdown deck primer
 
+### cEDH Guide
+A guide to competitive Commander, split into sub-tabs: a primer, a metagame tier list (top commanders with entries and points-per-game from cedhstats.org, a dated snapshot), deck archetypes, common combos, staple cards with art, banlist and bracket context, and a glossary with sources. Card art and Commander legality are fetched live from Scryfall, so a banned card is flagged automatically; Low Sodium bans are marked on the staples.
+
 ## Notes
 
 - For playtesting and personal use only — proxies are not tournament-legal cards.
