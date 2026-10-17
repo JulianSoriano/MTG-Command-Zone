@@ -6,11 +6,11 @@ Magic: The Gathering app for Commander (EDH) deck analysis, proxy making, and in
 
 Open [`index.html`](./index.html) directly in a browser, or enable **GitHub Pages** for this repo (Settings → Pages → Deploy from branch → `main` / root) to get a shareable live link.
 
-The app has three tabs:
+The app has four tabs:
 
 ### Deck Analyzer
 Paste a commander and a decklist to get:
-- Legality, singleton, and color-identity checks (official Commander rules, or a stricter "Low Sodium 2.0" house ban list you can toggle on)
+- Legality, singleton, and color-identity checks (official Commander rules, or a stricter "Low Sodium 2.0" house ban list you can toggle on — results come with a compliant / not-compliant verdict, a per-rule tally, and the exact reason each card is banned)
 - Card art for every card in the list, including the commander
 - Mana curve and a color-source/land-base analysis (hypergeometric odds of hitting your colors on curve)
 - Known 2–3 card infinite combo detection
@@ -29,6 +29,14 @@ Everything you need at the table during a game, with state that survives a page 
 - **Commander damage** — a tracker per opponent (add/remove/rename freely), with lethal (21+) highlighted
 - **Counters** — built-in Poison (lethal at 10), Experience, and Energy, plus free-form custom counters for anything else (Rad, Ascend, Shield, Ki, Ticket, etc.)
 - A single "Reset all" button zeroes life/mana/counters for a new game while keeping your named opponents and custom counters
+
+### Low Sodium
+Everything about the Low Sodium 2.0 house format in one place (the list is built in, so it all works instantly with no card lookup):
+- **Instant check** — paste a commander and a list (Moxfield/Archidekt exports work as-is) and get a verdict, a per-rule tally, and the reason each banned card is banned. Commander-only bans are marked "OK in 99". One click hands the same list to the full analyzer, which also catches misspelled names.
+- **Rules breakdown** — the twelve headline rules (no tutors, no mass land denial, no extra turns, no discard, no fast mana, no free interaction, no stax or taxes, no mind control, no commander denial, no removal engines, no locks, no severe resource imbalances) with live card counts, how the 99 and command-zone lists differ, and every rule word for word with the cards it bans.
+- **Ban list browser** — search all ~2,900 banned cards by name or rule text, filter by category and by "banned everywhere" vs "commander only".
+
+The embedded list is a dated snapshot (shown in the app); refresh it by regenerating the `LOW_SODIUM_2` block in `index.html`.
 
 ## Notes
 
