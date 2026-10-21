@@ -46,6 +46,10 @@ A guide to competitive Commander, split into sub-tabs: a primer, a metagame tier
 ### Random Commander
 Rolls a random card that is legal as a commander right now (via Scryfall's random endpoint). Filter by color identity (exact, within, or at least), maximum price, partner commanders, and legendary creatures only. Each result shows the card, type, mana cost, colors and price, optional Oracle text, and an EDHREC link, with one-click hand-off to the Deck Analyzer and a history of recent rolls. Inspired by randomcommander.com.
 
+## Look and feel
+- **Mana symbols** (self-drawn SVG, so they work offline) appear wherever colors do: the header, Game Tools mana pool, Deck Analyzer color identity and mana-source rows, Random Commander filters and results (including mana costs), and the cEDH tier list.
+- **Fantasy theme:** the button in the top-right switches between the classic look and a parchment-and-gold fantasy look (a night-castle variant when your device is in dark mode). The choice is remembered in your browser. Fonts (Cinzel, Crimson Text) load from Google Fonts only when the theme is on, and fall back to system serif fonts offline. Printing is unaffected.
+
 ## Notes
 
 - For playtesting and personal use only — proxies are not tournament-legal cards.

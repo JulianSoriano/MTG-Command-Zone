@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MTG Command Zone</title>
+<script>
+  try { if (localStorage.getItem("mtgAnalyzer.theme") === "fantasy") document.documentElement.setAttribute("data-theme", "fantasy"); } catch (e) {}
+</script>
 <style>
   :root {
     --bg: #f7f6f3;
@@ -93,7 +96,7 @@
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
   button {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent, #fff);
     border: none;
     border-radius: 8px;
     padding: 12px 20px;
@@ -253,7 +256,7 @@
     border-radius: 999px; padding: 8px 16px; font-size: 0.86rem; font-weight: 600;
     min-height: 0; cursor: pointer;
   }
-  .page-nav button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .page-nav button.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
   .page { display: none; }
   .page.active { display: block; }
 
@@ -331,7 +334,7 @@
     border-radius: 8px; padding: 10px 16px; font-size: 0.92rem; font-weight: 700;
     min-height: 0; cursor: pointer;
   }
-  .die-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .die-btn.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
   .dice-result { margin-top: 16px; }
   .dice-total { font-size: 1.6rem; font-weight: 700; margin-bottom: 8px; }
   .dice-total .dice-total-label { font-size: 0.85rem; font-weight: 400; color: var(--text-dim); }
@@ -356,7 +359,7 @@
     display: flex; flex-direction: column; align-items: center; gap: 6px;
     border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; min-width: 70px;
   }
-  .mana-counter .pip-swatch { width: 30px; height: 30px; font-size: 0.82rem; }
+  .mana-counter .mana { width: 30px; height: 30px; }
   .mana-counter .mana-value { font-size: 1.3rem; font-weight: 700; }
   .mana-counter .mana-btn-row { display: flex; gap: 4px; }
   .mana-counter button {
@@ -513,7 +516,7 @@
     min-height: 0; padding: 7px 13px; border-radius: 999px; font-size: 0.86rem; font-weight: 600;
     background: var(--panel); color: var(--text); border: 1px solid var(--border); cursor: pointer;
   }
-  .ce-tabs button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .ce-tabs button.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
   .ce-panel { display: none; }
   .ce-panel.active { display: block; }
   .ce-asof { font-size: 0.8rem; color: var(--text-dim); margin: 0 0 10px; }
@@ -525,7 +528,7 @@
   .ce-tier { margin: 18px 0 0; }
   .ce-tier-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
   .ce-tier-head .lab {
-    font-weight: 800; font-size: 0.95rem; padding: 2px 12px; border-radius: 8px; color: #fff;
+    font-weight: 800; font-size: 0.95rem; padding: 2px 12px; border-radius: 8px; color: var(--on-accent, #fff);
   }
   .ce-tier.t1 .lab { background: var(--good); }
   .ce-tier.t2 .lab { background: var(--accent); }
@@ -597,11 +600,145 @@
   .rc-info .btn-row { margin-top: 14px; }
   #rcOracleBox summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
   .rc-empty { color: var(--text-dim); font-style: italic; }
+
+  /* ---------------------------------------------------------------------
+   * Mana symbols
+   * ------------------------------------------------------------------- */
+  .mana { display: inline-flex; width: 1.25em; height: 1.25em; vertical-align: -0.28em; flex: 0 0 auto; align-items: center; justify-content: center; }
+  .mana svg { width: 100%; height: 100%; display: block; }
+  .mana-n {
+    border-radius: 50%; background: #d5d3d0; color: #2d2b29; border: 1px solid #8d8a86; font-size: 0.82em; font-weight: 700;
+    line-height: 1; width: 1.25em; height: 1.25em; font-family: var(--font-ui, inherit);
+  }
+  .mana-row { display: inline-flex; gap: 3px; align-items: center; flex-wrap: wrap; }
+  .mana-counter .mana { width: 30px; height: 30px; }
+  .pip-row > .mana { width: 24px; height: 24px; }
+  .rc-colors button .mana { width: 30px; height: 30px; }
+  .rc-meta .mana { width: 1.5em; height: 1.5em; }
+  .ce-cmd .mana-row .mana { width: 18px; height: 18px; }
+  .hdr-mana { margin-left: 8px; font-size: 0.7em; vertical-align: middle; }
+  .hdr-mana .mana { width: 1em; height: 1em; }
+  .top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  .top-row h1 { margin: 0; }
+  #themeBtn { min-height: 0; padding: 7px 14px; font-size: 0.82rem; }
+
+  /* ---------------------------------------------------------------------
+   * Fantasy theme (optional; toggled from the header, remembered per browser)
+   * ------------------------------------------------------------------- */
+  html[data-theme="fantasy"] {
+    --bg: #e6d6b4;
+    --panel: #f6eed9;
+    --border: #a98a4f;
+    --text: #2a1c0e;
+    --text-dim: #66503a;
+    --accent: #7a1f2b;
+    --accent-dim: #ecdcba;
+    --on-accent: #fbf1d8;
+    --good: #2d6a3a; --good-bg: #dde8c8;
+    --warn: #7f520e; --warn-bg: #f1dfb0;
+    --bad: #8f1d1d; --bad-bg: #efcdc0;
+    --font-display: "Cinzel", "Trajan Pro", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-body: "Crimson Text", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --font-ui: var(--font-display);
+    --gold: #c39a3f;
+  }
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="fantasy"] {
+      --bg: #130f0b;
+      --panel: #211a12;
+      --border: #6f5528;
+      --text: #efe2c4;
+      --text-dim: #b8a47c;
+      --accent: #e2b955;
+      --accent-dim: #3a2d15;
+      --on-accent: #1b1205;
+      --good: #8fd29b; --good-bg: #16281a;
+      --warn: #efbf63; --warn-bg: #33270f;
+      --bad: #f0907f; --bad-bg: #371813;
+      --gold: #e2b955;
+    }
+  }
+  html[data-theme="fantasy"] body {
+    font-family: var(--font-body);
+    font-size: 1.07rem;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(255, 244, 214, 0.55), transparent 60%),
+      radial-gradient(ellipse at 100% 100%, rgba(122, 31, 43, 0.12), transparent 55%),
+      var(--bg);
+    background-attachment: fixed;
+  }
+  @media (prefers-color-scheme: dark) {
+    html[data-theme="fantasy"] body {
+      background:
+        radial-gradient(ellipse at 50% -10%, rgba(226, 185, 85, 0.13), transparent 60%),
+        radial-gradient(ellipse at 100% 100%, rgba(122, 31, 43, 0.25), transparent 55%),
+        var(--bg);
+      background-attachment: fixed;
+    }
+  }
+  html[data-theme="fantasy"] h1, html[data-theme="fantasy"] h2, html[data-theme="fantasy"] h3, html[data-theme="fantasy"] h4,
+  html[data-theme="fantasy"] button, html[data-theme="fantasy"] .badge, html[data-theme="fantasy"] label {
+    font-family: var(--font-display);
+  }
+  html[data-theme="fantasy"] h1 {
+    font-size: 1.9rem; letter-spacing: 0.05em; color: var(--accent); text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  }
+  html[data-theme="fantasy"] h1::before { content: "\269C\00a0"; color: var(--gold); }
+  html[data-theme="fantasy"] .sub { font-style: italic; font-size: 1rem; }
+  html[data-theme="fantasy"] .panel {
+    border: 2px solid var(--border); border-radius: 6px;
+    box-shadow: inset 0 0 0 4px var(--panel), inset 0 0 0 5px var(--border), 0 6px 18px rgba(40, 25, 5, 0.18);
+    padding: 24px 26px;
+  }
+  html[data-theme="fantasy"] .panel h2 {
+    color: var(--accent); font-size: 1.2rem; letter-spacing: 0.06em; padding-bottom: 8px; margin-bottom: 14px;
+    border-bottom: 1px solid transparent;
+    border-image: linear-gradient(90deg, var(--gold), transparent) 1;
+  }
+  html[data-theme="fantasy"] .panel h3 { color: var(--text-dim); letter-spacing: 0.08em; }
+  :where(html[data-theme="fantasy"]) button {
+    border-radius: 4px; border: 1px solid var(--gold); letter-spacing: 0.04em;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 84%, #fff), var(--accent));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+  :where(html[data-theme="fantasy"]) button.secondary {
+    background: transparent; color: var(--accent); box-shadow: none; border: 1px solid var(--gold);
+  }
+  :where(html[data-theme="fantasy"]) button:hover:not(:disabled) { filter: brightness(1.08); box-shadow: 0 0 8px color-mix(in srgb, var(--gold) 70%, transparent); }
+  html[data-theme="fantasy"] a.button.secondary { border: 1px solid var(--gold); border-radius: 4px; font-family: var(--font-display); letter-spacing: 0.04em; }
+  html[data-theme="fantasy"] .page-nav button,
+  html[data-theme="fantasy"] .ce-tabs button { background: var(--panel); color: var(--text); box-shadow: none; border: 1px solid var(--border); border-radius: 4px; }
+  html[data-theme="fantasy"] .page-nav button.active,
+  html[data-theme="fantasy"] .ce-tabs button.active {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 84%, #fff), var(--accent)); color: var(--on-accent); border-color: var(--gold);
+  }
+  html[data-theme="fantasy"] .rc-colors button { background: var(--panel); box-shadow: none; border-width: 2px; border-color: var(--border); border-radius: 999px; }
+  html[data-theme="fantasy"] .rc-colors button[aria-pressed="true"] { border-color: var(--gold); box-shadow: 0 0 0 2px var(--accent-dim), 0 0 10px color-mix(in srgb, var(--gold) 60%, transparent); }
+  html[data-theme="fantasy"] textarea,
+  html[data-theme="fantasy"] input[type=text],
+  html[data-theme="fantasy"] input[type=number],
+  html[data-theme="fantasy"] select { border: 1px solid var(--border); border-radius: 4px; background: color-mix(in srgb, var(--panel) 80%, var(--border)); }
+  html[data-theme="fantasy"] .ls-card .ls-art,
+  html[data-theme="fantasy"] .rc-card { border-color: var(--gold); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35); }
+  html[data-theme="fantasy"] .ce-box,
+  html[data-theme="fantasy"] .ce-combo,
+  html[data-theme="fantasy"] .ce-cmd,
+  html[data-theme="fantasy"] .ls-tile,
+  html[data-theme="fantasy"] .ls-cat { border-radius: 4px; }
+  html[data-theme="fantasy"] .die-btn { border-color: var(--border); }
+  html[data-theme="fantasy"] .die-btn.active { border-color: var(--gold); box-shadow: 0 0 8px color-mix(in srgb, var(--gold) 60%, transparent); }
+  html[data-theme="fantasy"] .rc-info h3 { font-family: var(--font-display); font-size: 1.4rem; color: var(--accent); }
+  @media print {
+    html[data-theme="fantasy"] body { background: #fff !important; }
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>MTG Command Zone</h1>
+  <div class="top-row">
+    <h1>MTG Command Zone <span class="mana-row hdr-mana" id="hdrMana" aria-hidden="true"></span></h1>
+    <button type="button" class="secondary" id="themeBtn" aria-pressed="false">Fantasy theme: off</button>
+  </div>
   <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
@@ -1027,6 +1164,32 @@
    * ------------------------------------------------------------------- */
   const COLORS = ["W", "U", "B", "R", "G"];
   const COLOR_NAMES = { W: "White", U: "Blue", B: "Black", R: "Red", G: "Green", C: "Colorless" };
+
+  // Mana symbols: small self-drawn SVG icons (no external images, so they work
+  // offline and in print). Each is a colored disc with a simple glyph.
+  const MANA_ART = {
+    W: ['#f7f1cf', '#4d4220', '<g stroke="#4d4220" stroke-width="1.6" stroke-linecap="round"><path d="M12 3.6v2.6M12 17.8v2.6M3.6 12h2.6M17.8 12h2.6M6.1 6.1l1.8 1.8M16.1 16.1l1.8 1.8M17.9 6.1l-1.8 1.8M7.9 16.1l-1.8 1.8"/></g><circle cx="12" cy="12" r="3.8" fill="#4d4220"/>'],
+    U: ['#bcd9ee', '#0b4a75', '<path fill="#0b4a75" d="M12 4.2c-2.6 3.3-5.3 6.5-5.3 9.5a5.3 5.3 0 0 0 10.6 0c0-3-2.7-6.2-5.3-9.5z"/>'],
+    B: ['#cdc3bd', '#1b1512', '<circle cx="12" cy="10.8" r="5.4" fill="#1b1512"/><rect x="9.4" y="13.6" width="5.2" height="4.6" rx="1" fill="#1b1512"/><circle cx="9.9" cy="11" r="1.5" fill="#cdc3bd"/><circle cx="14.1" cy="11" r="1.5" fill="#cdc3bd"/>'],
+    R: ['#f4ab90', '#6e1a0a', '<path fill="#6e1a0a" d="M12.4 3.4c.7 3.2-3.2 4.9-3.2 8.6 0 1 .4 1.8 1 2.4-.1-1.5.7-2.5 1.6-3.3.2 1.4 2.5 2.4 2.5 4.5 0 1.4-.9 2.5-2.2 2.9 2.8-.1 4.9-2.1 4.9-5 0-4-3.3-4.9-4.6-8.1z"/>'],
+    G: ['#a5d1aa', '#0e4424', '<circle cx="12" cy="8.8" r="3.9" fill="#0e4424"/><circle cx="8.5" cy="12.3" r="3.2" fill="#0e4424"/><circle cx="15.5" cy="12.3" r="3.2" fill="#0e4424"/><rect x="11" y="13.5" width="2" height="6" fill="#0e4424"/>'],
+    C: ['#d5d3d0', '#3e3c3a', '<path fill="#3e3c3a" d="M12 4.6l5.4 7.4-5.4 7.4L6.6 12z"/>']
+  };
+  function manaSym(c, extraClass) {
+    const a = MANA_ART[c];
+    const name = COLOR_NAMES[c] || c;
+    if (!a) return `<span class="mana mana-n ${extraClass || ""}" role="img" aria-label="${esc(String(c))}">${esc(String(c))}</span>`;
+    return `<span class="mana mana-${c} ${extraClass || ""}" role="img" aria-label="${name}" title="${name}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="11.2" fill="${a[0]}" stroke="${a[1]}" stroke-width="1"/>${a[2]}</svg></span>`;
+  }
+  // Turns a Scryfall mana cost like "{2}{W}{U}" into a row of symbols.
+  function manaCostHtml(cost) {
+    if (!cost) return "";
+    return String(cost).replace(/\{([^}]+)\}/g, (m, t) => MANA_ART[t] ? manaSym(t) : `<span class="mana mana-n" role="img" aria-label="${esc(t)}">${esc(t.replace(/\//g, ""))}</span>`);
+  }
+  function identityIcons(arr) {
+    return (arr && arr.length ? arr : ["C"]).map(c => manaSym(c)).join("");
+  }
+
   const COLOR_HEX = { W: "#d8c58c", U: "#5b8fd6", B: "#8a7ea3", R: "#d97456", G: "#6f9e63", C: "#9a978f" };
   const SCRYFALL_COLLECTION = "https://api.scryfall.com/cards/collection";
   const SCRYFALL_SEARCH = "https://api.scryfall.com/cards/search";
@@ -1776,8 +1939,7 @@
   function esc(s) { return (s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
 
   function identityBadgeHtml(identityArr) {
-    if (!identityArr.length) return '<span class="pip-swatch" style="background:' + COLOR_HEX.C + '">C</span>';
-    return identityArr.map(c => `<span class="pip-swatch" style="background:${COLOR_HEX[c]}">${c}</span>`).join(" ");
+    return '<span class="mana-row">' + identityIcons(identityArr) + '</span>';
   }
 
   function renderIssues(a) {
@@ -1795,8 +1957,8 @@
     return `<div class="panel"><h2>Legality &amp; color identity <span class="badge ${rows.some(r=>r.level==='bad')?'bad':'warn'}">issues found</span></h2>
       ${rows.map(r => `
         <h3>${esc(r.label)}</h3>
-        ${r.showIdentity ? `<p class="hint">Your commander's color identity: <strong>${esc(identityLabel)}</strong>. Each card below lists its own color identity so you can check the comparison yourself &mdash; if that looks wrong, something's off in how the deck or commander was read, not the rule itself.</p>` : ""}
-        <ul class="clean">${r.items.map(i => `<li>${esc(i.name)}${i.qty > 1 ? " &times;" + i.qty : ""}${i.cardIdentity ? ` <span class="hint">(card identity: ${i.cardIdentity.length ? i.cardIdentity.map(c => COLOR_NAMES[c]).join("/") : "Colorless"})</span>` : ""}</li>`).join("")}</ul>
+        ${r.showIdentity ? `<p class="hint">Your commander's color identity: <span class="mana-row">${identityIcons(a.identityArr)}</span> <strong>${esc(identityLabel)}</strong>. Each card below lists its own color identity so you can check the comparison yourself &mdash; if that looks wrong, something's off in how the deck or commander was read, not the rule itself.</p>` : ""}
+        <ul class="clean">${r.items.map(i => `<li>${esc(i.name)}${i.qty > 1 ? " &times;" + i.qty : ""}${i.cardIdentity ? ` <span class="hint">(card identity: <span class="mana-row">${identityIcons(i.cardIdentity)}</span> ${i.cardIdentity.length ? i.cardIdentity.map(c => COLOR_NAMES[c]).join("/") : "Colorless"})</span>` : ""}</li>`).join("")}</ul>
       `).join("")}
     </div>`;
   }
@@ -1887,7 +2049,7 @@
       }
       const okLevel = need1 !== undefined ? (hgAtLeast(deckSize, have, 7 + Math.max(1, need1), 1) >= 0.85 ? "good" : (hgAtLeast(deckSize, have, 7 + Math.max(1, need1), 1) >= 0.7 ? "warn" : "bad")) : "good";
       return `<div class="pip-row">
-        <span class="pip-swatch" style="background:${COLOR_HEX[col]}">${col}</span>
+        ${manaSym(col)}
         <div style="flex:1">
           <div><strong>${have}</strong> sources of ${COLOR_NAMES[col]} &nbsp;<span class="badge ${okLevel}">${okLevel === "good" ? "on track" : okLevel === "warn" ? "borderline" : "short"}</span></div>
           ${line1 ? `<div class="hint">${line1}</div>` : ""}
@@ -2366,6 +2528,7 @@
           $("#rcCreaturesOnly").checked = !!s.creatures;
         }
       } catch (e) {}
+      document.querySelectorAll("#rcColors button").forEach(b => { b.innerHTML = manaSym(b.dataset.c); b.setAttribute("aria-label", COLOR_NAMES[b.dataset.c]); });
       const syncButtons = () => document.querySelectorAll("#rcColors button").forEach(b => b.setAttribute("aria-pressed", picked.has(b.dataset.c) ? "true" : "false"));
       syncButtons();
 
@@ -2415,9 +2578,9 @@
         $("#rcName").textContent = c.name;
         $("#rcType").textContent = textOf(c, "type_line").replace(/\n\n\/\/ \n\n/, " // ");
         const cost = faces(c)[0].mana_cost || c.mana_cost || "";
-        $("#rcCost").textContent = cost ? cost.replace(/\}\{/g, " ").replace(/[{}]/g, "") : "None";
+        $("#rcCost").innerHTML = cost ? `<span class="mana-row">${manaCostHtml(cost)}</span>` : "None";
         const id = c.color_identity || [];
-        $("#rcIdent").textContent = id.length ? id.map(x => NAMES[x] || x).join(", ") : "Colorless";
+        $("#rcIdent").innerHTML = `<span class="mana-row">${identityIcons(id)}</span> ${esc(id.length ? id.map(x => NAMES[x] || x).join(", ") : "Colorless")}`;
         const usd = c.prices && c.prices.usd;
         $("#rcPriceOut").textContent = usd ? "$" + usd + " (USD, approx.)" : "No price listed";
         $("#rcOracle").textContent = textOf(c, "oracle_text").replace(/\n\n\/\/ \n\n/g, "\n\n— — —\n\n");
@@ -2556,6 +2719,13 @@
         return `<span class="ls-art${url ? " loaded" : ""}"><span class="ls-ph">${esc(n)}</span>${url ? `<img alt="" src="${esc(url)}">` : ""}</span>`;
       }
 
+      function identOf(r) {
+        const set = new Set(); let any = false;
+        r.names.forEach(n => { const c = lookup(n); if (c && Array.isArray(c.color_identity)) { any = true; c.color_identity.forEach(x => set.add(x)); } });
+        if (!any) return "";
+        return `<div class="mana-row">${identityIcons(["W", "U", "B", "R", "G"].filter(x => set.has(x)))}</div>`;
+      }
+
       function renderTiers() {
         $("#ceMetaAsOf").innerHTML = `Source: <a href="${META.source}" target="_blank" rel="noopener">cedhstats.org</a> (Topdeck.gg tournament data), read ${META.asOf}. Baseline PPG ${META.baseline}. Top ten commanders by entries.`;
         const top = Math.max(...META.rows.map(r => r.ppg), 1.5);
@@ -2566,7 +2736,7 @@
           if (!list.length) return "";
           return `<div class="ce-tier ${t.id}"><div class="ce-tier-head"><span class="lab">${t.label}</span><span class="hint">${esc(t.blurb)}</span></div>
             <div class="ce-cmds">${list.map(r => `<div class="ce-cmd"><span class="arts">${r.names.map(artHtml).join("")}</span>
-              <span class="info"><div class="nm">${esc(r.label)}</div><div class="st">${fmt(r.entries)} entries &middot; PPG ${r.ppg.toFixed(2)}</div>
+              <span class="info"><div class="nm">${esc(r.label)}</div><div class="st">${fmt(r.entries)} entries &middot; PPG ${r.ppg.toFixed(2)}</div>${identOf(r)}
               <div class="ce-bar" title="PPG ${r.ppg.toFixed(2)} vs baseline ${META.baseline}"><i style="width:${(r.ppg / top * 100).toFixed(1)}%"></i><b style="left:${(META.baseline / top * 100).toFixed(1)}%"></b></div></span></div>`).join("")}</div></div>`;
         }).join("");
       }
@@ -2629,6 +2799,35 @@
     }
   })();
 
+
+
+  /* ---------------------------------------------------------------------
+   * Theme toggle (Classic / Fantasy) + header mana row
+   * ------------------------------------------------------------------- */
+  (function wireTheme() {
+    try {
+      const btn = $("#themeBtn");
+      const root = document.documentElement;
+      $("#hdrMana").innerHTML = ["W", "U", "B", "R", "G"].map(c => manaSym(c)).join("");
+      function ensureFonts() {
+        if (document.getElementById("fantasyFonts")) return;
+        const l = document.createElement("link");
+        l.id = "fantasyFonts"; l.rel = "stylesheet";
+        l.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap";
+        document.head.appendChild(l);
+      }
+      function apply(on, persist) {
+        if (on) { root.setAttribute("data-theme", "fantasy"); ensureFonts(); } else root.removeAttribute("data-theme");
+        btn.setAttribute("aria-pressed", on ? "true" : "false");
+        btn.textContent = "Fantasy theme: " + (on ? "on" : "off");
+        if (persist) { try { localStorage.setItem("mtgAnalyzer.theme", on ? "fantasy" : "classic"); } catch (e) {} }
+      }
+      apply(root.getAttribute("data-theme") === "fantasy", false);
+      btn.addEventListener("click", () => apply(root.getAttribute("data-theme") !== "fantasy", true));
+    } catch (err) {
+      console.error("Theme toggle failed to initialise", err);
+    }
+  })();
 
   /* ---------------------------------------------------------------------
    * Low Sodium tab (instant check, rules breakdown, ban-list browser)
@@ -3566,7 +3765,7 @@
     function renderMana() {
       manaPoolRowEl.innerHTML = MANA_COLORS.map(c => `
         <div class="mana-counter" data-color="${c}">
-          <span class="pip-swatch" style="background:${COLOR_HEX[c]}">${c}</span>
+          ${manaSym(c)}
           <div class="mana-value">${state.mana[c]}</div>
           <div class="mana-btn-row">
             <button type="button" class="secondary" data-mana-delta="-1" data-color="${c}">&minus;</button>
