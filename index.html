@@ -1,12 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="fantasy">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MTG Command Zone</title>
-<script>
-  try { if (localStorage.getItem("mtgAnalyzer.theme") === "fantasy") document.documentElement.setAttribute("data-theme", "fantasy"); } catch (e) {}
-</script>
 <style>
   :root {
     --bg: #f7f6f3;
@@ -620,7 +617,6 @@
   .hdr-mana .mana { width: 1em; height: 1em; }
   .top-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
   .top-row h1 { margin: 0; }
-  #themeBtn { min-height: 0; padding: 7px 14px; font-size: 0.82rem; }
 
   /* ---------------------------------------------------------------------
    * Fantasy theme (optional; toggled from the header, remembered per browser)
@@ -737,7 +733,6 @@
 <div class="wrap">
   <div class="top-row">
     <h1>MTG Command Zone <span class="mana-row hdr-mana" id="hdrMana" aria-hidden="true"></span></h1>
-    <button type="button" class="secondary" id="themeBtn" aria-pressed="false">Fantasy theme: off</button>
   </div>
   <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
@@ -2802,30 +2797,18 @@
 
 
   /* ---------------------------------------------------------------------
-   * Theme toggle (Classic / Fantasy) + header mana row
+   * Fantasy theme fonts + header mana row
    * ------------------------------------------------------------------- */
   (function wireTheme() {
     try {
-      const btn = $("#themeBtn");
-      const root = document.documentElement;
       $("#hdrMana").innerHTML = ["W", "U", "B", "R", "G"].map(c => manaSym(c)).join("");
-      function ensureFonts() {
-        if (document.getElementById("fantasyFonts")) return;
-        const l = document.createElement("link");
-        l.id = "fantasyFonts"; l.rel = "stylesheet";
-        l.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap";
-        document.head.appendChild(l);
-      }
-      function apply(on, persist) {
-        if (on) { root.setAttribute("data-theme", "fantasy"); ensureFonts(); } else root.removeAttribute("data-theme");
-        btn.setAttribute("aria-pressed", on ? "true" : "false");
-        btn.textContent = "Fantasy theme: " + (on ? "on" : "off");
-        if (persist) { try { localStorage.setItem("mtgAnalyzer.theme", on ? "fantasy" : "classic"); } catch (e) {} }
-      }
-      apply(root.getAttribute("data-theme") === "fantasy", false);
-      btn.addEventListener("click", () => apply(root.getAttribute("data-theme") !== "fantasy", true));
+      // Display fonts load from Google Fonts; offline, system serif fonts are used.
+      const l = document.createElement("link");
+      l.id = "fantasyFonts"; l.rel = "stylesheet";
+      l.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap";
+      document.head.appendChild(l);
     } catch (err) {
-      console.error("Theme toggle failed to initialise", err);
+      console.error("Theme setup failed", err);
     }
   })();
 
