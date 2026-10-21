@@ -43,6 +43,9 @@ Paste a commander and a decklist to get:
 ### cEDH Guide
 A guide to competitive Commander, split into sub-tabs: a primer, a metagame tier list (top commanders with entries and points-per-game from cedhstats.org, a dated snapshot), deck archetypes, common combos, staple cards with art, banlist and bracket context, and a glossary with sources. Card art and Commander legality are fetched live from Scryfall, so a banned card is flagged automatically; Low Sodium bans are marked on the staples.
 
+### Random Commander
+Rolls a random card that is legal as a commander right now (via Scryfall's random endpoint). Filter by color identity (exact, within, or at least), maximum price, partner commanders, and legendary creatures only. Each result shows the card, type, mana cost, colors and price, optional Oracle text, and an EDHREC link, with one-click hand-off to the Deck Analyzer and a history of recent rolls. Inspired by randomcommander.com.
+
 ## Notes
 
 - For playtesting and personal use only — proxies are not tournament-legal cards.

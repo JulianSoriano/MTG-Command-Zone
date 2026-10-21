@@ -561,12 +561,48 @@
   .ce-src li { margin: 6px 0; font-size: 0.9rem; }
   .ce-cmd .ls-art, .ce-staple .ls-art { display: block; }
   .ce-status { font-size: 0.8rem; color: var(--text-dim); margin: 6px 0; }
+
+  /* ---------------------------------------------------------------------
+   * Random Commander
+   * ------------------------------------------------------------------- */
+  .rc-layout { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 10px; }
+  @media (min-width: 760px) { .rc-layout { grid-template-columns: 300px 1fr; align-items: start; } }
+  .rc-cardwrap { max-width: 300px; width: 100%; margin: 0 auto; }
+  .rc-card { width: 100%; aspect-ratio: 488 / 680; border-radius: 5% / 3.6%; background: var(--accent-dim); border: 1px solid var(--border); overflow: hidden; display: block; position: relative; }
+  .rc-card img { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .rc-card.loading { animation: rcpulse 1s ease-in-out infinite; }
+  @keyframes rcpulse { 50% { opacity: 0.55; } }
+  .rc-filters { display: grid; gap: 12px; margin: 8px 0 14px; }
+  .rc-colors { display: flex; gap: 8px; flex-wrap: wrap; }
+  .rc-colors button {
+    min-height: 0; width: 42px; height: 42px; padding: 0; border-radius: 999px; font-weight: 800; font-size: 0.95rem;
+    background: var(--panel); color: var(--text); border: 2px solid var(--border); cursor: pointer;
+  }
+  .rc-colors button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); background: var(--accent-dim); }
+  .rc-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .rc-row label { display: flex; gap: 6px; align-items: center; font-size: 0.88rem; margin: 0; }
+  .rc-row input[type=checkbox] { width: auto; margin: 0; }
+  .rc-row select { width: auto; }
+  .rc-info h3 { margin: 0 0 2px; font-size: 1.25rem; text-transform: none; letter-spacing: 0; color: var(--text); }
+  .rc-meta { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 0.9rem; margin: 10px 0; }
+  .rc-meta dt { color: var(--text-dim); }
+  .rc-meta dd { margin: 0; }
+  .rc-oracle { white-space: pre-line; font-size: 0.9rem; border-left: 3px solid var(--accent); background: var(--accent-dim); padding: 8px 12px; border-radius: 0 8px 8px 0; margin: 8px 0; }
+  .rc-hist { display: flex; gap: 8px; overflow-x: auto; padding: 4px 0 8px; margin-top: 6px; }
+  .rc-hist button { flex: 0 0 auto; width: 64px; min-height: 0; padding: 0; background: none; border: 2px solid var(--border); border-radius: 6px; overflow: hidden; cursor: pointer; }
+  .rc-hist button img { display: block; width: 100%; }
+  .rc-hist button.cur { border-color: var(--accent); }
+  a.button.secondary { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 12px 20px; font-size: 0.95rem; font-weight: 600; min-height: 44px; box-sizing: border-box; }
+  #rcResult { margin-top: 18px; }
+  .rc-info .btn-row { margin-top: 14px; }
+  #rcOracleBox summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+  .rc-empty { color: var(--text-dim); font-style: italic; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>MTG Command Zone</h1>
-  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, and read a cEDH guide &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
+  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
     <button type="button" id="navPrint" class="active">Print Proxy Sheets</button>
@@ -574,6 +610,7 @@
     <button type="button" id="navGame">Game Tools</button>
     <button type="button" id="navAnalyzer">Deck Analyzer</button>
     <button type="button" id="navCedh">cEDH Guide</button>
+    <button type="button" id="navRandom">Random Commander</button>
   </div>
 
   <div id="cedhPage" class="page">
@@ -695,6 +732,70 @@
         </ul>
         <p class="hint">Written 2026-10-17 from the sources above and general format knowledge. The metagame shifts constantly, so use this as a starting point and check the live sources for the latest.</p>
       </div>
+    </div>
+  </div>
+
+  <div id="randomPage" class="page">
+    <div class="panel">
+      <h2>Random Commander</h2>
+      <p class="hint">Can't pick a commander? Roll one. Every result is a card that is legal as a commander in the official Commander format right now (live from Scryfall). Narrow it down with the filters, or leave them alone for a total surprise.</p>
+      <div class="rc-filters">
+        <div>
+          <label>Colors (leave all off for any)</label>
+          <div class="rc-colors" id="rcColors" role="group" aria-label="Color identity">
+            <button type="button" data-c="W" aria-pressed="false" title="White">W</button>
+            <button type="button" data-c="U" aria-pressed="false" title="Blue">U</button>
+            <button type="button" data-c="B" aria-pressed="false" title="Black">B</button>
+            <button type="button" data-c="R" aria-pressed="false" title="Red">R</button>
+            <button type="button" data-c="G" aria-pressed="false" title="Green">G</button>
+            <button type="button" data-c="C" aria-pressed="false" title="Colorless">C</button>
+          </div>
+        </div>
+        <div class="rc-row">
+          <label for="rcMode">Match</label>
+          <select id="rcMode" aria-label="How to match the colors">
+            <option value="exact">Exactly these colors</option>
+            <option value="within">Only these colors (or fewer)</option>
+            <option value="includes">At least these colors</option>
+          </select>
+          <label for="rcPrice">Card price</label>
+          <select id="rcPrice" aria-label="Maximum price">
+            <option value="">Any</option>
+            <option value="1">Under $1</option>
+            <option value="5">Under $5</option>
+            <option value="20">Under $20</option>
+            <option value="50">Under $50</option>
+          </select>
+        </div>
+        <div class="rc-row">
+          <label><input type="checkbox" id="rcPartner" checked> Include partner commanders</label>
+          <label><input type="checkbox" id="rcCreaturesOnly"> Legendary creatures only</label>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" id="rcRoll">Roll a commander</button>
+      </div>
+      <div class="ce-status" id="rcStatus" aria-live="polite"></div>
+      <div class="rc-layout" id="rcResult" hidden>
+        <div class="rc-cardwrap"><a class="rc-card" id="rcCard" target="_blank" rel="noopener" title="Open on Scryfall"></a></div>
+        <div class="rc-info">
+          <h3 id="rcName"></h3>
+          <dl class="rc-meta">
+            <dt>Type</dt><dd id="rcType"></dd>
+            <dt>Mana cost</dt><dd id="rcCost"></dd>
+            <dt>Colors</dt><dd id="rcIdent"></dd>
+            <dt>Price</dt><dd id="rcPriceOut"></dd>
+          </dl>
+          <details id="rcOracleBox"><summary>Show Oracle text</summary><div class="rc-oracle" id="rcOracle"></div></details>
+          <div class="btn-row">
+            <a class="button secondary" id="rcEdhrec" target="_blank" rel="noopener" href="#">EDHREC page</a>
+            <button type="button" class="secondary" id="rcToAnalyzer">Use in Deck Analyzer</button>
+            <button type="button" class="secondary" id="rcCopy">Copy name</button>
+          </div>
+        </div>
+      </div>
+      <div id="rcHistWrap" hidden><label>Recent rolls</label><div class="rc-hist" id="rcHist"></div></div>
+      <p class="hint">Idea inspired by <a href="https://randomcommander.com/" target="_blank" rel="noopener">randomcommander.com</a>. Card data and images from Scryfall; EDHREC links are for convenience.</p>
     </div>
   </div>
 
@@ -2226,7 +2327,8 @@
       lowsodium: { nav: $("#navLowSodium"), page: $("#lowSodiumPage") },
       game: { nav: $("#navGame"), page: $("#gamePage") },
       analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
-      cedh: { nav: $("#navCedh"), page: $("#cedhPage") }
+      cedh: { nav: $("#navCedh"), page: $("#cedhPage") },
+      random: { nav: $("#navRandom"), page: $("#randomPage") }
     };
     function showPage(which) {
       for (const key of Object.keys(pages)) {
@@ -2240,6 +2342,148 @@
     pages.game.nav.addEventListener("click", () => showPage("game"));
     pages.lowsodium.nav.addEventListener("click", () => showPage("lowsodium"));
     pages.cedh.nav.addEventListener("click", () => showPage("cedh"));
+    pages.random.nav.addEventListener("click", () => showPage("random"));
+  })();
+
+  /* ---------------------------------------------------------------------
+   * Random Commander tab
+   * ------------------------------------------------------------------- */
+  (function wireRandomCommander() {
+    try {
+      const KEY = "mtgAnalyzer.randomCommander";
+      const picked = new Set();
+      const history = [];
+      let current = -1, busy = false;
+
+      const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ c: [...picked], mode: $("#rcMode").value, price: $("#rcPrice").value, partner: $("#rcPartner").checked, creatures: $("#rcCreaturesOnly").checked })); } catch (e) {} };
+      try {
+        const s = JSON.parse(localStorage.getItem(KEY) || "null");
+        if (s) {
+          (s.c || []).forEach(c => picked.add(c));
+          if (s.mode) $("#rcMode").value = s.mode;
+          $("#rcPrice").value = s.price || "";
+          $("#rcPartner").checked = s.partner !== false;
+          $("#rcCreaturesOnly").checked = !!s.creatures;
+        }
+      } catch (e) {}
+      const syncButtons = () => document.querySelectorAll("#rcColors button").forEach(b => b.setAttribute("aria-pressed", picked.has(b.dataset.c) ? "true" : "false"));
+      syncButtons();
+
+      $("#rcColors").addEventListener("click", ev => {
+        const b = ev.target.closest("button[data-c]");
+        if (!b) return;
+        const c = b.dataset.c;
+        if (picked.has(c)) picked.delete(c);
+        else {
+          if (c === "C") picked.clear(); else picked.delete("C");
+          picked.add(c);
+        }
+        syncButtons(); save();
+      });
+      ["#rcMode", "#rcPrice", "#rcPartner", "#rcCreaturesOnly"].forEach(s => $(s).addEventListener("change", save));
+
+      function buildQuery() {
+        const q = ["is:commander", "game:paper", "legal:commander"];
+        if ($("#rcCreaturesOnly").checked) q.push("t:legendary", "t:creature");
+        if (!$("#rcPartner").checked) q.push("-keyword:partner");
+        const p = $("#rcPrice").value;
+        if (p) q.push("usd<" + p);
+        if (picked.size) {
+          const letters = ["W", "U", "B", "R", "G", "C"].filter(c => picked.has(c)).join("").toLowerCase();
+          const mode = $("#rcMode").value;
+          if (letters === "c") q.push("id=c");
+          else q.push(mode === "exact" ? "id=" + letters : mode === "within" ? "id<=" + letters : "id>=" + letters);
+        }
+        return q.join(" ");
+      }
+
+      const faces = c => (c.card_faces && c.card_faces.length ? c.card_faces : [c]);
+      const textOf = (c, k) => c[k] || faces(c).map(f => f[k]).filter(Boolean).join("\n\n// \n\n");
+      const edhrecSlug = name => name.split(" // ")[0].toLowerCase().replace(/['’,]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const NAMES = { W: "White", U: "Blue", B: "Black", R: "Red", G: "Green" };
+
+      function show(i) {
+        const c = history[i];
+        if (!c) return;
+        current = i;
+        $("#rcResult").hidden = false;
+        const url = cardImageUrl(c, "normal");
+        const a = $("#rcCard");
+        a.href = c.scryfall_uri || "#";
+        a.classList.remove("loading");
+        a.innerHTML = url ? `<img alt="${esc(c.name)}" src="${esc(url)}">` : `<span class="ls-ph-lg">${esc(c.name)}</span>`;
+        $("#rcName").textContent = c.name;
+        $("#rcType").textContent = textOf(c, "type_line").replace(/\n\n\/\/ \n\n/, " // ");
+        const cost = faces(c)[0].mana_cost || c.mana_cost || "";
+        $("#rcCost").textContent = cost ? cost.replace(/\}\{/g, " ").replace(/[{}]/g, "") : "None";
+        const id = c.color_identity || [];
+        $("#rcIdent").textContent = id.length ? id.map(x => NAMES[x] || x).join(", ") : "Colorless";
+        const usd = c.prices && c.prices.usd;
+        $("#rcPriceOut").textContent = usd ? "$" + usd + " (USD, approx.)" : "No price listed";
+        $("#rcOracle").textContent = textOf(c, "oracle_text").replace(/\n\n\/\/ \n\n/g, "\n\n— — —\n\n");
+        $("#rcEdhrec").href = "https://edhrec.com/commanders/" + edhrecSlug(c.name);
+        renderHistory();
+      }
+
+      function renderHistory() {
+        $("#rcHistWrap").hidden = history.length < 2;
+        $("#rcHist").innerHTML = history.map((c, i) => {
+          const u = cardImageUrl(c, "small");
+          return `<button type="button" data-i="${i}" class="${i === current ? "cur" : ""}" title="${esc(c.name)}" aria-label="${esc(c.name)}">${u ? `<img alt="" src="${esc(u)}">` : esc(c.name)}</button>`;
+        }).join("");
+      }
+
+      async function roll() {
+        if (busy) return;
+        busy = true;
+        const btn = $("#rcRoll");
+        btn.disabled = true;
+        $("#rcStatus").textContent = "Rolling…";
+        $("#rcCard").classList.add("loading");
+        try {
+          const res = await fetch("https://api.scryfall.com/cards/random?q=" + encodeURIComponent(buildQuery()));
+          if (res.status === 404) {
+            $("#rcStatus").textContent = "No commander matches those filters. Try loosening the colors, the match mode, or the price.";
+            $("#rcCard").classList.remove("loading");
+            return;
+          }
+          if (!res.ok) throw new Error("status " + res.status);
+          const card = await res.json();
+          history.push(card);
+          if (history.length > 12) history.shift();
+          $("#rcStatus").textContent = "";
+          show(history.length - 1);
+        } catch (err) {
+          $("#rcStatus").textContent = "Couldn't reach Scryfall. Check your connection and try again.";
+          $("#rcCard").classList.remove("loading");
+        } finally {
+          busy = false;
+          btn.disabled = false;
+        }
+      }
+
+      $("#rcRoll").addEventListener("click", roll);
+      $("#rcHist").addEventListener("click", ev => {
+        const b = ev.target.closest("button[data-i]");
+        if (b) show(Number(b.dataset.i));
+      });
+      $("#rcToAnalyzer").addEventListener("click", () => {
+        const c = history[current];
+        if (!c) return;
+        $("#commanderInput").value = c.name;
+        $("#navAnalyzer").click();
+        $("#commanderInput").focus();
+      });
+      $("#rcCopy").addEventListener("click", async () => {
+        const c = history[current];
+        if (!c) return;
+        const b = $("#rcCopy");
+        try { await navigator.clipboard.writeText(c.name); b.textContent = "Copied"; } catch (e) { b.textContent = "Copy failed"; }
+        setTimeout(() => { b.textContent = "Copy name"; }, 1500);
+      });
+    } catch (err) {
+      console.error("Random Commander tab failed to initialise", err);
+    }
   })();
 
   /* ---------------------------------------------------------------------
