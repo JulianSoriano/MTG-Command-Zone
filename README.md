@@ -46,6 +46,9 @@ A guide to competitive Commander, split into sub-tabs: a primer, a metagame tier
 ### Random Commander
 Rolls a random card that is legal as a commander right now (via Scryfall's random endpoint). Filter by color identity (exact, within, or at least), maximum price, partner commanders, and legendary creatures only. Each result shows the card, type, mana cost, colors and price, optional Oracle text, and an EDHREC link, with one-click hand-off to the Deck Analyzer and a history of recent rolls. Inspired by randomcommander.com.
 
+### Card Creator
+Design your own card: name, mana cost (with symbols, including hybrid, {X}, {T} and {Q}), type line, rarity, frame color (automatic from the cost and type, or chosen), rules text (reminder text in parentheses is italicized), flavor text, power/toughness or loyalty, artist credit, and a footer note. Upload a JPG or PNG for the art (or drag it onto the preview), then zoom and reposition it. Type an existing card's name (with suggestions) to use it as a template, optionally with its art. Finished cards can be downloaded as a 744×1039 PNG (about 2.5×3.5 inches at 300 dpi), saved in the browser, or added to the Print Proxy sheet in any number of copies; they stay on the sheet when you rebuild it and each has a Remove button. The card frame is an original design, not Wizards of the Coast's.
+
 ## Look and feel
 - **Mana symbols** (self-drawn SVG, so they work offline) appear wherever colors do: the header, Game Tools mana pool, Deck Analyzer color identity and mana-source rows, Random Commander filters and results (including mana costs), and the cEDH tier list.
 - **Fantasy theme:** the whole app uses a parchment-and-gold fantasy look (a night-castle variant when your device is in dark mode). Fonts (Cinzel, Crimson Text) load from Google Fonts and fall back to system serif fonts offline. Printing is unaffected.

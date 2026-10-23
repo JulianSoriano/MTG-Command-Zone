@@ -727,6 +727,44 @@
   @media print {
     html[data-theme="fantasy"] body { background: #fff !important; }
   }
+
+  /* ---------------------------------------------------------------------
+   * Card Creator
+   * ------------------------------------------------------------------- */
+  .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .cc-inline input[type=text] { flex: 1 1 220px; }
+  .cc-check { display: flex; gap: 8px; align-items: center; font-weight: 400; margin: 10px 0 0; }
+  .cc-check input { width: auto; margin: 0; }
+  .cc-layout { display: grid; grid-template-columns: 1fr; gap: 22px; }
+  @media (min-width: 820px) { .cc-layout { grid-template-columns: 1fr 340px; align-items: start; } .cc-preview { position: sticky; top: 12px; } }
+  .cc-grid2 { display: grid; grid-template-columns: 1fr; gap: 0 12px; }
+  @media (min-width: 520px) { .cc-grid2 { grid-template-columns: 1fr 1fr; } }
+  .cc-grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0 10px; }
+  .cc-form textarea, .cc-form input[type=text], .cc-template input[type=text] { min-height: 0; font-family: inherit; }
+  .cc-form input[type=file] { width: 100%; font-size: 0.9rem; }
+  .cc-artbtns { margin-top: 8px; }
+  .cc-artbtns button { min-height: 0; padding: 6px 12px; font-size: 0.82rem; }
+  .cc-sliders { display: grid; grid-template-columns: 1fr; gap: 6px; margin-top: 10px; }
+  @media (min-width: 520px) { .cc-sliders { grid-template-columns: repeat(3, 1fr); } }
+  .cc-sliders label { font-weight: 400; font-size: 0.82rem; margin: 0; }
+  .cc-sliders input { width: 100%; }
+  .cc-preview { width: 100%; max-width: 340px; margin: 0 auto; }
+  .cc-preview canvas { width: 100%; height: auto; display: block; filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35)); }
+  .cc-preview.dragging canvas { outline: 3px dashed var(--accent); outline-offset: 4px; }
+  .cc-actions { display: grid; gap: 8px; margin-top: 14px; }
+  .cc-actions button { width: 100%; }
+  .cc-actions .cc-inline button { flex: 1 1 auto; width: auto; }
+  .cc-copies { margin: 0; font-weight: 600; }
+  #ccCopies { width: 72px; flex: 0 0 auto; }
+  .cc-saved { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+  .cc-saved-item { display: flex; flex-direction: column; gap: 6px; font-size: 0.8rem; }
+  .cc-saved-item img { width: 100%; border-radius: 5% / 3.6%; display: block; }
+  .cc-saved-item .cc-inline button { flex: 1 1 auto; min-height: 0; padding: 5px 8px; font-size: 0.75rem; }
+  .proxy-remove-custom {
+    position: absolute; top: 6px; right: 6px; min-height: 0; padding: 3px 8px; font-size: 0.7rem; border-radius: 6px;
+  }
+  @media print { .proxy-remove-custom { display: none !important; } }
 </style>
 </head>
 <body>
@@ -734,7 +772,7 @@
   <div class="top-row">
     <h1>MTG Command Zone <span class="mana-row hdr-mana" id="hdrMana" aria-hidden="true"></span></h1>
   </div>
-  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
+  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander, and design your own cards &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
     <button type="button" id="navPrint" class="active">Print Proxy Sheets</button>
@@ -743,6 +781,7 @@
     <button type="button" id="navAnalyzer">Deck Analyzer</button>
     <button type="button" id="navCedh">cEDH Guide</button>
     <button type="button" id="navRandom">Random Commander</button>
+    <button type="button" id="navCreator">Card Creator</button>
   </div>
 
   <div id="cedhPage" class="page">
@@ -928,6 +967,93 @@
       </div>
       <div id="rcHistWrap" hidden><label>Recent rolls</label><div class="rc-hist" id="rcHist"></div></div>
       <p class="hint">Idea inspired by <a href="https://randomcommander.com/" target="_blank" rel="noopener">randomcommander.com</a>. Card data and images from Scryfall; EDHREC links are for convenience.</p>
+    </div>
+  </div>
+
+  <div id="creatorPage" class="page">
+    <div class="panel">
+      <h2>Card Creator</h2>
+      <p class="hint">Design your own card. Fill in the fields, upload a JPG or PNG for the art, or start from a real card and change what you like. The preview updates as you type. You can download it as an image, save the design in this browser, or add it to your Print Proxy sheet.</p>
+
+      <div class="cc-template">
+        <label for="ccTemplate">Start from an existing card (optional)</label>
+        <div class="cc-inline">
+          <input type="text" id="ccTemplate" list="ccSuggest" placeholder="e.g. Llanowar Elves" autocomplete="off" spellcheck="false">
+          <datalist id="ccSuggest"></datalist>
+          <button type="button" id="ccLoadBtn">Use as template</button>
+        </div>
+        <label class="cc-check"><input type="checkbox" id="ccTemplateArt" checked> Also use that card's art</label>
+        <div class="ce-status" id="ccStatus" aria-live="polite"></div>
+      </div>
+
+      <div class="cc-layout">
+        <div class="cc-form">
+          <div class="cc-grid2">
+            <div class="field"><label for="ccName">Card name</label><input type="text" id="ccName" placeholder="Name"></div>
+            <div class="field"><label for="ccCost">Mana cost</label><input type="text" id="ccCost" placeholder="{2}{G}{G} or 2GG" spellcheck="false"></div>
+          </div>
+          <div class="cc-grid2">
+            <div class="field"><label for="ccType">Type line</label><input type="text" id="ccType" placeholder="Creature — Elf Druid"></div>
+            <div class="field"><label for="ccRarity">Rarity</label>
+              <select id="ccRarity"><option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare" selected>Rare</option><option value="mythic">Mythic</option></select></div>
+          </div>
+          <div class="field"><label for="ccFrame">Frame color</label>
+            <select id="ccFrame">
+              <option value="auto">Automatic (from mana cost and type)</option>
+              <option value="W">White</option><option value="U">Blue</option><option value="B">Black</option>
+              <option value="R">Red</option><option value="G">Green</option><option value="gold">Gold (multicolor)</option>
+              <option value="artifact">Artifact</option><option value="colorless">Colorless</option><option value="land">Land</option>
+            </select></div>
+
+          <div class="field cc-artfield">
+            <label for="ccArt">Card art (JPG or PNG)</label>
+            <input type="file" id="ccArt" accept="image/png,image/jpeg">
+            <div class="cc-inline cc-artbtns"><button type="button" class="secondary" id="ccArtClear">Remove art</button></div>
+            <div class="cc-sliders">
+              <label>Zoom <input type="range" id="ccZoom" min="100" max="300" value="100"></label>
+              <label>Left / right <input type="range" id="ccPanX" min="-100" max="100" value="0"></label>
+              <label>Up / down <input type="range" id="ccPanY" min="-100" max="100" value="0"></label>
+            </div>
+            <p class="hint">Tip: you can also drag an image onto the preview.</p>
+          </div>
+
+          <div class="field"><label for="ccRules">Rules text</label>
+            <textarea id="ccRules" rows="5" placeholder="Flying&#10;{T}: Add {G}.&#10;(Reminder text in parentheses is shown in italics.)"></textarea>
+            <p class="hint">Symbols: type them in braces, like {W} {U} {B} {R} {G} {C} {2} {X} {T} (tap) {Q} (untap), or hybrid {W/U}. Start a new line for a new paragraph.</p></div>
+          <div class="field"><label for="ccFlavor">Flavor text</label><textarea id="ccFlavor" rows="2" placeholder="Optional italic flavor text"></textarea></div>
+          <div class="cc-grid3">
+            <div class="field"><label for="ccPow">Power</label><input type="text" id="ccPow" placeholder="—"></div>
+            <div class="field"><label for="ccTou">Toughness</label><input type="text" id="ccTou" placeholder="—"></div>
+            <div class="field"><label for="ccLoy">Loyalty</label><input type="text" id="ccLoy" placeholder="—"></div>
+          </div>
+          <div class="cc-grid2">
+            <div class="field"><label for="ccArtist">Artist credit</label><input type="text" id="ccArtist" placeholder="Your name"></div>
+            <div class="field"><label for="ccFooter">Footer note</label><input type="text" id="ccFooter"></div>
+          </div>
+        </div>
+
+        <div class="cc-preview" id="ccPreview">
+          <canvas id="ccCanvas" width="744" height="1039" aria-label="Card preview" role="img"></canvas>
+          <div class="cc-actions">
+            <button type="button" id="ccDownload">Download image</button>
+            <div class="cc-inline">
+              <label class="cc-copies" for="ccCopies">Copies</label>
+              <input type="number" id="ccCopies" min="1" max="99" value="1">
+              <button type="button" class="secondary" id="ccToPrint">Add to print sheet</button>
+            </div>
+            <div class="cc-inline">
+              <button type="button" class="secondary" id="ccSave">Save design</button>
+              <button type="button" class="secondary" id="ccReset">Start over</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="ccSavedWrap" hidden>
+        <h3>Saved designs</h3>
+        <p class="hint">Stored in this browser only. Very large images are shrunk to save space.</p>
+        <div class="cc-saved" id="ccSaved"></div>
+      </div>
     </div>
   </div>
 
@@ -1159,6 +1285,9 @@
    * ------------------------------------------------------------------- */
   const COLORS = ["W", "U", "B", "R", "G"];
   const COLOR_NAMES = { W: "White", U: "Blue", B: "Black", R: "Red", G: "Green", C: "Colorless" };
+
+  // Lets other tabs (the Card Creator) hand cards to the Print Proxy sheet.
+  const printBridge = {};
 
   // Mana symbols: small self-drawn SVG icons (no external images, so they work
   // offline and in print). Each is a colored disc with a simple glyph.
@@ -2485,7 +2614,8 @@
       game: { nav: $("#navGame"), page: $("#gamePage") },
       analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
       cedh: { nav: $("#navCedh"), page: $("#cedhPage") },
-      random: { nav: $("#navRandom"), page: $("#randomPage") }
+      random: { nav: $("#navRandom"), page: $("#randomPage") },
+      creator: { nav: $("#navCreator"), page: $("#creatorPage") }
     };
     function showPage(which) {
       for (const key of Object.keys(pages)) {
@@ -2500,7 +2630,468 @@
     pages.lowsodium.nav.addEventListener("click", () => showPage("lowsodium"));
     pages.cedh.nav.addEventListener("click", () => showPage("cedh"));
     pages.random.nav.addEventListener("click", () => showPage("random"));
+    pages.creator.nav.addEventListener("click", () => showPage("creator"));
   })();
+
+  /* ---------------------------------------------------------------------
+   * Card Creator tab
+   * ------------------------------------------------------------------- */
+  (function wireCardCreator() {
+    try {
+      const W = 744, H = 1039;              // ~2.5in x 3.5in at 300dpi
+      const canvas = $("#ccCanvas");
+      const ctx = canvas.getContext("2d");
+      const F = id => $("#cc" + id);
+      const FIELDS = ["Name", "Cost", "Type", "Rarity", "Frame", "Rules", "Flavor", "Pow", "Tou", "Loy", "Artist", "Footer", "Zoom", "PanX", "PanY"];
+      const DEFAULTS = { Name: "", Cost: "", Type: "", Rarity: "rare", Frame: "auto", Rules: "", Flavor: "", Pow: "", Tou: "", Loy: "", Artist: "", Footer: "Custom card · Not for sale", Zoom: "100", PanX: "0", PanY: "0" };
+      const DRAFT_KEY = "mtgAnalyzer.ccDraft", SAVED_KEY = "mtgAnalyzer.customCards";
+      const DISPLAY_FONT = '"Cinzel", "Palatino Linotype", Palatino, Georgia, serif';
+      const BODY_FONT = '"Crimson Text", "Palatino Linotype", Palatino, Georgia, serif';
+
+      let art = null;        // HTMLImageElement
+      let artSrc = "";       // what to store when saving (data URL or remote URL)
+
+      const status = (msg) => { $("#ccStatus").textContent = msg || ""; };
+      const val = k => F(k).value;
+      const getFields = () => Object.fromEntries(FIELDS.map(k => [k, val(k)]));
+      const setFields = obj => FIELDS.forEach(k => { F(k).value = obj && obj[k] != null ? obj[k] : DEFAULTS[k]; });
+
+      /* ---------- mana symbols on the canvas ---------- */
+      const symImgs = {};
+      Object.keys(MANA_ART).forEach(c => {
+        const a = MANA_ART[c];
+        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11.2" fill="${a[0]}" stroke="${a[1]}" stroke-width="1"/>${a[2]}</svg>`;
+        const img = new Image();
+        img.onload = () => draw();
+        img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+        symImgs[c] = img;
+      });
+
+      function disc(x, y, s, fill, stroke) {
+        ctx.beginPath(); ctx.arc(x + s / 2, y + s / 2, s / 2 - 0.5, 0, Math.PI * 2);
+        ctx.fillStyle = fill; ctx.fill();
+        ctx.lineWidth = Math.max(1, s / 24); ctx.strokeStyle = stroke; ctx.stroke();
+      }
+      function drawSymbol(tok, x, y, s) {
+        const t = tok.toUpperCase();
+        if (symImgs[t] && symImgs[t].complete && symImgs[t].naturalWidth) { ctx.drawImage(symImgs[t], x, y, s, s); return; }
+        const hy = t.match(/^([WUBRGC2])\/([WUBRGCP])$/);
+        if (hy && MANA_ART[hy[1]] && MANA_ART[hy[2]]) {
+          const cx = x + s / 2, cy = y + s / 2, r = s / 2 - 0.5;
+          ctx.save();
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, Math.PI * 0.75, Math.PI * 1.75); ctx.closePath(); ctx.fillStyle = MANA_ART[hy[1]][0]; ctx.fill();
+          ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, Math.PI * 1.75, Math.PI * 2.75); ctx.closePath(); ctx.fillStyle = MANA_ART[hy[2]][0]; ctx.fill();
+          ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.lineWidth = Math.max(1, s / 24); ctx.strokeStyle = "#3e3c3a"; ctx.stroke();
+          ctx.fillStyle = "#222"; ctx.font = `700 ${s * 0.36}px ${BODY_FONT}`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(hy[1], cx - s * 0.17, cy - s * 0.15); ctx.fillText(hy[2], cx + s * 0.17, cy + s * 0.17);
+          ctx.restore();
+          return;
+        }
+        disc(x, y, s, "#d5d3d0", "#5d5a56");
+        ctx.save();
+        ctx.fillStyle = "#2d2b29"; ctx.strokeStyle = "#2d2b29";
+        if (t === "T" || t === "Q") {
+          // A curved arrow over the top, ending in a solid arrowhead.
+          const cx = x + s / 2, cy = y + s * 0.56, r = s * 0.22;
+          ctx.lineWidth = s * 0.1; ctx.lineCap = "round";
+          if (t === "T") {
+            ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI, Math.PI * 1.98, false); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx + r - s * 0.14, cy - s * 0.02); ctx.lineTo(cx + r + s * 0.14, cy - s * 0.02); ctx.lineTo(cx + r, cy + s * 0.17); ctx.closePath(); ctx.fill();
+          } else {
+            ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI * 1.02, Math.PI * 2, false); ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(cx - r - s * 0.14, cy - s * 0.02); ctx.lineTo(cx - r + s * 0.14, cy - s * 0.02); ctx.lineTo(cx - r, cy + s * 0.17); ctx.closePath(); ctx.fill();
+          }
+        } else {
+          const label = t.replace("/", "");
+          ctx.font = `700 ${s * (label.length > 1 ? 0.5 : 0.62)}px ${BODY_FONT}`;
+          ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.fillText(label, x + s / 2, y + s / 2 + s * 0.04);
+        }
+        ctx.restore();
+      }
+
+      // "{2}{G}{G}" or plain "2GG" -> ["2","G","G"]
+      function costTokens(cost) {
+        cost = (cost || "").trim();
+        if (!cost) return [];
+        if (cost.includes("{")) return [...cost.matchAll(/\{([^}]+)\}/g)].map(m => m[1].trim()).filter(Boolean);
+        return (cost.toUpperCase().match(/\d+|[WUBRGCXYZSE]/g) || []);
+      }
+
+      /* ---------- frame colors ---------- */
+      const FRAMES = {
+        W: ["#efe6c6", "#b3a064"], U: ["#a9cbec", "#2d64a0"], B: ["#9b918c", "#2b2523"],
+        R: ["#eaa486", "#a3341c"], G: ["#a6cfa8", "#2e6a3b"], gold: ["#ead07f", "#a17c25"],
+        artifact: ["#c9d1d8", "#66737f"], colorless: ["#dbd9d4", "#85827c"], land: ["#cdb898", "#6a5233"]
+      };
+      function frameKey(f) {
+        if (f.Frame !== "auto") return f.Frame;
+        const cols = new Set();
+        costTokens(f.Cost).forEach(t => t.toUpperCase().split("/").forEach(c => { if ("WUBRG".includes(c) && c.length === 1) cols.add(c); }));
+        if (cols.size > 1) return "gold";
+        if (cols.size === 1) return [...cols][0];
+        if (/\bland\b/i.test(f.Type)) return "land";
+        if (/\bartifact\b/i.test(f.Type)) return "artifact";
+        return "colorless";
+      }
+      const mix = (a, b, t) => {
+        const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+        const A = p(a), B = p(b);
+        return "#" + A.map((v, i) => Math.round(v + (B[i] - v) * t).toString(16).padStart(2, "0")).join("");
+      };
+
+      function rr(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+      }
+      function fitFont(text, weight, family, max, min, width) {
+        let s = max;
+        for (; s > min; s--) { ctx.font = `${weight} ${s}px ${family}`; if (ctx.measureText(text).width <= width) break; }
+        ctx.font = `${weight} ${s}px ${family}`;
+        return s;
+      }
+
+      /* ---------- rules text layout (word wrap with inline symbols) ---------- */
+      function tokenize(text, allItalic) {
+        const paras = [];
+        let italic = false;
+        (text || "").replace(/\r/g, "").split("\n").forEach(line => {
+          const items = [];
+          line.split(/(\{[^}]+\})/).forEach(part => {
+            if (!part) return;
+            const sym = part.match(/^\{([^}]+)\}$/);
+            if (sym) { items.push({ sym: sym[1], italic: allItalic || italic, glue: true }); return; }
+            part.split(/(\s+)/).forEach(w => {
+              if (!w) return;
+              if (/^\s+$/.test(w)) { items.push({ space: true }); return; }
+              if (w.includes("(")) italic = true;
+              items.push({ text: w, italic: allItalic || italic });
+              if (w.includes(")")) italic = false;
+            });
+          });
+          paras.push(items);
+        });
+        return paras;
+      }
+      function layoutText(rules, flavor, fs, width) {
+        const lh = fs * 1.2, symS = fs * 0.86, lines = [];
+        const fontFor = it => `${it ? "italic " : ""}400 ${fs}px ${BODY_FONT}`;
+        ctx.font = fontFor(false);
+        const spaceW = ctx.measureText(" ").width;
+        let y = 0;
+        const flow = (paras, gapAfterPara) => {
+          paras.forEach((items, pi) => {
+            let line = [], x = 0, pendingSpace = false;
+            const push = () => { lines.push({ y, items: line }); y += lh; line = []; x = 0; pendingSpace = false; };
+            items.forEach(it => {
+              if (it.space) { pendingSpace = true; return; }
+              let w;
+              if (it.sym) w = symS + fs * 0.06; else { ctx.font = fontFor(it.italic); w = ctx.measureText(it.text).width; }
+              const gap = pendingSpace && line.length ? spaceW : 0;
+              if (line.length && x + gap + w > width) push();
+              else x += gap;
+              line.push({ ...it, x, w });
+              x += w; pendingSpace = false;
+            });
+            if (line.length || !items.length) push();
+            if (pi < paras.length - 1) y += gapAfterPara;
+          });
+        };
+        const rp = tokenize(rules, false).filter((p, i, a) => p.length || (i > 0 && i < a.length - 1));
+        flow(rp, fs * 0.32);
+        let divider = null;
+        if ((flavor || "").trim()) {
+          if (rp.length) { y += fs * 0.35; divider = y; y += fs * 0.45; }
+          flow(tokenize(flavor, true), fs * 0.15);
+        }
+        return { lines, height: y, divider, fs, symS };
+      }
+
+      /* ---------- drawing ---------- */
+      function draw() {
+        const f = getFields();
+        const [light, dark] = FRAMES[frameKey(f)] || FRAMES.colorless;
+        const barFill = mix(light, "#ffffff", 0.55), boxFill = mix(light, "#ffffff", 0.78);
+        ctx.clearRect(0, 0, W, H);
+        ctx.save();
+        rr(0, 0, W, H, 34); ctx.clip();
+        ctx.fillStyle = "#151311"; ctx.fillRect(0, 0, W, H);
+
+        // frame
+        const g = ctx.createLinearGradient(0, 0, W, H);
+        g.addColorStop(0, mix(light, "#ffffff", 0.15)); g.addColorStop(0.5, light); g.addColorStop(1, mix(light, dark, 0.35));
+        rr(26, 26, W - 52, 962, 20); ctx.fillStyle = g; ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
+
+        // name bar
+        rr(44, 46, W - 88, 66, 16); ctx.fillStyle = barFill; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
+        const toks = costTokens(f.Cost), symS = 40, symGap = 3;
+        const costW = toks.length ? toks.length * (symS + symGap) - symGap : 0;
+        let sx = W - 62 - costW;
+        toks.forEach(t => { drawSymbol(t, sx, 59, symS); sx += symS + symGap; });
+        ctx.fillStyle = "#1c140b"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        fitFont(f.Name || " ", 700, DISPLAY_FONT, 38, 16, W - 124 - costW - (costW ? 14 : 0));
+        ctx.fillText(f.Name, 64, 81);
+
+        // art
+        const ax = 58, ay = 122, aw = W - 116, ah = 456;
+        ctx.save();
+        ctx.beginPath(); ctx.rect(ax, ay, aw, ah); ctx.clip();
+        if (art && art.naturalWidth) {
+          const zoom = Number(f.Zoom) / 100;
+          const scale = Math.max(aw / art.naturalWidth, ah / art.naturalHeight) * zoom;
+          const dw = art.naturalWidth * scale, dh = art.naturalHeight * scale;
+          const ox = (dw - aw) / 2, oy = (dh - ah) / 2;
+          ctx.drawImage(art, ax - ox - ox * Number(f.PanX) / 100, ay - oy - oy * Number(f.PanY) / 100, dw, dh);
+        } else {
+          const ag = ctx.createLinearGradient(ax, ay, ax, ay + ah);
+          ag.addColorStop(0, mix(light, "#000000", 0.25)); ag.addColorStop(1, mix(light, "#000000", 0.55));
+          ctx.fillStyle = ag; ctx.fillRect(ax, ay, aw, ah);
+          ctx.fillStyle = "rgba(255,255,255,0.75)"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          ctx.font = `600 30px ${DISPLAY_FONT}`; ctx.fillText("Upload card art", ax + aw / 2, ay + ah / 2 - 14);
+          ctx.font = `400 22px ${BODY_FONT}`; ctx.fillText("JPG or PNG", ax + aw / 2, ay + ah / 2 + 22);
+        }
+        ctx.restore();
+        ctx.lineWidth = 4; ctx.strokeStyle = dark; ctx.strokeRect(ax, ay, aw, ah);
+
+        // type bar + rarity gem
+        rr(44, 584, W - 88, 58, 16); ctx.fillStyle = barFill; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
+        const GEM = { common: ["#2a2a2a", "#888"], uncommon: ["#b9c6cf", "#4f5c66"], rare: ["#e2bd4f", "#7a5a12"], mythic: ["#ef6a2c", "#7a2a08"] };
+        const gem = GEM[f.Rarity] || GEM.rare;
+        ctx.beginPath(); ctx.moveTo(W - 78, 597); ctx.lineTo(W - 62, 613); ctx.lineTo(W - 78, 629); ctx.lineTo(W - 94, 613); ctx.closePath();
+        ctx.fillStyle = gem[0]; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = gem[1]; ctx.stroke();
+        ctx.fillStyle = "#1c140b"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        fitFont(f.Type || " ", 600, DISPLAY_FONT, 30, 14, W - 170);
+        ctx.fillText(f.Type, 64, 614);
+
+        // text box
+        const bx = 58, by = 652, bw = W - 116, bh = 312;
+        ctx.fillStyle = boxFill; ctx.fillRect(bx, by, bw, bh);
+        ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.strokeRect(bx, by, bw, bh);
+        const hasPT = (f.Pow || f.Tou).trim() !== "", hasLoy = !hasPT && f.Loy.trim() !== "";
+        const pad = 22, availH = bh - pad * 2 - (hasPT || hasLoy ? 28 : 0);
+        let L = null;
+        for (let fs = 32; fs >= 13; fs--) { L = layoutText(f.Rules, f.Flavor, fs, bw - pad * 2); if (L.height <= availH) break; }
+        const top = by + pad + Math.max(0, (availH - L.height) / 2);
+        ctx.fillStyle = "#1a130b"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+        L.lines.forEach(ln => ln.items.forEach(it => {
+          const baseY = top + ln.y + L.fs * 0.92;
+          if (it.sym) drawSymbol(it.sym, bx + pad + it.x + L.fs * 0.03, baseY - L.symS * 0.82, L.symS);
+          else { ctx.font = `${it.italic ? "italic " : ""}400 ${L.fs}px ${BODY_FONT}`; ctx.fillStyle = "#1a130b"; ctx.fillText(it.text, bx + pad + it.x, baseY); }
+        }));
+        if (L.divider != null) {
+          const dy = top + L.divider;
+          ctx.beginPath(); ctx.moveTo(bx + 60, dy); ctx.lineTo(bx + bw - 60, dy); ctx.lineWidth = 1.5; ctx.strokeStyle = mix(dark, boxFill, 0.4); ctx.stroke();
+        }
+
+        // power / toughness or loyalty
+        if (hasPT) {
+          rr(W - 196, 930, 150, 62, 16); ctx.fillStyle = barFill; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
+          ctx.fillStyle = "#1c140b"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          fitFont(`${f.Pow}/${f.Tou}`, 700, DISPLAY_FONT, 38, 16, 130);
+          ctx.fillText(`${f.Pow}/${f.Tou}`, W - 121, 962);
+        } else if (hasLoy) {
+          const cx = W - 104, cy = 958;
+          ctx.beginPath(); ctx.moveTo(cx - 46, cy - 34); ctx.lineTo(cx + 46, cy - 34); ctx.lineTo(cx + 46, cy + 4);
+          ctx.quadraticCurveTo(cx + 40, cy + 30, cx, cy + 40); ctx.quadraticCurveTo(cx - 40, cy + 30, cx - 46, cy + 4); ctx.closePath();
+          ctx.fillStyle = "#211b16"; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = "#cfc6b6"; ctx.stroke();
+          ctx.fillStyle = "#ffffff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+          fitFont(f.Loy, 700, DISPLAY_FONT, 36, 14, 80); ctx.fillText(f.Loy, cx, cy - 1);
+        }
+
+        // footer on the black border
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#f2ede2"; ctx.textAlign = "left";
+        ctx.font = `italic 400 21px ${BODY_FONT}`;
+        if (f.Artist.trim()) ctx.fillText("Illus. " + f.Artist.trim(), 46, 1012);
+        ctx.fillStyle = "#bdb6a8"; ctx.textAlign = "right"; ctx.font = `400 18px ${BODY_FONT}`;
+        if (f.Footer.trim()) ctx.fillText(f.Footer.trim(), W - 46, 1012);
+        ctx.restore();
+        canvas.setAttribute("aria-label", "Card preview: " + (f.Name || "untitled"));
+      }
+
+      let raf = 0;
+      const redraw = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); };
+      const saveDraft = () => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields())); } catch (e) {} };
+      FIELDS.forEach(k => { F(k).addEventListener("input", () => { redraw(); saveDraft(); }); F(k).addEventListener("change", () => { redraw(); saveDraft(); }); });
+
+      // Redraw once the display fonts arrive (they load from Google Fonts).
+      if (document.fonts) {
+        [`700 38px ${DISPLAY_FONT}`, `400 30px ${BODY_FONT}`, `italic 400 30px ${BODY_FONT}`].forEach(sp => document.fonts.load(sp).then(redraw, () => {}));
+        document.fonts.ready.then(redraw, () => {});
+      }
+
+      /* ---------- art ---------- */
+      function setArt(src, opts) {
+        opts = opts || {};
+        return new Promise(resolve => {
+          if (!src) { art = null; artSrc = ""; redraw(); resolve(true); return; }
+          const img = new Image();
+          if (opts.remote) img.crossOrigin = "anonymous";
+          img.onload = () => { art = img; artSrc = opts.store || src; redraw(); resolve(true); };
+          img.onerror = () => resolve(false);
+          img.src = src;
+        });
+      }
+      function readFile(file) {
+        if (!file) return;
+        if (!/^image\/(png|jpeg)$/.test(file.type)) { status("Please choose a JPG or PNG image."); return; }
+        const reader = new FileReader();
+        reader.onload = () => setArt(reader.result).then(ok => status(ok ? "Art added. Use the sliders to frame it." : "That image couldn't be opened."));
+        reader.onerror = () => status("That image couldn't be read.");
+        reader.readAsDataURL(file);
+      }
+      F("Art").addEventListener("change", ev => readFile(ev.target.files && ev.target.files[0]));
+      F("ArtClear").addEventListener("click", () => { F("Art").value = ""; setArt(null); });
+      const prev = $("#ccPreview");
+      prev.addEventListener("dragover", ev => { ev.preventDefault(); prev.classList.add("dragging"); });
+      prev.addEventListener("dragleave", () => prev.classList.remove("dragging"));
+      prev.addEventListener("drop", ev => {
+        ev.preventDefault(); prev.classList.remove("dragging");
+        readFile(ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0]);
+      });
+
+      /* ---------- template from an existing card ---------- */
+      let acTimer = 0, acToken = 0;
+      F("Template").addEventListener("input", () => {
+        clearTimeout(acTimer);
+        const q = val("Template").trim();
+        if (q.length < 2) return;
+        acTimer = setTimeout(async () => {
+          const tok = ++acToken;
+          try {
+            const res = await fetch("https://api.scryfall.com/cards/autocomplete?q=" + encodeURIComponent(q));
+            if (!res.ok || tok !== acToken) return;
+            const data = await res.json();
+            $("#ccSuggest").innerHTML = (data.data || []).slice(0, 12).map(n => `<option value="${esc(n)}"></option>`).join("");
+          } catch (e) {}
+        }, 250);
+      });
+      async function loadTemplate() {
+        const q = val("Template").trim();
+        if (!q) { status("Type a card name first."); return; }
+        status("Looking up “" + q + "”…");
+        F("LoadBtn").disabled = true;
+        try {
+          const res = await fetch(SCRYFALL_NAMED + "?fuzzy=" + encodeURIComponent(q));
+          if (res.status === 404) { status("No card found with that name. Check the spelling."); return; }
+          if (!res.ok) throw new Error("status " + res.status);
+          const card = await res.json();
+          const face = card.card_faces && card.card_faces.length && !card.oracle_text ? card.card_faces[0] : card;
+          const rar = ["common", "uncommon", "rare", "mythic"].includes(card.rarity) ? card.rarity : "rare";
+          setFields({
+            ...getFields(),
+            Name: face.name || card.name, Cost: face.mana_cost || "", Type: face.type_line || "",
+            Rules: face.oracle_text || "", Flavor: face.flavor_text || "", Pow: face.power || "", Tou: face.toughness || "",
+            Loy: face.loyalty || "", Artist: face.artist || card.artist || "", Rarity: rar, Frame: "auto", Zoom: "100", PanX: "0", PanY: "0"
+          });
+          let msg = `Loaded ${card.name}. Edit any field to make it your own.`;
+          if (F("TemplateArt").checked) {
+            const uris = face.image_uris || card.image_uris || {};
+            const url = uris.art_crop;
+            if (url) {
+              const ok = await setArt(url, { remote: true });
+              if (!ok) msg += " Its art couldn't be loaded; upload your own.";
+            }
+          }
+          status(msg);
+          redraw(); saveDraft();
+        } catch (err) {
+          status("Couldn't reach Scryfall. Check your connection and try again.");
+        } finally {
+          F("LoadBtn").disabled = false;
+        }
+      }
+      F("LoadBtn").addEventListener("click", loadTemplate);
+      F("Template").addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); loadTemplate(); } });
+
+      /* ---------- output ---------- */
+      const fileName = () => (val("Name").trim() || "custom-card").replace(/[^\w\- ]+/g, "").trim().replace(/\s+/g, "-").toLowerCase() + ".png";
+      function exportPng() {
+        draw();
+        try { return canvas.toDataURL("image/png"); }
+        catch (e) { status("This art can't be exported because of browser security rules. Upload the image yourself instead."); return null; }
+      }
+      F("Download").addEventListener("click", () => {
+        const url = exportPng();
+        if (!url) return;
+        const a = document.createElement("a");
+        a.href = url; a.download = fileName();
+        document.body.appendChild(a); a.click(); a.remove();
+        status("Downloaded " + a.download + ".");
+      });
+      F("ToPrint").addEventListener("click", () => {
+        const url = exportPng();
+        if (!url) return;
+        const n = Math.max(1, Math.min(99, parseInt(val("Copies"), 10) || 1));
+        const total = printBridge.addCustom ? printBridge.addCustom(val("Name").trim() || "Custom card", url, n) : 0;
+        status(`Added ${n} cop${n === 1 ? "y" : "ies"} to the Print Proxy sheet (${total} custom card${total === 1 ? "" : "s"} there now). Open the Print Proxy Sheets tab to print.`);
+      });
+
+      /* ---------- saved designs ---------- */
+      const readSaved = () => { try { return JSON.parse(localStorage.getItem(SAVED_KEY) || "[]"); } catch (e) { return []; } };
+      function shrink(img, max, type, q) {
+        const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        return c.toDataURL(type, q);
+      }
+      function renderSaved() {
+        const list = readSaved();
+        $("#ccSavedWrap").hidden = !list.length;
+        $("#ccSaved").innerHTML = list.map(d => `<div class="cc-saved-item"><img alt="" src="${esc(d.thumb || "")}"><strong>${esc(d.fields.Name || "Untitled")}</strong>
+          <div class="cc-inline"><button type="button" class="secondary" data-cc-load="${esc(d.id)}">Load</button><button type="button" class="secondary" data-cc-del="${esc(d.id)}">Delete</button></div></div>`).join("");
+      }
+      F("Save").addEventListener("click", () => {
+        let thumb = "", storedArt = "";
+        try {
+          draw();
+          const t = document.createElement("canvas"); t.width = 186; t.height = 260;
+          t.getContext("2d").drawImage(canvas, 0, 0, 186, 260);
+          thumb = t.toDataURL("image/jpeg", 0.8);
+          if (art) storedArt = /^https?:/.test(artSrc) ? artSrc : shrink(art, 1200, "image/jpeg", 0.88);
+        } catch (e) { if (art && /^https?:/.test(artSrc)) storedArt = artSrc; }
+        const list = readSaved();
+        list.unshift({ id: Date.now().toString(36), fields: getFields(), art: storedArt, thumb });
+        try { localStorage.setItem(SAVED_KEY, JSON.stringify(list)); status("Design saved in this browser."); }
+        catch (e) { status("Not enough browser storage to save this design. Delete an older saved design and try again."); return; }
+        renderSaved();
+      });
+      $("#ccSaved").addEventListener("click", ev => {
+        const load = ev.target.closest("[data-cc-load]"), del = ev.target.closest("[data-cc-del]");
+        const list = readSaved();
+        if (load) {
+          const d = list.find(x => x.id === load.dataset.ccLoad);
+          if (!d) return;
+          setFields(d.fields); F("Art").value = "";
+          setArt(d.art || null, { remote: /^https?:/.test(d.art || "") });
+          saveDraft(); redraw();
+          status(`Loaded “${d.fields.Name || "Untitled"}”.`);
+          window.scrollTo({ top: $("#creatorPage").offsetTop, behavior: "smooth" });
+        } else if (del) {
+          const d = list.find(x => x.id === del.dataset.ccDel);
+          if (!d || !confirm(`Delete the saved design “${d.fields.Name || "Untitled"}”?`)) return;
+          try { localStorage.setItem(SAVED_KEY, JSON.stringify(list.filter(x => x !== d))); } catch (e) {}
+          renderSaved();
+        }
+      });
+      F("Reset").addEventListener("click", () => {
+        if (!confirm("Clear every field and the art to start a new card?")) return;
+        setFields(DEFAULTS); F("Art").value = ""; F("Template").value = "";
+        setArt(null); saveDraft(); status("");
+      });
+
+      try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); setFields(d || DEFAULTS); } catch (e) { setFields(DEFAULTS); }
+      renderSaved();
+      draw();
+      $("#navCreator").addEventListener("click", redraw);
+    } catch (err) {
+      console.error("Card Creator failed to initialise", err);
+    }
+  })();
+
 
   /* ---------------------------------------------------------------------
    * Random Commander tab
@@ -3273,6 +3864,7 @@
     };
 
     let printTiles = [];      // { name, base, card, prints?, loadingPrints? }
+    let customTiles = [];     // cards made in the Card Creator; kept across sheet rebuilds
     let styleToken = 0;       // guards against overlapping style lookups
 
     const hasArt = c => !!(c && (cardImageUrl(c, "png") || cardImageUrl(c, "large") || cardImageUrl(c, "normal")));
@@ -3312,7 +3904,7 @@
       const style = PRINT_STYLES[styleId] || PRINT_STYLES.default;
       const token = ++styleToken;
       if (styleId === "default") {
-        printTiles.forEach(t => { t.card = t.base; t.changed = false; });
+        printTiles.forEach(t => { if (t.custom) return; t.card = t.base; t.changed = false; });
         return { note: "" };
       }
       const unique = [...new Map(printTiles.filter(t => t.base).map(t => [t.base.name, t.base])).values()];
@@ -3370,7 +3962,7 @@
     }
 
     function pickHtml(tile) {
-      if (!tile.card) return "";
+      if (!tile.card || tile.custom) return "";
       const label = esc(`Change print of ${tile.name}`);
       let opts;
       if (tile.prints && tile.prints.length) {
@@ -3392,7 +3984,8 @@
       const inner = url
         ? `<img src="${url}" alt="${esc(tile.name)}" loading="eager">`
         : `<div class="proxy-missing">${esc(tile.name)}</div>`;
-      return `<div class="proxy-card${tile.changed ? " proxy-changed" : ""}" data-idx="${idx}">${inner}${pickHtml(tile)}</div>`;
+      const rm = tile.custom ? `<button type="button" class="secondary proxy-remove-custom" data-remove-custom="${idx}" aria-label="Remove ${esc(tile.name)} from the sheet">Remove</button>` : "";
+      return `<div class="proxy-card${tile.changed ? " proxy-changed" : ""}" data-idx="${idx}">${inner}${pickHtml(tile)}${rm}</div>`;
     }
 
     function renderProxyPreview() {
@@ -3429,7 +4022,7 @@
     // Load a card's printings the first time someone reaches for its picker.
     async function ensurePrints(idx) {
       const tile = printTiles[idx];
-      if (!tile || !tile.card || tile.prints || tile.loadingPrints) return;
+      if (!tile || !tile.card || tile.custom || tile.prints || tile.loadingPrints) return;
       tile.loadingPrints = true;
       refreshPick(idx);
       try {
@@ -3467,6 +4060,7 @@
       const decklistText = $("#printDecklistInput").value;
       const commanderText = $("#printCommanderInput").value;
       if (!decklistText.trim() && !commanderText.trim()) {
+        if (customTiles.length) { printTiles = customTiles.slice(); renderProxyPreview(); printBtnEl.disabled = false; printStatusEl.textContent = `${customTiles.length} custom card${customTiles.length === 1 ? "" : "s"} on the sheet.`; return; }
         printStatusEl.textContent = "Paste a decklist (and/or commander) first.";
         return;
       }
@@ -3532,6 +4126,9 @@
         for (let i = 0; i < qty; i++) tiles.push({ name: card.name, base: card, card });
       }
 
+      // Cards made in the Card Creator ride along at the end of the sheet.
+      tiles.push(...customTiles);
+
       // Apply the chosen print style (one batched lookup, not one per card).
       printTiles = tiles;
       let styleNote = "";
@@ -3566,6 +4163,31 @@
     }
 
     $("#printGenerateBtn").addEventListener("click", runPrintGenerate);
+
+    // Card Creator hand-off: add N copies of a finished card image to the sheet.
+    printBridge.addCustom = (name, dataUrl, copies) => {
+      const card = { name, custom: true, image_uris: { png: dataUrl } };
+      for (let i = 0; i < copies; i++) {
+        const tile = { name, base: null, card, custom: true };
+        customTiles.push(tile);
+        printTiles.push(tile);
+      }
+      renderProxyPreview();
+      printBtnEl.disabled = !printTiles.length;
+      printStatusEl.textContent = `${customTiles.length} custom card${customTiles.length === 1 ? "" : "s"} added from the Card Creator. ${printTiles.length} card${printTiles.length === 1 ? "" : "s"} on the sheet.`;
+      return customTiles.length;
+    };
+    printPreviewWrapEl.addEventListener("click", ev => {
+      const btn = ev.target.closest && ev.target.closest("[data-remove-custom]");
+      if (!btn) return;
+      const tile = printTiles[Number(btn.dataset.removeCustom)];
+      if (!tile || !tile.custom) return;
+      printTiles = printTiles.filter(t => t !== tile);
+      customTiles = customTiles.filter(t => t !== tile);
+      renderProxyPreview();
+      printBtnEl.disabled = !printTiles.length;
+      printStatusEl.textContent = `Removed ${tile.name}. ${printTiles.length} card${printTiles.length === 1 ? "" : "s"} on the sheet.`;
+    });
     $("#printBtn").addEventListener("click", () => window.print());
     $("#useAnalyzerListBtn").addEventListener("click", () => {
       $("#printCommanderInput").value = $("#commanderInput").value;
@@ -3578,6 +4200,7 @@
       printMissingEl.innerHTML = "";
       printStatusEl.textContent = "";
       printTiles = [];
+      customTiles = [];
       printBtnEl.disabled = true;
       try { localStorage.removeItem("mtgAnalyzer.printDecklist"); localStorage.removeItem("mtgAnalyzer.printCommander"); } catch (e) {}
     });
