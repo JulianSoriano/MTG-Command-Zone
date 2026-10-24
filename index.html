@@ -765,6 +765,48 @@
     position: absolute; top: 6px; right: 6px; min-height: 0; padding: 3px 8px; font-size: 0.7rem; border-radius: 6px;
   }
   @media print { .proxy-remove-custom { display: none !important; } }
+
+  /* ---------------------------------------------------------------------
+   * MTG Lore
+   * ------------------------------------------------------------------- */
+  .lore-pane { display: none; }
+  .lore-pane.active { display: block; }
+  .lore-filters { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 6px 0; }
+  @media (min-width: 720px) { .lore-filters { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+  .lore-filters input[type=text], .lore-filters select { font-family: inherit; font-size: 16px; }
+  .lore-era { margin: 22px 0 8px; }
+  .lore-era h3 { margin: 0; font-size: 1.05rem; text-transform: none; letter-spacing: 0.02em; color: var(--accent); display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .lore-era h3 .yrs { font-size: 0.78rem; color: var(--text-dim); font-weight: 400; letter-spacing: 0; font-family: var(--font-body, inherit); }
+  .lore-era p { margin: 2px 0 8px; font-size: 0.88rem; color: var(--text-dim); }
+  .lore-set { display: grid; grid-template-columns: 40px 1fr; gap: 12px; padding: 12px 0; border-top: 1px solid var(--border); scroll-margin-top: 14px; }
+  .lore-set.flash { animation: loreflash 1.6s ease-out; }
+  @keyframes loreflash { 0% { background: var(--accent-dim); } 100% { background: transparent; } }
+  .lore-icon { width: 32px; height: 32px; object-fit: contain; display: block; margin: 2px auto 0; opacity: 0.85; }
+  @media (prefers-color-scheme: dark) { .lore-icon { filter: invert(1); } }
+  .lore-icon-ph { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); margin: 2px auto 0; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: var(--text-dim); }
+  .lore-set h4 { margin: 0; font-size: 1rem; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .lore-set h4 .dt { font-size: 0.78rem; font-weight: 400; color: var(--text-dim); font-family: var(--font-body, inherit); }
+  .lore-tags { display: flex; gap: 6px; flex-wrap: wrap; margin: 4px 0; }
+  .lore-tag { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.03em; padding: 1px 8px; border-radius: 999px; background: var(--accent-dim); color: var(--accent); }
+  .lore-tag.plane { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
+  .lore-set p { margin: 4px 0 2px; font-size: 0.92rem; }
+  .lore-chars { font-size: 0.82rem; color: var(--text-dim); }
+  .lore-chars b { font-weight: 700; }
+  .lore-ub { margin-top: 22px; border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
+  .lore-ub summary { cursor: pointer; font-weight: 700; }
+  .lore-ub ul { margin: 8px 0 0; padding-left: 18px; font-size: 0.9rem; }
+  .lore-timeline { position: relative; margin: 14px 0 4px; padding-left: 22px; border-left: 3px solid var(--border); }
+  .lore-t-era { position: relative; margin: 0 0 24px; }
+  .lore-t-era::before { content: ""; position: absolute; left: -31px; top: 6px; width: 15px; height: 15px; border-radius: 50%; background: var(--accent); border: 3px solid var(--panel); }
+  .lore-t-era h3 { margin: 0; font-size: 1.05rem; text-transform: none; letter-spacing: 0.02em; color: var(--accent); }
+  .lore-t-era .when { font-size: 0.8rem; color: var(--text-dim); margin: 0 0 6px; }
+  .lore-t-era .note { font-size: 0.8rem; font-style: italic; color: var(--text-dim); margin: 0 0 6px; }
+  .lore-ev { display: grid; grid-template-columns: 110px 1fr; gap: 10px; font-size: 0.9rem; padding: 4px 0; }
+  @media (max-width: 520px) { .lore-ev { grid-template-columns: 1fr; gap: 0; } }
+  .lore-ev .y { font-weight: 700; color: var(--text-dim); font-size: 0.82rem; }
+  .lore-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .lore-chip { min-height: 0; padding: 3px 10px; font-size: 0.78rem; font-weight: 600; border-radius: 999px; background: var(--accent-dim); color: var(--accent); border: 1px solid transparent; cursor: pointer; }
+  .lore-chip:hover { border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -772,7 +814,7 @@
   <div class="top-row">
     <h1>MTG Command Zone <span class="mana-row hdr-mana" id="hdrMana" aria-hidden="true"></span></h1>
   </div>
-  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander, and design your own cards &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
+  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander, design your own cards, and read the story of Magic &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
     <button type="button" id="navPrint" class="active">Print Proxy Sheets</button>
@@ -782,6 +824,7 @@
     <button type="button" id="navCedh">cEDH Guide</button>
     <button type="button" id="navRandom">Random Commander</button>
     <button type="button" id="navCreator">Card Creator</button>
+    <button type="button" id="navLore">MTG Lore</button>
   </div>
 
   <div id="cedhPage" class="page">
@@ -1053,6 +1096,56 @@
         <h3>Saved designs</h3>
         <p class="hint">Stored in this browser only. Very large images are shrunk to save space.</p>
         <div class="cc-saved" id="ccSaved"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="lorePage" class="page">
+    <div class="panel">
+      <h2>MTG Lore</h2>
+      <p class="hint">The story of Magic, told two ways: <strong>by set</strong>, in the order the sets were released, and in <strong>story order</strong>, the order things happen in the multiverse. Summaries are short and avoid big spoilers.</p>
+      <div class="ce-tabs" id="loreTabs" role="tablist">
+        <button type="button" class="active" data-lore="sets">By set</button>
+        <button type="button" data-lore="story">Story order</button>
+        <button type="button" data-lore="about">About &amp; sources</button>
+      </div>
+
+      <div class="lore-pane active" id="lore-sets">
+        <div class="lore-filters">
+          <input type="text" id="loreSearch" placeholder="Search sets, planes or characters&hellip;" aria-label="Search lore" autocomplete="off">
+          <select id="loreEra" aria-label="Story era"><option value="">All eras</option></select>
+          <select id="lorePlane" aria-label="Plane"><option value="">All planes</option></select>
+          <select id="loreSort" aria-label="Sort order"><option value="old">Oldest first</option><option value="new">Newest first</option></select>
+        </div>
+        <div class="ce-status" id="loreCount" aria-live="polite"></div>
+        <div id="loreSetList"></div>
+        <details class="lore-ub" id="loreUB">
+          <summary>Universes Beyond and sets with no story</summary>
+          <p class="hint">Universes Beyond sets are crossovers with other franchises. They are not part of Magic's own multiverse story. Core sets and reprint sets (for example Foundations, 2024) also carry little or no continuing story.</p>
+          <ul id="loreUBList"></ul>
+        </details>
+      </div>
+
+      <div class="lore-pane" id="lore-story">
+        <p class="hint">Dates use <strong>AR</strong>, Dominaria's calendar (a year is 420 days). Other planes keep their own calendars, so their events are placed here by when they happen. Click a set to jump to it.</p>
+        <div id="loreTimeline" class="lore-timeline"></div>
+      </div>
+
+      <div class="lore-pane" id="lore-about">
+        <h3>How to read this</h3>
+        <ul>
+          <li><strong>Release order isn't story order.</strong> Magic often tells older stories later. The Brothers' War (2022) retells events from around 20&ndash;63 AR, and the earliest sets (1993&ndash;1994) were fitted into the timeline long afterward.</li>
+          <li><strong>Some placements are approximate.</strong> Where the source timeline doesn't give a firm date, the set is placed by era and marked approximate.</li>
+          <li><strong>The newest sets</strong> are part of a three-year arc called Metronome, which runs from Wilds of Eldraine (2023) to Reality Fracture (2026).</li>
+        </ul>
+        <h3>Sources</h3>
+        <ul class="ce-src">
+          <li><a href="https://en.wikipedia.org/wiki/List_of_Magic:_The_Gathering_sets" target="_blank" rel="noopener">Wikipedia: List of Magic: The Gathering sets</a> &mdash; release dates.</li>
+          <li><a href="https://mtg.wiki/page/Timeline" target="_blank" rel="noopener">MTG Wiki: Timeline</a> &mdash; in-universe dates and event order.</li>
+          <li><a href="https://mtg.wiki/page/Metronome" target="_blank" rel="noopener">MTG Wiki: Metronome</a> &mdash; the 2023&ndash;2026 story arc.</li>
+          <li><a href="https://magic.wizards.com/en/news/magic-story" target="_blank" rel="noopener">Wizards of the Coast: Magic Story</a> &mdash; the official stories, for the full details.</li>
+        </ul>
+        <p class="hint">Researched 2026-10-24. Set icons are loaded live from Scryfall. For the full story of any set, the official Magic Story pages are the best place to read.</p>
       </div>
     </div>
   </div>
@@ -2615,7 +2708,8 @@
       analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
       cedh: { nav: $("#navCedh"), page: $("#cedhPage") },
       random: { nav: $("#navRandom"), page: $("#randomPage") },
-      creator: { nav: $("#navCreator"), page: $("#creatorPage") }
+      creator: { nav: $("#navCreator"), page: $("#creatorPage") },
+      lore: { nav: $("#navLore"), page: $("#lorePage") }
     };
     function showPage(which) {
       for (const key of Object.keys(pages)) {
@@ -2631,7 +2725,349 @@
     pages.cedh.nav.addEventListener("click", () => showPage("cedh"));
     pages.random.nav.addEventListener("click", () => showPage("random"));
     pages.creator.nav.addEventListener("click", () => showPage("creator"));
+    pages.lore.nav.addEventListener("click", () => showPage("lore"));
   })();
+
+  /* ---------------------------------------------------------------------
+   * MTG Lore tab
+   * ------------------------------------------------------------------- */
+  (function wireLore() {
+    try {
+      // Release dates come from Wikipedia's list of Magic sets; the story order and
+      // dates (AR = "After Restoration", Dominaria's calendar) come from the community
+      // wiki's timeline. Summaries are short and spoiler-light on purpose.
+      const ERAS = [
+        { id: "early", label: "The Early Years", years: "1993–1995", blurb: "Before Magic had a continuing story: standalone sets that were stitched into Dominaria's history later.", sets: [
+          ["Arabian Nights", "1993-12", "Unanchored", "Inspired by Arabian folk tales. Its place in the multiverse was only fitted in much later.", ""],
+          ["Antiquities", "1994-03", "Dominaria (Terisiare)", "The war between the brothers Urza and Mishra, fought with artifacts and machines dug out of ancient Thran ruins.", "Urza, Mishra, Tocasia, Gix"],
+          ["Legends", "1994-06", "Dominaria", "A gallery of famous heroes, villains and wizards. The first set with Legendary Creatures; no single plot.", ""],
+          ["The Dark", "1994-08", "Dominaria (Terisiare)", "Humanity's grim recovery in the Dark Age that followed the Brothers' War.", ""],
+          ["Fallen Empires", "1994-11", "Dominaria (Sarpadia)", "The collapse of Sarpadia's empires as elves, dwarves, merfolk, goblins, orcs and the new thrulls and thallids fight for the broken land.", ""],
+          ["Ice Age", "1995-06", "Dominaria (Terisiare)", "A world locked in glaciers: Kjeldorans and Balduvians scrape out a living while ancient magic stirs.", "Jaya Ballard, Lim-Dûl"],
+          ["Homelands", "1995-10", "Ulgrotha", "A standalone story on the plane of Ulgrotha, with a feared vampire baron and a land cut off from the rest of the multiverse.", "Baron Sengir, Feroz, Autumn Willow"]
+        ]},
+        { id: "weatherlight", label: "The Weatherlight Saga", years: "1996–1998", blurb: "Magic's first long, connected story: the crew of a flying ship chases a destiny that leads to Phyrexia.", sets: [
+          ["Alliances", "1996-06", "Dominaria (Terisiare)", "The last chapter of the Ice Age story, with old alliances and rivalries coming to a head.", "Lim-Dûl, Jaya Ballard"],
+          ["Mirage", "1996-10", "Dominaria (Jamuraa)", "A war tears across the continent of Jamuraa, ending with a hard sacrifice.", "Asmira"],
+          ["Visions", "1997-02", "Dominaria (Jamuraa)", "The second part of the Jamuraan story, in the wake of the Mirage War.", ""],
+          ["Weatherlight", "1997-06", "Dominaria", "Introduces the airship Weatherlight and its crew, starting the saga that ties the next several blocks together.", "Sisay"],
+          ["Tempest", "1997-10", "Rath", "The Weatherlight crew is pulled onto the artificial plane of Rath, ruled by the tyrant Volrath.", "Gerrard, Hanna, Crovax, Squee, Volrath"],
+          ["Stronghold", "1998-03", "Rath", "The crew fights through Volrath's Stronghold and the Phyrexian tricks behind Rath.", "Gerrard, Crovax, Volrath"],
+          ["Exodus", "1998-06", "Rath", "The crew escapes Rath, but not without cost, and the road leads back to Dominaria.", "Gerrard, Crovax"]
+        ]},
+        { id: "urza", label: "Urza and the Invasion", years: "1998–2001", blurb: "Urza prepares for Phyrexia, then the Phyrexians come for Dominaria.", sets: [
+          ["Urza's Saga", "1998-10", "Dominaria", "Urza, now a legend of artifice, builds his defenses against a Phyrexian threat he has seen coming for centuries.", "Urza, Xantcha"],
+          ["Urza's Legacy", "1999-02", "Dominaria", "More of Urza's secret projects and the machinery of the coming war.", "Urza"],
+          ["Urza's Destiny", "1999-06", "Dominaria", "The fight against the Phyrexian plot builds toward its climax.", "Urza"],
+          ["Mercadian Masques", "1999-10", "Mercadia", "The Weatherlight crew arrives in the mercantile plane of Mercadia, where gold decides everything.", "Gerrard, Hanna, Squee"],
+          ["Nemesis", "2000-02", "Mercadia", "The Mercadian story deepens as the crew faces enemies sent by Phyrexia.", "Gerrard"],
+          ["Prophecy", "2000-06", "Dominaria", "The last Weatherlight prophecy sets up the invasion, including the war in Keld.", ""],
+          ["Invasion", "2000-10", "Dominaria", "Yawgmoth's Phyrexians invade Dominaria. Heroes of every color make a stand.", "Gerrard, Urza, Sisay"],
+          ["Planeshift", "2001-02", "Dominaria", "The invasion spreads and the plane itself starts to break apart.", "Gerrard"],
+          ["Apocalypse", "2001-06", "Dominaria", "The invasion reaches its end, at a terrible price for Dominaria.", "Gerrard, Yawgmoth, Karn"]
+        ]},
+        { id: "otaria", label: "Otaria, Mirrodin and Kamigawa", years: "2001–2005", blurb: "Three new worlds, each with its own self-contained story.", sets: [
+          ["Odyssey", "2001-10", "Otaria", "A world of cabals, the Mirari and the rising threat of Chainer's undead.", "Chainer, Kamahl"],
+          ["Torment", "2002-02", "Otaria", "The dark side of the Odyssey story, with the Cabal and the price of power.", "Chainer"],
+          ["Judgment", "2002-05", "Otaria", "The story of the Mirari and the gathering of forces for the next conflict.", ""],
+          ["Onslaught", "2002-10", "Otaria", "Kamahl and a new generation of heroes face the coming war.", "Kamahl, Karona"],
+          ["Legions", "2003-02", "Otaria", "The all-creature set of the Onslaught block: the clans rise against Karona.", "Karona"],
+          ["Scourge", "2003-05", "Otaria", "Karona's war reaches its end, and the Mirari is changed forever.", "Kamahl, Karona"],
+          ["Mirrodin", "2003-10", "Mirrodin", "A plane made of metal, shaped by the planeswalker Karn, with Memnarch's secret.", "Glissa, Slobad, Memnarch"],
+          ["Darksteel", "2004-02", "Mirrodin", "Memnarch's plans for Mirrodin unfold as heroes rise against him.", "Glissa, Memnarch"],
+          ["Fifth Dawn", "2004-06", "Mirrodin", "Mirrodin's fifth sun rises and the final battle with Memnarch begins.", "Glissa, Slobad, Memnarch"],
+          ["Champions of Kamigawa", "2004-10", "Kamigawa", "A land of spirits and mortals: the Kami War breaks out between the spirit world and humanity.", "Toshi Umezawa, Takeno"],
+          ["Betrayers of Kamigawa", "2005-02", "Kamigawa", "The Kami War deepens with betrayals on every side.", "Hidetsugu"],
+          ["Saviors of Kamigawa", "2005-06", "Kamigawa", "The last chapter of the war between spirits and people, and what survives it.", "Toshi Umezawa"]
+        ]},
+        { id: "ravnica", label: "Ravnica to the Time Spiral", years: "2005–2007", blurb: "A city-plane built around ten guilds, then a story that revisits Dominaria's whole history.", sets: [
+          ["Ravnica: City of Guilds", "2005-10", "Ravnica", "A city covering an entire plane, run by ten guilds, each with its own philosophy and its own way of using magic.", "Niv-Mizzet, Rakdos, Teysa Karlov"],
+          ["Guildpact", "2006-02", "Ravnica", "The guilds jostle for power as the old Guildpact starts to fray.", ""],
+          ["Dissension", "2006-05", "Ravnica", "The guilds reach a turning point and a new, non-magical Guildpact is signed.", ""],
+          ["Coldsnap", "2006-07", "Dominaria (Terisiare)", "An echo of the Ice Age in which a wizard tries to bring it back.", "Heidar, Jaya Ballard"],
+          ["Time Spiral", "2006-10", "Dominaria", "Time itself cracks apart over Dominaria; heroes and villains from the past return.", "Teferi, Jhoira, Venser"],
+          ["Planar Chaos", "2007-02", "Dominaria", "Alternate histories bleed through the rifts, with familiar characters seen in strange new forms.", ""],
+          ["Future Sight", "2007-05", "Dominaria", "Glimpses of the future during the crisis that ends in the Great Mending.", "Teferi"]
+        ]},
+        { id: "mending", label: "After the Mending", years: "2007–2015", blurb: "Planeswalkers lose much of their power and become the story's heroes. The multiverse is explored plane by plane.", sets: [
+          ["Lorwyn", "2007-10", "Lorwyn", "A pastoral world of kithkin, elves, merfolk, giants and boggarts, with the Great Aurora approaching. The first set with planeswalker cards.", "Oona, Maralen"],
+          ["Morningtide", "2008-02", "Lorwyn", "The creature types of Lorwyn take center stage as the Aurora nears.", "Oona"],
+          ["Shadowmoor", "2008-05", "Shadowmoor", "The Aurora turns Lorwyn into its dark mirror: a bitter, twisted plane.", "Oona, Maralen"],
+          ["Eventide", "2008-07", "Shadowmoor", "Light and dark collide as Shadowmoor's story ends.", ""],
+          ["Shards of Alara", "2008-10", "Alara", "A plane split into five shards, each missing two of the five colors.", "Sarkhan Vol, Elspeth, Ajani, Tezzeret, Nicol Bolas"],
+          ["Conflux", "2009-02", "Alara", "The shards are drawn back together under pressure from Nicol Bolas.", "Nicol Bolas, Sarkhan Vol"],
+          ["Alara Reborn", "2009-04", "Alara", "Alara is made whole again and the planeswalkers decide what comes next.", "Nicol Bolas, Ajani, Elspeth"],
+          ["Zendikar", "2009-10", "Zendikar", "A wild adventuring world with an ancient prison at its heart.", "Jace Beleren, Gideon Jura, Nissa Revane"],
+          ["Worldwake", "2010-02", "Zendikar", "Explorers race for relics while something older stirs below.", "Jace Beleren, Gideon Jura"],
+          ["Rise of the Eldrazi", "2010-04", "Zendikar", "The Eldrazi Titans are freed from their prison and begin to consume the world.", "Ulamog, Kozilek, Emrakul, Nissa"],
+          ["Scars of Mirrodin", "2010-10", "Mirrodin", "The Phyrexians return and corrupt Mirrodin from within, as the Mirran resistance fights back.", "Karn, Elesh Norn, Koth, Venser"],
+          ["Mirrodin Besieged", "2011-02", "Mirrodin", "Mirrodin splits into Mirran and Phyrexian forces for a final siege.", "Karn, Venser, Elesh Norn"],
+          ["New Phyrexia", "2011-05", "New Phyrexia", "The siege ends and Mirrodin becomes New Phyrexia, a new home plane for the Phyrexians.", "Karn, Elesh Norn, Koth, Venser"],
+          ["Innistrad", "2011-09", "Innistrad", "A gothic horror world of werewolves, vampires, spirits and zombies, protected by the angel Avacyn, who has vanished.", "Sorin Markov, Garruk, Tamiyo"],
+          ["Dark Ascension", "2012-02", "Innistrad", "The monsters grow bolder as the nights lengthen and hope fades.", "Sorin Markov"],
+          ["Avacyn Restored", "2012-05", "Innistrad", "Avacyn returns to save Innistrad, but she is not what she was.", "Avacyn, Sorin Markov"],
+          ["Return to Ravnica", "2012-10", "Ravnica", "Ravnica's guilds return, now with Jace and Ral in the middle of a fight for the city's future.", "Jace Beleren, Ral Zarek, Vraska"],
+          ["Gatecrash", "2013-02", "Ravnica", "A different set of five guilds vie for control while the Implicit Maze begins to reshape the city.", "Jace Beleren, Domri Rade"],
+          ["Dragon's Maze", "2013-05", "Ravnica", "All ten guilds race through a labyrinth to claim the city's crown.", "Jace Beleren, Ral Zarek"],
+          ["Theros", "2013-09", "Theros", "A world inspired by Greek myth, with gods, heroes and monsters, where belief decides the gods' power.", "Elspeth Tirel, Xenagos"],
+          ["Born of the Gods", "2014-02", "Theros", "The gods and the mortals contend for belief and for Theros's future.", "Elspeth Tirel, Xenagos"],
+          ["Journey into Nyx", "2014-05", "Theros", "The story of Theros reaches Nyx, the starry realm of the gods.", "Elspeth Tirel, Xenagos"],
+          ["Khans of Tarkir", "2014-09", "Tarkir", "Five clans fight for survival on a world where dragons are long gone.", "Sarkhan Vol, Ugin"],
+          ["Fate Reforged", "2015-01", "Tarkir", "Time is rewound so dragons live again, and the clans meet them.", "Sarkhan Vol, Ugin"],
+          ["Dragons of Tarkir", "2015-03", "Tarkir", "The dragonlords rule Tarkir, and the clans' heroes must decide whether to bow.", "Sarkhan Vol, Narset"],
+          ["Magic Origins", "2015-07", "Multiple planes", "The origin stories of five planeswalkers, showing how each first discovered their spark.", "Jace, Gideon, Chandra, Liliana, Nissa"]
+        ]},
+        { id: "gatewatch", label: "The Gatewatch", years: "2015–2019", blurb: "A team of planeswalkers forms to face threats too big for any single hero.", sets: [
+          ["Battle for Zendikar", "2015-10", "Zendikar", "The Eldrazi return to Zendikar and drag the multiverse's heroes in.", "Gideon, Jace, Chandra, Nissa"],
+          ["Oath of the Gatewatch", "2016-01", "Zendikar", "The heroes make a pact that forms the Gatewatch.", "Gideon, Jace, Chandra, Nissa, Ob Nixilis"],
+          ["Shadows over Innistrad", "2016-04", "Innistrad", "Innistrad is falling into madness, and the cause is something far worse than monsters.", "Jace, Arlinn Kord, Sorin"],
+          ["Eldritch Moon", "2016-07", "Innistrad", "The Gatewatch battles an Eldrazi titan that is eating Innistrad from within.", "Jace, Gideon, Chandra, Nissa, Liliana, Emrakul"],
+          ["Kaladesh", "2016-09", "Kaladesh", "A plane of inventors and aether-powered machines, where a festival is the center of a plot.", "Chandra, Pia Nalaar, Saheeli Rai"],
+          ["Aether Revolt", "2017-01", "Kaladesh", "Kaladesh's people revolt against the Consulate that rules them.", "Chandra, Pia Nalaar, Saheeli Rai, Tezzeret"],
+          ["Amonkhet", "2017-04", "Amonkhet", "A desert world of gods and trials, where every young person trains for an honor that is not what it seems.", "Nicol Bolas, Gideon, Samut"],
+          ["Hour of Devastation", "2017-07", "Amonkhet", "Nicol Bolas arrives in force and the Gatewatch faces him.", "Nicol Bolas, Gideon, Chandra, Nissa, Jace, Liliana"],
+          ["Ixalan", "2017-09", "Ixalan", "A jungle plane where pirates, a sun-worshipping empire, vampires and merfolk all hunt for a golden city.", "Jace, Vraska, Huatli, Admiral Brass"],
+          ["Rivals of Ixalan", "2018-01", "Ixalan", "The factions race for the Immortal Sun.", "Jace, Vraska, Huatli, Admiral Brass"],
+          ["Dominaria", "2018-04", "Dominaria", "A return to Dominaria as old heroes deal with a looming threat from the past.", "Jaya Ballard, Teferi, Karn, Jhoira"],
+          ["Guilds of Ravnica", "2018-10", "Ravnica", "Ravnica's guilds compete, unaware of the larger plot behind them.", "Ral Zarek, Vraska, Jace, Nicol Bolas"],
+          ["Ravnica Allegiance", "2019-01", "Ravnica", "The other five guilds come to the fore as the plot closes in on Ravnica.", "Ral Zarek, Kaya, Vraska, Jace, Nicol Bolas"],
+          ["War of the Spark", "2019-05", "Ravnica", "Nicol Bolas invades Ravnica with an army of Eternals and a trap for planeswalkers. The multiverse's greatest heroes make a stand.", "Gideon, Liliana, Chandra, Jace, Nissa, Teferi, Karn, Ajani, Teyo, Nicol Bolas"]
+        ]},
+        { id: "postwar", label: "After the War of the Spark", years: "2019–2022", blurb: "The multiverse recovers, new heroes step up, and a darker threat gathers in the background.", sets: [
+          ["Throne of Eldraine", "2019-10", "Eldraine", "A fairy-tale world of knights and witches, where the Kenrith family faces a new threat.", "Oko, Garruk, Will and Rowan Kenrith, King Kenrith"],
+          ["Theros Beyond Death", "2020-01", "Theros", "Theros's heroes descend into the Underworld.", "Elspeth Tirel, Klothys, Ashiok"],
+          ["Ikoria: Lair of Behemoths", "2020-05", "Ikoria", "A world of giant monsters and the humans who bond with them.", "Vivien Reid, Lukka"],
+          ["Zendikar Rising", "2020-09", "Zendikar", "Zendikar is recovering from the Eldrazi, but a new danger has appeared.", "Nahiri, Nissa"],
+          ["Kaldheim", "2021-02", "Kaldheim", "A Norse-inspired world of ten realms joined by a great tree. A legendary weapon may protect it or ruin it.", "Kaya, Tibalt, Tyvar Kell"],
+          ["Strixhaven: School of Mages", "2021-04", "Arcavios", "A university for magic with five colleges, each founded by a dragon. The Oriq threaten it.", ""],
+          ["Innistrad: Midnight Hunt", "2021-09", "Innistrad", "Innistrad's werewolves and spirits surge as a harvest moon approaches.", "Arlinn Kord, Sigarda"],
+          ["Innistrad: Crimson Vow", "2021-11", "Innistrad", "A vampire wedding brings dark family politics to Innistrad.", "Edgar Markov, Sigarda"],
+          ["Kamigawa: Neon Dynasty", "2022-02", "Kamigawa", "A neon-lit Kamigawa where an emperor has gone missing and three factions fight for the future.", "Tamiyo, Kaito Shizuki"],
+          ["Streets of New Capenna", "2022-04", "New Capenna", "An Art Deco city ruled by five crime families led by demons. Elspeth comes looking for her past.", "Elspeth Tirel"]
+        ]},
+        { id: "phyrexian", label: "The Phyrexian Arc", years: "2022–2023", blurb: "A four-set story where New Phyrexia invades the whole multiverse.", sets: [
+          ["Dominaria United", "2022-09", "Dominaria", "Phyrexians have already reached Dominaria. Karn reflects on its past to prepare it for the fight ahead.", "Karn, Ajani, Jaya, Teferi"],
+          ["The Brothers' War", "2022-11", "Dominaria (past)", "A retelling of the war between Urza and Mishra that shaped Dominaria and the multiverse.", "Urza, Mishra, Tocasia, Gix"],
+          ["Phyrexia: All Will Be One", "2023-02", "New Phyrexia", "The planeswalkers strike at New Phyrexia itself to stop Elesh Norn, but some risk compleation.", "Elspeth Tirel, Kaito Shizuki, Nahiri, Koth"],
+          ["March of the Machine", "2023-04", "Many planes", "The whole multiverse unites against New Phyrexia's invasion.", "Elspeth Tirel, Teferi Akosa, Tamiyo, Chandra, Karn"],
+          ["March of the Machine: The Aftermath", "2023-05", "Many planes", "An epilogue that resolves loose ends and sets up what comes next.", ""]
+        ]},
+        { id: "omenpath", label: "The Omenpath Arc", years: "2023–2024", blurb: "First part of the three-year Metronome story: after the Desparkening, a young hero travels the Omenpaths in search of his father.", sets: [
+          ["Wilds of Eldraine", "2023-09", "Eldraine", "Twins Will and Rowan Kenrith and a young hero with fae blood face witches and the Wicked Slumber curse.", "Will and Rowan Kenrith, Eriette, Ashiok, Kellan"],
+          ["The Lost Caverns of Ixalan", "2023-11", "Ixalan", "Explorers dig into the caverns beneath Ixalan, where a fungal monster and other hidden things are waiting.", "Quintorius Kand, Saheeli, Kellan"],
+          ["Murders at Karlov Manor", "2024-02", "Ravnica", "A detective story across Ravnica: a murder at the Karlov family mansion, with suspects from every guild.", "Alquist Proft, Kaya Cassir, Kellan"],
+          ["Outlaws of Thunder Junction", "2024-04", "Thunder Junction", "A Wild West heist led by Oko, with Kellan on his trail to bring his father home.", "Oko, Kellan, Vraska, Tinybones, Annie Flash"]
+        ]},
+        { id: "dragonstorm", label: "The Dragonstorm Arc", years: "2024–2025", blurb: "Dragonstorms on Tarkir spill dragons across the multiverse while Jace and Vraska travel the Omenpaths with Loot.", sets: [
+          ["Bloomburrow", "2024-08", "Bloomburrow", "A world of animal people, where Mabel and her companions try to save the realm from elemental calamity beasts and the Great-Night Owl.", "Mabel, Gev, Hugs, Finneas, Zoraline"],
+          ["Duskmourn: House of Horror", "2024-09", "Duskmourn", "A whole plane that is one giant haunted house, ruled by the demon Valgavoth. A mother's son vanishes into it.", "Niko Aris, Kaito Shizuki, Zimone Wola, Tyvar Kell"],
+          ["Aetherdrift", "2025-02", "Amonkhet, Avishkar and Muraganda", "An interplanar race for the Aetherspark, with dragonstorms disrupting the course.", "Chandra Nalaar"],
+          ["Tarkir: Dragonstorm", "2025-04", "Tarkir", "The clans overthrow the dragonlords with spirit dragons, while Jace's plans in the Meditation Realm unravel.", "Narset, Elspeth, Jace Beleren, Ugin, Nicol Bolas"]
+        ]},
+        { id: "metronome", label: "The Metronome Finale", years: "2025–2026", blurb: "The last arc of the three-year Metronome story, ending in Reality Fracture.", sets: [
+          ["Edge of Eternities", "2025-08", "The Edge (Sothera system)", "A space opera on the edge of the multiverse where rival forces compete for power in the Sothera system.", "Tezzeret, Sami, Haliya, Alpharael, Tannuk"],
+          ["Lorwyn Eclipsed", "2026-01", "Lorwyn-Shadowmoor", "Four Strixhaven students are led through an Omenpath into Lorwyn-Shadowmoor, where their arrival upsets the plane's balance.", "Abigale, Sanar, Kirol, Tamira, Lluwen, Maralen"],
+          ["Secrets of Strixhaven", "2026-04", "Arcavios", "The students come home to find the plane's Archaics acting strangely, with planeswalkers on both sides of the crisis.", "Abigale, Sanar, Kirol, Tam, Lluwen, Jadzi, Chandra, Ajani, Dellian Fel"],
+          ["Reality Fracture", "2026-10", "The Echoverse", "The climax of the arc: Jace stops fixing and starts rebuilding, building a mirrored multiverse where everyone's life turned out differently.", "Jace Beleren, Chandra, Liliana, Garruk, Ajani"]
+        ]}
+      ];
+
+      const UB = [
+        ["Adventures in the Forgotten Realms", "2021-07", "Dungeons & Dragons"],
+        ["Warhammer 40,000 Commander", "2022-10", "Warhammer 40,000"],
+        ["The Lord of the Rings: Tales of Middle-earth", "2023-06", "The Lord of the Rings"],
+        ["Doctor Who", "2023-10", "Doctor Who"],
+        ["Fallout", "2024-03", "Fallout"],
+        ["Assassin's Creed", "2024-07", "Assassin's Creed"],
+        ["Final Fantasy", "2025-06", "Final Fantasy"],
+        ["Marvel's Spider-Man", "2025-09", "Marvel"],
+        ["Avatar: The Last Airbender", "2025-11", "Avatar: The Last Airbender"],
+        ["Teenage Mutant Ninja Turtles", "2026-03", "Teenage Mutant Ninja Turtles"],
+        ["Marvel Super Heroes", "2026-06", "Marvel"],
+        ["The Hobbit", "2026-08", "Tolkien"],
+        ["Star Trek", "2026-11", "Star Trek (scheduled)"]
+      ];
+
+      // In-universe order. "AR" is Dominaria's calendar; Ravnica, Innistrad and others keep their own.
+      const TIMELINE = [
+        { era: "Before recorded history", when: "Before −5000 AR", note: "Mostly told as backstory.", events: [
+          ["c. −25,000", "The Ur-Dragon creates the first dragons on Dominaria."],
+          ["−20,000 to −17,000", "The Elder Dragon War. Nicol Bolas and his kin win and ascend; the losers become wurms."],
+          ["c. −12,208", "Niv-Mizzet hatches on Ravnica."],
+          ["c. −5517", "The Guildpact is created on Ravnica, dividing the city's duties among nine guilds."],
+          ["Before −5000", "Yawgmoth rises on a decaying plane and turns it into Phyrexia. The Thran Empire falls."]
+        ], sets: [] },
+        { era: "Time of Legends", when: "−5000 to 0 AR", note: "Placement of these sets is approximate.", events: [
+          ["c. −2440", "Sorin Markov is born on Innistrad; Edgar Markov creates vampirism."],
+          ["c. −2438", "Humanoids emerge on Arcavios, beginning the Blood Age."],
+          ["c. −1500", "Sorin, Ugin and Nahiri imprison the Eldrazi on Zendikar."],
+          ["−912", "Penregon is founded."]
+        ], sets: ["Legends", "Arabian Nights"] },
+        { era: "The Brothers' War", when: "20–63 AR", events: [
+          ["20 AR", "Urza, Mishra and Tocasia discover the Caves of Koilos. The powerstone splits and the brothers become enemies, with Gix whispering in both ears."],
+          ["63 AR", "The war ends in the Sylex Blast on Argoth. Dominaria enters an ice age and Urza becomes a planeswalker."]
+        ], sets: ["Antiquities", "The Brothers' War"] },
+        { era: "The Dark Age and the Ice Age", when: "64–2934 AR", events: [
+          ["73 AR", "The Dark Age begins."],
+          ["c. 170 AR", "Reod Dai unites the goblins and orcs of Sarpadia, who overthrow the dwarves."],
+          ["c. 600 AR", "The Shard is fully formed, trapping planeswalkers on Dominaria and eleven other planes."],
+          ["c. 2434 AR", "Kjeldor is founded."],
+          ["2934 AR", "Jodah and Jaya Ballard rescue King Darien. The World Spell floods the land and destroys the Shard, ending the Ice Age."]
+        ], sets: ["The Dark", "Fallen Empires", "Ice Age", "Alliances"] },
+        { era: "The Flood Ages", when: "2934–3285 AR", events: [
+          ["2954 AR", "New Argive is formed."],
+          ["2956 AR", "Heidar's attempt to restore the Ice Age fails."],
+          ["3207–3227 AR", "The Kami War on Kamigawa."],
+          ["3254–3255 AR", "Urza kills the Phyrexian sleeper agents and fights Gix at the Caves of Koilos."],
+          ["3279 AR", "Nicol Bolas defeats Ugin, and Sarkhan encases Ugin in a hedron cocoon."]
+        ], sets: ["Coldsnap", "Champions of Kamigawa", "Betrayers of Kamigawa", "Saviors of Kamigawa"] },
+        { era: "The War with Phyrexia", when: "3285–4194 AR", events: [
+          ["3285 AR", "The Tolarian Academy is founded."],
+          ["3307 AR", "Phyrexians destroy the Academy. Urza, Barrin and Karn escape to New Tolaria."],
+          ["3337–3360 AR", "Urza builds his Mana Rig and the Legacy and Bloodline projects, and defeats Radiant."],
+          ["3420–3607 AR", "Serra arrives on Ulgrotha and Feroz's Ban is raised (placement of Homelands is approximate)."],
+          ["c. 3840 AR", "Sorin creates Avacyn and the Helvault on Innistrad."]
+        ], sets: ["Urza's Saga", "Urza's Legacy", "Urza's Destiny", "Homelands"] },
+        { era: "The Mirage and Weatherlight years", when: "4195–4205 AR", events: [
+          ["4195–4196 AR", "The Mirage War ends with Asmira's sacrifice. The Planeswalker War devastates Corondor."],
+          ["4197–4204 AR", "Vuel becomes Volrath and Sisay is abducted. Keld invades Jamuraa."],
+          ["4205 AR", "The Weatherlight crew defeats the Phyrexians in Mercadia."]
+        ], sets: ["Mirage", "Visions", "Weatherlight", "Tempest", "Stronghold", "Exodus", "Mercadian Masques", "Nemesis", "Prophecy"] },
+        { era: "The Phyrexian Invasion", when: "4205–4206 AR", events: [
+          ["4205 AR", "Benalia is destroyed. The Battle of Koilos closes the Phyrexian portal and Yawgmoth dies as a death cloud. Karn ascends."],
+          ["4206 AR", "Freyalise erects the Martyrs' Tomb."]
+        ], sets: ["Invasion", "Planeshift", "Apocalypse"] },
+        { era: "The Rift Era", when: "4206–4500 AR", events: [
+          ["c. 4300 AR", "Liliana Vess is born."],
+          ["4305–4306 AR", "Chainer discovers the Mirari and Kamahl fights Karona's War. The Mirari becomes Memnarch."],
+          ["4306–4400 AR", "Mirrodin's history under Memnarch, Glissa and Slobad."],
+          ["4483–4495 AR", "Ravnica's Decamillennial and the Rakdos attack, followed by a new non-magical Guildpact."]
+        ], sets: ["Odyssey", "Torment", "Judgment", "Onslaught", "Legions", "Scourge", "Mirrodin", "Darksteel", "Fifth Dawn", "Ravnica: City of Guilds", "Guildpact", "Dissension"] },
+        { era: "The Temporal Crisis and the Great Mending", when: "4500 AR", events: [
+          ["4500 AR", "Mana-sucking rifts open across Dominaria. Teferi, Freyalise, Windgrace and Karn give their lives or sparks to close them."],
+          ["4500 AR", "The Great Mending heals all fractures. Planeswalkers lose their immortality and much of their power."]
+        ], sets: ["Time Spiral", "Planar Chaos", "Future Sight"] },
+        { era: "The Mending Era, part one", when: "4500–4558 AR", note: "Placement within this stretch is approximate.", events: [
+          ["4509–4541 AR", "Births and early events of the new generation of planeswalkers across Zendikar, Lorwyn, Fiora, Theros, Kaladesh and more."],
+          ["4554–4556 AR", "The events of Alara Unbroken; alternate-timeline events on Tarkir."],
+          ["4557 AR", "The Eye of Ugin is broken, freeing the Eldrazi Titans. Gideon flees Zendikar."],
+          ["4558 AR", "The Implicit Maze reshapes Ravnica. Elesh Norn seizes power on New Phyrexia."]
+        ], sets: ["Lorwyn", "Morningtide", "Shadowmoor", "Eventide", "Shards of Alara", "Conflux", "Alara Reborn", "Zendikar", "Worldwake", "Rise of the Eldrazi", "Scars of Mirrodin", "Mirrodin Besieged", "New Phyrexia", "Innistrad", "Dark Ascension", "Avacyn Restored", "Return to Ravnica", "Gatecrash", "Dragon's Maze", "Khans of Tarkir", "Fate Reforged", "Dragons of Tarkir"] },
+        { era: "The Gatewatch", when: "4558–4560 AR", events: [
+          ["4558 AR", "The Legion arrives on Ixalan."],
+          ["4559 AR", "The Theros god war and Xenagos's ascension. Sorin frees Ugin. The Gatewatch forms."],
+          ["4559–4560 AR", "Emrakul corrupts Innistrad and is sealed in the moon. Bolas's Eternals attack Amonkhet and the Gatewatch is defeated."],
+          ["4560 AR", "Belzenlok is defeated on Dominaria. In the War of the Spark, Bolas is defeated on Ravnica and imprisoned by Ugin."]
+        ], sets: ["Theros", "Born of the Gods", "Journey into Nyx", "Magic Origins", "Battle for Zendikar", "Oath of the Gatewatch", "Shadows over Innistrad", "Eldritch Moon", "Kaladesh", "Aether Revolt", "Amonkhet", "Hour of Devastation", "Ixalan", "Rivals of Ixalan", "Dominaria", "Guilds of Ravnica", "Ravnica Allegiance", "War of the Spark"] },
+        { era: "After the War of the Spark", when: "4560–4562 AR", events: [
+          ["4560–4561 AR", "Oko transforms King Kenrith. Garruk is freed. Strixhaven's events, the Innistrad harvest moon crisis, the Doomskar on Kaldheim, and the Tamiyo and Tezzeret conflict on Kamigawa."],
+          ["4562 AR", "Ob Nixilis begins the Adversary War on New Capenna."]
+        ], sets: ["Throne of Eldraine", "Theros Beyond Death", "Ikoria: Lair of Behemoths", "Zendikar Rising", "Kaldheim", "Strixhaven: School of Mages", "Innistrad: Midnight Hunt", "Innistrad: Crimson Vow", "Kamigawa: Neon Dynasty", "Streets of New Capenna"] },
+        { era: "The Phyrexian Arc", when: "4562 AR", events: [
+          ["4562 AR", "Sheoldred is moved to Dominaria and the second Phyrexian invasion begins. Phyrexian forces attack many planes. Elesh Norn is destroyed and the glistening oil becomes inert."],
+          ["4562 AR", "The Desparkening strips most planeswalkers of their sparks. Omenpaths open across the multiverse."]
+        ], sets: ["Dominaria United", "The Brothers' War", "Phyrexia: All Will Be One", "March of the Machine", "March of the Machine: The Aftermath"] },
+        { era: "The Age of Omenpaths", when: "4562 AR to the present", note: "Dates after about 4564 AR are not fixed on the source timeline yet.", events: [
+          ["4563 AR", "Events on Eldraine, Ixalan and Ravnica, including the Mycotyrant's attacks and the Wicked Slumber's end."],
+          ["c. 4564 AR", "Ral Zarek and Niv-Mizzet set up Omenpath relays. Jace and Vraska seize Loot. Amalia maps Thunder Junction."],
+          ["Later", "Dragonstorms spill dragons across the multiverse, then the Metronome arc builds to Jace's Echoverse in Reality Fracture."]
+        ], sets: ["Wilds of Eldraine", "The Lost Caverns of Ixalan", "Murders at Karlov Manor", "Outlaws of Thunder Junction", "Bloomburrow", "Duskmourn: House of Horror", "Aetherdrift", "Tarkir: Dragonstorm", "Edge of Eternities", "Lorwyn Eclipsed", "Secrets of Strixhaven", "Reality Fracture"] }
+      ];
+      const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const fmtDate = d => { const [y, m] = d.split("-"); return MONTHS[Number(m) - 1] + " " + y; };
+      const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+      const ALL = [];
+      ERAS.forEach(e => e.sets.forEach(s => ALL.push({ era: e, name: s[0], date: s[1], plane: s[2], text: s[3], chars: s[4] })));
+      const icons = new Map();   // normalized set name -> icon url
+      let iconsLoaded = false, iconsLoading = false;
+
+      const eraSel = $("#loreEra"), planeSel = $("#lorePlane");
+      ERAS.forEach(e => { const o = document.createElement("option"); o.value = e.id; o.textContent = `${e.label} (${e.years})`; eraSel.appendChild(o); });
+      [...new Set(ALL.map(s => s.plane))].sort((a, b) => a.localeCompare(b)).forEach(p => { const o = document.createElement("option"); o.value = p; o.textContent = p; planeSel.appendChild(o); });
+
+      function iconHtml(name) {
+        const u = icons.get(norm(name));
+        return u ? `<img class="lore-icon" alt="" loading="lazy" src="${esc(u)}">` : `<span class="lore-icon-ph" aria-hidden="true">&#10022;</span>`;
+      }
+
+      function renderSets() {
+        const terms = norm($("#loreSearch").value).split(" ").filter(Boolean);
+        const era = eraSel.value, plane = planeSel.value, newest = $("#loreSort").value === "new";
+        let list = ALL.filter(s =>
+          (!era || s.era.id === era) && (!plane || s.plane === plane) &&
+          terms.every(t => norm(`${s.name} ${s.plane} ${s.chars} ${s.text} ${s.era.label}`).includes(t)));
+        $("#loreCount").textContent = `${list.length} of ${ALL.length} sets`;
+        if (!list.length) { $("#loreSetList").innerHTML = `<div class="ls-empty">No sets match that search.</div>`; return; }
+        const groups = [];
+        ERAS.forEach(e => { const g = list.filter(s => s.era === e); if (g.length) groups.push({ e, g: newest ? g.slice().reverse() : g }); });
+        if (newest) groups.reverse();
+        $("#loreSetList").innerHTML = groups.map(({ e, g }) => `
+          <section class="lore-era"><h3>${esc(e.label)} <span class="yrs">${esc(e.years)}</span></h3><p>${esc(e.blurb)}</p>
+          ${g.map(s => `<article class="lore-set" id="lore-${esc(norm(s.name).replace(/ /g, "-"))}">
+            <div>${iconHtml(s.name)}</div>
+            <div><h4>${esc(s.name)} <span class="dt">${esc(fmtDate(s.date))}</span></h4>
+              <div class="lore-tags"><span class="lore-tag plane">${esc(s.plane)}</span></div>
+              <p>${esc(s.text)}</p>
+              ${s.chars ? `<div class="lore-chars"><b>Featuring:</b> ${esc(s.chars)}</div>` : ""}</div>
+          </article>`).join("")}</section>`).join("");
+      }
+
+      function renderTimeline() {
+        $("#loreTimeline").innerHTML = TIMELINE.map(t => `
+          <section class="lore-t-era"><h3>${esc(t.era)}</h3><div class="when">${esc(t.when)}</div>
+          ${t.note ? `<div class="note">${esc(t.note)}</div>` : ""}
+          ${t.events.map(([y, x]) => `<div class="lore-ev"><span class="y">${esc(y)}</span><span>${esc(x)}</span></div>`).join("")}
+          ${t.sets.length ? `<div class="lore-chips">${t.sets.map(n => `<button type="button" class="lore-chip" data-lore-set="${esc(n)}">${esc(n)}</button>`).join("")}</div>` : ""}
+          </section>`).join("");
+      }
+
+      $("#loreUBList").innerHTML = UB.map(([n, d, f]) => `<li><strong>${esc(n)}</strong> <span class="hint">${esc(fmtDate(d))} &middot; ${esc(f)}</span></li>`).join("");
+
+      function showPane(k) {
+        document.querySelectorAll("#loreTabs button").forEach(b => b.classList.toggle("active", b.dataset.lore === k));
+        document.querySelectorAll("#lorePage .lore-pane").forEach(p => p.classList.toggle("active", p.id === "lore-" + k));
+      }
+      $("#loreTabs").addEventListener("click", ev => { const b = ev.target.closest("[data-lore]"); if (b) showPane(b.dataset.lore); });
+
+      let timer = 0;
+      $("#loreSearch").addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(renderSets, 120); });
+      [eraSel, planeSel, $("#loreSort")].forEach(el => el.addEventListener("change", renderSets));
+
+      $("#loreTimeline").addEventListener("click", ev => {
+        const b = ev.target.closest("[data-lore-set]");
+        if (!b) return;
+        $("#loreSearch").value = ""; eraSel.value = ""; planeSel.value = "";
+        renderSets(); showPane("sets");
+        const el = document.getElementById("lore-" + norm(b.dataset.loreSet).replace(/ /g, "-"));
+        if (el) { el.scrollIntoView({ behavior: "smooth", block: "center" }); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+      });
+
+      // Set icons come from Scryfall's set list (one request, only when the tab is first opened).
+      async function loadIcons() {
+        if (iconsLoaded || iconsLoading) return;
+        iconsLoading = true;
+        try {
+          const res = await fetch("https://api.scryfall.com/sets");
+          if (!res.ok) return;
+          const data = await res.json();
+          (data.data || []).forEach(s => { if (s.icon_svg_uri && !icons.has(norm(s.name))) icons.set(norm(s.name), s.icon_svg_uri); });
+          iconsLoaded = true;
+          renderSets();
+        } catch (e) {
+          // The list works fine without icons.
+        } finally {
+          iconsLoading = false;
+        }
+      }
+
+      renderSets();
+      renderTimeline();
+      $("#navLore").addEventListener("click", loadIcons);
+    } catch (err) {
+      console.error("Lore tab failed to initialise", err);
+    }
+  })();
+
 
   /* ---------------------------------------------------------------------
    * Card Creator tab
