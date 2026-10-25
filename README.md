@@ -21,14 +21,16 @@ Everything about the Low Sodium 2.0 house format in one place (the list is built
 
 The embedded list is a dated snapshot (shown in the app); refresh it by regenerating the `LOW_SODIUM_2` block in `index.html`.
 
-### Game Tools
-Everything you need at the table during a game, with state that survives a page reload:
-- **Dice roller** — d4, d6, d8, d10, d12, d20, d100, or a custom side count; roll up to 20 dice at once, see each face plus the total, and a scrollable history of recent rolls
-- **Mana pool** — a simple floating-mana tracker for all five colors plus colorless
-- **Life total** — quick ±1/±5 buttons and a resettable starting life
-- **Commander damage** — a tracker per opponent (add/remove/rename freely), with lethal (21+) highlighted
-- **Counters** — built-in Poison (lethal at 10), Experience, and Energy, plus free-form custom counters for anything else (Rad, Ascend, Shield, Ki, Ticket, etc.)
-- A single "Reset all" button zeroes life/mana/counters for a new game while keeping your named opponents and custom counters
+### Game Tools (tabletop game table)
+A full-screen Commander table for phones, tablets and desktops, modeled on apps like Lifetap, Lotus, Mythic Tools and Life Trinket. Pick 2-6 players, starting life (20/25/30/40/custom), names and colors, then start. Your game is saved and can be resumed after a reload.
+- **Seat cards** - big life totals; tap the left/right half for -1/+1, hold for -10/+10; a change bubble shows the running total. In tabletop mode seats rotate to face each player (portrait and landscape layouts for every player count); switch to upright for a single shared device.
+- **Commander damage** - tracked per opponent commander (partners supported) and optionally subtracted from life automatically; 21 from one commander is lethal. Commander tax tracker included.
+- **Counters and status** - Poison (10 is lethal), Energy, Experience, Rad, custom named counters, Monarch, Initiative, City's blessing.
+- **Commander art** - type a commander name to use its Scryfall art as the card background.
+- **Defeat and winner detection** - life, poison, commander damage or concede; the last player standing is announced. Defeated players can be kept in the game.
+- **Center hub menu** - dice (d4-d100, custom), coin flip, roll-for-first-player, random player picker, turn tracker with rounds (skips defeated players), mana pool, action log with undo, day/night, game clock, wake lock and full screen.
+- The dice, coin and mana pool also open from the setup screen without starting a game.
+
 
 ### Deck Analyzer
 Paste a commander and a decklist to get:
@@ -53,7 +55,7 @@ Design your own card: name, mana cost (with symbols, including hybrid, {X}, {T} 
 The story of Magic, two ways. **By set:** 109 premier sets in release order, grouped into story eras (The Early Years through the Metronome finale, ending with Reality Fracture), each with date, plane, a short spoiler-light summary and featured characters; search by set, plane or character, filter by era or plane, and flip the sort. Set icons load live from Scryfall. **Story order:** an in-universe timeline from before recorded history to the Age of Omenpaths, with Dominaria's AR dates and the sets that tell each stretch (click a set to jump to it). A third section lists Universes Beyond crossovers and the sources used. Dates come from Wikipedia's set list and the community MTG Wiki timeline; some placements are marked approximate.
 
 ## Look and feel
-- **Mana symbols** (self-drawn SVG, so they work offline) appear wherever colors do: the header, Game Tools mana pool, Deck Analyzer color identity and mana-source rows, Random Commander filters and results (including mana costs), and the cEDH tier list.
+- **Mana symbols** (self-drawn SVG, so they work offline) appear wherever colors do: the header, Game Tools mana pool and seat menus, Deck Analyzer color identity and mana-source rows, Random Commander filters and results (including mana costs), and the cEDH tier list.
 - **Fantasy theme:** the whole app uses a parchment-and-gold fantasy look (a night-castle variant when your device is in dark mode). Fonts (Cinzel, Crimson Text) load from Google Fonts and fall back to system serif fonts offline. Printing is unaffected.
 
 ## Notes

@@ -363,33 +363,143 @@
     min-height: 0; padding: 4px 10px; font-size: 0.85rem; border-radius: 6px;
   }
 
-  .life-tracker { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 10px 0 4px; }
-  .life-value { font-size: 2.4rem; font-weight: 700; min-width: 90px; text-align: center; }
-  .life-value.life-dead { color: var(--bad); }
-  .life-btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
-  .life-btn-row button { min-height: 0; padding: 8px 14px; }
-  .life-btn-row button.big { font-weight: 700; }
 
-  .opponent-row, .counter-row {
-    display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border);
-    flex-wrap: wrap;
+  /* ---------------------------------------------------------------------
+   * Commander game table
+   * ------------------------------------------------------------------- */
+  .gt-table[hidden], .gt-modal[hidden], .gt-out[hidden], .gt-bubble[hidden], .gt-toast[hidden], .gt-resume[hidden] { display: none !important; }
+  .gt-seg { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .gt-seg button { min-height: 0; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .gt-seg button.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
+  .gt-seg input { width: 90px; flex: 0 0 auto; padding: 8px 10px; font-family: inherit; }
+  .gt-resume { display: flex; gap: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap; border: 1px solid var(--gold, var(--accent)); background: var(--accent-dim); border-radius: 8px; padding: 12px 14px; margin: 8px 0 16px; }
+  .gt-setup-players { display: grid; gap: 8px; }
+  .gt-sp { display: grid; grid-template-columns: 1fr; gap: 6px; border: 1px solid var(--border); border-radius: 8px; padding: 8px; }
+  @media (min-width: 640px) { .gt-sp { grid-template-columns: minmax(150px, 1fr) auto; align-items: center; } }
+  .gt-sp input[type=text] { font-family: inherit; font-size: 16px; padding: 8px 10px; }
+  .gt-swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .gt-sw { width: 30px; height: 30px; min-height: 0; padding: 0; border-radius: 50%; border: 2px solid transparent; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 2px rgba(255,255,255,0.35); }
+  .gt-sw[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--accent); }
+  .gt-sw .mana { width: 18px; height: 18px; }
+  .gt-opts { display: grid; gap: 2px; }
+  .gt-help { margin: 4px 0 0; padding-left: 18px; font-size: 0.92rem; }
+  .gt-help li { margin: 5px 0; }
+  .gt-grid2 { display: grid; grid-template-columns: 1fr; gap: 0 16px; }
+  @media (min-width: 520px) { .gt-grid2 { grid-template-columns: 1fr 1fr; } }
+  .gt-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .gt-row .field { flex: 1 1 100px; }
+
+  /* the table itself */
+  .gt-table { position: fixed; inset: 0; z-index: 900; background: #0c0a08; padding: 6px; display: block; }
+  .gt-table[hidden] { display: none; }
+  .gt-grid { display: grid; gap: 6px; width: 100%; height: 100%; }
+  .gt-seat { position: relative; min-width: 0; min-height: 0; container-type: size; }
+  .gt-card {
+    position: absolute; top: 50%; left: 50%; width: 100cqw; height: 100cqh; transform: translate(-50%, -50%) rotate(var(--rot, 0deg));
+    border-radius: 14px; overflow: hidden; color: #fff; container-type: size; user-select: none; -webkit-user-select: none;
+    background: var(--pc, #3a7d44); box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6), inset 0 0 0 2px rgba(255, 255, 255, 0.12);
+    font-family: var(--font-display, inherit);
   }
-  .opponent-row:last-child, .counter-row:last-child { border-bottom: none; }
-  .opponent-row input[type=text] {
-    flex: 1 1 140px; min-width: 100px; padding: 6px 10px; font-size: 0.88rem;
+  .gt-seat.r90 .gt-card, .gt-seat.r270 .gt-card { width: 100cqh; height: 100cqw; }
+  .gt-seat.r90 { --rot: 90deg; } .gt-seat.r180 { --rot: 180deg; } .gt-seat.r270 { --rot: 270deg; } .gt-seat.r0 { --rot: 0deg; }
+  .gt-card::before { content: ""; position: absolute; inset: 0; background: linear-gradient(160deg, rgba(0,0,0,0.05), rgba(0,0,0,0.5)); pointer-events: none; }
+  .gt-card.art::before { background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.6)); }
+  .gt-card.active { box-shadow: 0 0 0 3px #f5d76e, 0 0 22px 4px rgba(245, 215, 110, 0.55), 0 2px 10px rgba(0, 0, 0, 0.6); }
+  .gt-card.spin { box-shadow: 0 0 0 4px #fff, 0 0 26px 8px rgba(255, 255, 255, 0.7); }
+  .gt-zone { position: absolute; top: 0; bottom: 0; width: 50%; background: none; border: 0; padding: 0; margin: 0; min-height: 0; border-radius: 0; box-shadow: none; color: rgba(255,255,255,0.5); cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; display: flex; align-items: center; font-size: min(14cqh, 10cqw); font-weight: 300; }
+  .gt-zone.minus { left: 0; justify-content: flex-start; padding-left: 5%; }
+  .gt-zone.plus { right: 0; justify-content: flex-end; padding-right: 5%; }
+  .gt-zone:active { background: rgba(255, 255, 255, 0.12); }
+  .gt-zone:focus-visible { outline: 3px solid #fff; outline-offset: -3px; }
+  .gt-name { position: absolute; top: 5cqh; left: 0; right: 0; text-align: center; font-size: min(7.5cqh, 5.5cqw); font-weight: 700; letter-spacing: 0.03em; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8); padding: 0 16%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+  .gt-life { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%); font-size: min(46cqh, 30cqw); font-weight: 700; line-height: 1; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7); pointer-events: none; font-variant-numeric: tabular-nums; }
+  .gt-life.l3 { font-size: min(38cqh, 22cqw); }
+  .gt-life.l4 { font-size: min(32cqh, 17cqw); }
+  .gt-bubble { position: absolute; top: 50%; left: 50%; transform: translate(-50%, 85%); font-size: min(9cqh, 7cqw); font-weight: 700; padding: 1px 12px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); pointer-events: none; }
+  .gt-bubble[hidden] { display: none; }
+  .gt-badges { position: absolute; left: 0; right: 0; bottom: 3cqh; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; padding: 0 14%; pointer-events: none; }
+  .gt-b { font-size: min(6cqh, 4.6cqw); font-weight: 700; padding: 1px 9px; border-radius: 999px; background: rgba(0, 0, 0, 0.55); white-space: nowrap; line-height: 1.5; }
+  .gt-b.warn { background: #b3261e; }
+  .gt-b.pill { background: #f5d76e; color: #2a1c0e; }
+  .gt-more { position: absolute; top: 3cqh; right: 3cqw; width: min(12cqh, 9cqw); min-width: 36px; height: min(12cqh, 9cqw); min-height: 36px; padding: 0; border-radius: 50%; background: rgba(0, 0, 0, 0.5); color: #fff; border: 1px solid rgba(255, 255, 255, 0.4); font-size: 1.1rem; box-shadow: none; z-index: 3; line-height: 1; }
+  .gt-out { position: absolute; inset: 0; background: rgba(10, 8, 6, 0.82); display: flex; flex-direction: column; gap: 6px; align-items: center; justify-content: center; text-align: center; z-index: 4; padding: 10px; }
+  .gt-out strong { font-size: min(12cqh, 9cqw); }
+  .gt-out span { font-size: min(6cqh, 4.6cqw); opacity: 0.85; }
+  .gt-out button { min-height: 0; padding: 6px 14px; font-size: 0.85rem; }
+  .gt-hub {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 78px; height: 78px; border-radius: 50%; padding: 0; z-index: 20;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; line-height: 1.15;
+    background: radial-gradient(circle at 35% 30%, #3b2f1c, #120d07); color: #f5d76e; border: 2px solid #c39a3f; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.7);
   }
-  .opponent-row .counter-value, .counter-row .counter-value {
-    font-size: 1.1rem; font-weight: 700; min-width: 34px; text-align: center;
+  .gt-hub-top { font-size: 0.74rem; font-weight: 700; } .gt-hub-sub { font-size: 0.62rem; opacity: 0.8; letter-spacing: 0.06em; text-transform: uppercase; }
+  .gt-toast { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 30; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 8px 16px; border-radius: 999px; font-size: 0.9rem; max-width: 90vw; text-align: center; }
+  .gt-toast[hidden] { display: none; }
+
+  /* layouts: portrait first, wide screens get their own arrangement */
+  .gt-n2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .gt-n3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; grid-template-areas: "a a" "b c"; }
+  .gt-n4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; grid-template-areas: "a b" "c d"; }
+  .gt-n5 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; grid-template-areas: "a b" "c d" "e e"; }
+  .gt-n6 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; grid-template-areas: "a b" "c d" "e f"; }
+  .gt-grid > :nth-child(1) { grid-area: a; } .gt-grid > :nth-child(2) { grid-area: b; } .gt-grid > :nth-child(3) { grid-area: c; }
+  .gt-grid > :nth-child(4) { grid-area: d; } .gt-grid > :nth-child(5) { grid-area: e; } .gt-grid > :nth-child(6) { grid-area: f; }
+  .gt-grid.gt-n2 > :nth-child(n) { grid-area: auto; }
+  @media (min-aspect-ratio: 5/4) {
+    .gt-n3 { grid-template-columns: 1fr 1fr; grid-template-areas: "a b" "c c"; }
+    .gt-n5 { grid-template-columns: repeat(6, 1fr); grid-template-rows: 1fr 1fr; grid-template-areas: "a a b b c c" "d d d e e e"; }
+    .gt-n6 { grid-template-columns: repeat(3, 1fr); grid-template-rows: 1fr 1fr; grid-template-areas: "a b c" "d e f"; }
   }
-  .counter-row .counter-label { flex: 1 1 140px; font-size: 0.9rem; }
-  .counter-value.counter-lethal { color: var(--bad); }
-  .counter-btn-row { display: flex; gap: 4px; }
-  .counter-btn-row button, .opponent-row button.remove-row, .counter-row button.remove-row {
-    min-height: 0; padding: 5px 11px; font-size: 0.85rem;
-  }
-  button.remove-row { background: transparent; color: var(--bad); border: 1px solid var(--bad); }
-  .counter-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
-  @media (min-width: 640px) { .counter-grid { grid-template-columns: 1fr 1fr; gap: 0 20px; } }
+
+  /* player menu (sits inside the card, so it faces the player) */
+  .gt-pm { position: absolute; inset: 0; z-index: 6; background: var(--panel); color: var(--text); display: flex; flex-direction: column; font-family: var(--font-body, inherit); }
+  .gt-pm-head { display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-bottom: 1px solid var(--border); flex: 0 0 auto; }
+  .gt-pm-head strong { flex: 1; font-size: 0.95rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-display, inherit); }
+  .gt-pm-head button { min-height: 0; padding: 4px 10px; font-size: 0.8rem; }
+  .gt-pm-tabs { display: flex; gap: 4px; padding: 6px 8px 0; flex: 0 0 auto; }
+  .gt-pm-tabs button { min-height: 0; flex: 1; padding: 5px 4px; font-size: 0.78rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+  .gt-pm-tabs button.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
+  .gt-pm-body { overflow-y: auto; padding: 8px; flex: 1 1 auto; font-size: 0.85rem; -webkit-overflow-scrolling: touch; }
+  .gt-st { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); }
+  .gt-st:last-child { border-bottom: 0; }
+  .gt-st .lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .gt-st .lab small { display: block; color: var(--text-dim); font-size: 0.72rem; }
+  .gt-step { display: inline-flex; align-items: center; gap: 4px; }
+  .gt-step button { min-height: 0; width: 32px; height: 30px; padding: 0; font-size: 1rem; }
+  .gt-step .v { min-width: 28px; text-align: center; font-weight: 700; font-size: 1rem; }
+  .gt-step .v.bad { color: var(--bad); }
+  .gt-pm-body h5 { margin: 8px 0 2px; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+  .gt-pm-body input[type=text] { font-family: inherit; font-size: 16px; padding: 6px 8px; }
+  .gt-pm-body .gt-inline { display: flex; gap: 6px; align-items: center; margin: 4px 0; }
+  .gt-pm-body .gt-inline button { min-height: 0; padding: 6px 10px; font-size: 0.8rem; flex: 0 0 auto; }
+  .gt-pm-body .gt-inline input[type=text] { flex: 1 1 auto; min-width: 0; }
+  .gt-pm-body .gt-toggle { display: flex; align-items: center; gap: 8px; margin: 6px 0; font-weight: 400; font-size: 0.85rem; }
+  .gt-pm-body .gt-toggle input { width: auto; margin: 0; }
+  .gt-pm-body .gt-sw { width: 26px; height: 26px; }
+  .gt-pm-body .gt-sw .mana { width: 16px; height: 16px; }
+  .gt-status { color: var(--text-dim); font-size: 0.78rem; min-height: 1em; }
+
+  /* hub menu */
+  .gt-modal { position: fixed; inset: 0; z-index: 1000; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; padding: 10px; }
+  .gt-modal[hidden] { display: none; }
+  .gt-sheet { position: relative; width: 100%; max-width: 520px; max-height: 92dvh; overflow-y: auto; background: var(--panel); color: var(--text); border-radius: 12px; border: 2px solid var(--border); padding: 16px; font-family: var(--font-body, inherit); }
+  .gt-x { position: absolute; top: 8px; right: 8px; width: 34px; height: 34px; min-height: 0; padding: 0; border-radius: 50%; font-size: 1.3rem; line-height: 1; background: var(--accent-dim); color: var(--accent); border: 0; box-shadow: none; z-index: 2; }
+  .gt-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 40px 12px 0; }
+  .gt-tabs button { min-height: 0; padding: 7px 12px; font-size: 0.85rem; background: var(--bg); color: var(--text); border: 1px solid var(--border); box-shadow: none; }
+  .gt-tabs button.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
+  .gt-tabpane { display: none; }
+  .gt-tabpane.active { display: block; }
+  .gt-turn-now { font-size: 1.15rem; margin-bottom: 10px; }
+  .gt-turn-now small { display: block; color: var(--text-dim); font-size: 0.8rem; }
+  .gt-turn-list { margin-top: 12px; display: grid; gap: 6px; }
+  .gt-turn-list button { display: flex; align-items: center; gap: 10px; min-height: 0; padding: 8px 12px; text-align: left; background: var(--bg); color: var(--text); border: 1px solid var(--border); box-shadow: none; justify-content: flex-start; }
+  .gt-turn-list button.active { border-color: var(--accent); background: var(--accent-dim); }
+  .gt-turn-list i { width: 14px; height: 14px; border-radius: 50%; flex: 0 0 auto; display: inline-block; }
+  .gt-log { margin-top: 10px; max-height: 46dvh; overflow-y: auto; font-size: 0.85rem; }
+  .gt-log div { display: flex; gap: 10px; padding: 4px 0; border-bottom: 1px solid var(--border); }
+  .gt-log time { color: var(--text-dim); flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+  .gt-clock { font-size: 1.6rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 2px 0 6px; }
+  .gt-coin { display: inline-flex; width: 64px; height: 64px; border-radius: 50%; align-items: center; justify-content: center; font-weight: 800; color: #3a2a06; background: radial-gradient(circle at 35% 30%, #fbe68f, #c39a3f); border: 3px solid #8a6a1f; }
+  @media (max-width: 520px) { .gt-hub { width: 66px; height: 66px; } }
   .empty-note-inline { color: var(--text-dim); font-size: 0.85rem; font-style: italic; padding: 6px 0; }
 
   /* ---------------------------------------------------------------------
@@ -1285,88 +1395,116 @@
   </div>
 
   <div id="gamePage" class="page">
-    <div class="panel">
-      <h2>Dice roller</h2>
-      <div class="dice-sides-row" id="diceSidesRow">
-        <button type="button" class="die-btn" data-sides="4">d4</button>
-        <button type="button" class="die-btn active" data-sides="6">d6</button>
-        <button type="button" class="die-btn" data-sides="8">d8</button>
-        <button type="button" class="die-btn" data-sides="10">d10</button>
-        <button type="button" class="die-btn" data-sides="12">d12</button>
-        <button type="button" class="die-btn" data-sides="20">d20</button>
-        <button type="button" class="die-btn" data-sides="100">d100</button>
-        <button type="button" class="die-btn" data-sides="custom">Custom</button>
+    <div class="panel" id="gtSetup">
+      <h2>Commander game table</h2>
+      <p class="hint">A life and counter tracker built for the table. Put your phone or tablet flat in the middle, and each player gets their own card, turned to face their seat. Tap the left side of a card to lose life and the right side to gain it; hold for 10.</p>
+      <div class="gt-resume" id="gtResume" hidden>
+        <div><strong>Game in progress</strong><div class="hint" id="gtResumeInfo"></div></div>
+        <div class="btn-row"><button type="button" id="gtResumeBtn">Resume game</button><button type="button" class="secondary" id="gtDiscardBtn">Discard</button></div>
       </div>
-      <div class="row">
-        <div class="field">
-          <label for="diceCount">Number of dice</label>
-          <input type="number" id="diceCount" min="1" max="20" value="1">
-        </div>
-        <div class="field" id="diceCustomSidesField" style="display:none;">
-          <label for="diceCustomSides">Custom sides</label>
-          <input type="number" id="diceCustomSides" min="2" max="1000" value="3">
-        </div>
-      </div>
-      <div class="btn-row">
-        <button type="button" id="rollDiceBtn">Roll</button>
-        <button type="button" id="clearDiceHistoryBtn" class="secondary">Clear history</button>
-      </div>
-      <div class="dice-result" id="diceResult"></div>
-      <div class="dice-history" id="diceHistory"></div>
-    </div>
 
-    <div class="panel">
-      <h2>Mana pool</h2>
-      <p class="hint">Track floating mana during a turn. Remember it empties at the end of each step/phase under the current rules &mdash; use "Clear pool" to zero it out.</p>
-      <div class="mana-pool-row" id="manaPoolRow"></div>
-      <div class="btn-row" style="margin-top:14px;">
-        <button type="button" id="clearManaPoolBtn" class="secondary">Clear pool</button>
+      <div class="field"><label>Players</label>
+        <div class="gt-seg" id="gtCount" role="group" aria-label="Number of players">
+          <button type="button" data-n="2">2</button><button type="button" data-n="3">3</button><button type="button" data-n="4" class="active">4</button><button type="button" data-n="5">5</button><button type="button" data-n="6">6</button>
+        </div></div>
+      <div class="field"><label>Starting life</label>
+        <div class="gt-seg" id="gtLife" role="group" aria-label="Starting life">
+          <button type="button" data-v="20">20</button><button type="button" data-v="25">25</button><button type="button" data-v="30">30</button><button type="button" data-v="40" class="active">40</button>
+          <input type="number" id="gtLifeCustom" min="1" max="999" placeholder="Other" aria-label="Custom starting life">
+        </div></div>
+      <div class="field"><label>Player names and colors</label><div id="gtSetupPlayers" class="gt-setup-players"></div></div>
+      <div class="gt-opts">
+        <label class="cc-check"><input type="checkbox" id="gtAutoCmd" checked> Commander damage also lowers life</label>
+        <label class="cc-check"><input type="checkbox" id="gtTabletop" checked> Turn each card to face its seat (tabletop mode)</label>
+        <label class="cc-check"><input type="checkbox" id="gtRandomFirst" checked> Pick a random first player</label>
+      </div>
+      <div class="btn-row" style="margin-top:16px;">
+        <button type="button" id="gtStartBtn">Start game</button>
+        <button type="button" class="secondary" id="gtToolsBtn">Dice, coins &amp; mana pool</button>
       </div>
     </div>
 
     <div class="panel">
-      <h2>Life &amp; counters</h2>
-      <div class="field" style="max-width:160px;">
-        <label for="startingLifeInput">Starting life</label>
-        <input type="number" id="startingLifeInput" min="1" max="999" value="40">
-      </div>
-      <div class="life-tracker">
-        <div class="life-value" id="lifeValue">40</div>
-        <div class="life-btn-row">
-          <button type="button" class="secondary" data-life-delta="-5">&minus;5</button>
-          <button type="button" class="secondary big" data-life-delta="-1">&minus;1</button>
-          <button type="button" class="secondary big" data-life-delta="1">+1</button>
-          <button type="button" class="secondary" data-life-delta="5">+5</button>
-          <button type="button" class="secondary" id="resetLifeBtn">Reset</button>
-        </div>
-      </div>
-
-      <h3>Commander damage</h3>
-      <p class="hint">One tracker per opponent &mdash; 21 from a single commander is lethal.</p>
-      <div id="commanderDamageList"></div>
-      <div class="btn-row">
-        <button type="button" id="addOpponentBtn" class="secondary">+ Add opponent</button>
-      </div>
-
-      <h3>Common counters</h3>
-      <div class="counter-grid" id="builtinCountersRow"></div>
-
-      <h3>Custom counters</h3>
-      <p class="hint">Anything else &mdash; Rad, Ascend, Shield, Ki, Ticket, experience from a specific card, etc.</p>
-      <div id="customCountersList"></div>
-      <div class="row">
-        <div class="field" style="flex:1 1 220px; margin-bottom:0;">
-          <input type="text" id="customCounterNameInput" placeholder="e.g. Rad counters">
-        </div>
-        <button type="button" id="addCustomCounterBtn" class="secondary">+ Add counter</button>
-      </div>
-
-      <div class="btn-row" style="margin-top:18px;">
-        <button type="button" id="resetGameBtn">Reset all (new game)</button>
-      </div>
-      <div class="hint">Resetting zeroes life, mana, and every counter back to their starting values &mdash; it keeps the opponents and custom counters you've named, just like starting a fresh game with the same pod.</div>
+      <h2>How it works</h2>
+      <ul class="gt-help">
+        <li><strong>Life:</strong> tap the left or right half of a card, or hold for 10. The &ldquo;&hellip;&rdquo; button opens that player's counters.</li>
+        <li><strong>Commander damage:</strong> tracked per opponent, with partner support. Damage over 20 from one commander defeats a player, and it also lowers life if you leave that option on.</li>
+        <li><strong>Counters:</strong> poison (10 is lethal), energy, experience, rad, commander tax, your own custom counters, monarch, initiative, and the city's blessing.</li>
+        <li><strong>Center button:</strong> dice and coins, turn order, mana pool, game log with undo, and game settings. Your game is saved automatically.</li>
+        <li><strong>Commander art:</strong> in a player's menu, type a commander to use its art as that player's card background.</li>
+      </ul>
     </div>
   </div><!-- /gamePage -->
+
+  <div id="gtTable" class="gt-table" hidden>
+    <div class="gt-grid" id="gtGrid"></div>
+    <button type="button" class="gt-hub" id="gtHub" aria-label="Open table menu"><span class="gt-hub-top" id="gtHubTop">Round 1</span><span class="gt-hub-sub" id="gtHubSub">Menu</span></button>
+    <div class="gt-toast" id="gtToast" role="status" aria-live="polite" hidden></div>
+  </div>
+
+  <div id="gtMenu" class="gt-modal" hidden>
+    <div class="gt-sheet" role="dialog" aria-modal="true" aria-label="Table menu">
+      <button type="button" class="gt-x" id="gtMenuClose" aria-label="Close menu">&times;</button>
+      <div class="gt-tabs" id="gtMenuTabs">
+        <button type="button" data-t="dice" class="active">Dice</button>
+        <button type="button" data-t="turn">Turn</button>
+        <button type="button" data-t="mana">Mana</button>
+        <button type="button" data-t="log">Log</button>
+        <button type="button" data-t="game">Game</button>
+      </div>
+      <div class="gt-tabpane active" id="gtTab-dice">
+        <div class="dice-sides-row" id="diceSidesRow">
+          <button type="button" class="die-btn" data-sides="4">d4</button>
+          <button type="button" class="die-btn" data-sides="6">d6</button>
+          <button type="button" class="die-btn" data-sides="8">d8</button>
+          <button type="button" class="die-btn" data-sides="10">d10</button>
+          <button type="button" class="die-btn" data-sides="12">d12</button>
+          <button type="button" class="die-btn active" data-sides="20">d20</button>
+          <button type="button" class="die-btn" data-sides="100">d100</button>
+          <button type="button" class="die-btn" data-sides="custom">Custom</button>
+        </div>
+        <div class="gt-row">
+          <div class="field"><label for="diceCount">Dice</label><input type="number" id="diceCount" min="1" max="20" value="1"></div>
+          <div class="field" id="diceCustomSidesField" style="display:none;"><label for="diceCustomSides">Sides</label><input type="number" id="diceCustomSides" min="2" max="1000" value="3"></div>
+        </div>
+        <div class="btn-row"><button type="button" id="rollDiceBtn">Roll</button><button type="button" class="secondary" id="flipCoinBtn">Flip a coin</button></div>
+        <div class="dice-result" id="diceResult"></div>
+        <div class="btn-row" style="margin-top:12px;"><button type="button" class="secondary" id="highRollBtn">Roll for first player</button></div>
+        <div class="dice-history" id="diceHistory"></div>
+        <button type="button" class="secondary" id="clearDiceHistoryBtn" style="margin-top:8px;min-height:0;padding:6px 12px;font-size:.8rem;">Clear history</button>
+      </div>
+      <div class="gt-tabpane" id="gtTab-turn">
+        <div class="gt-turn-now" id="gtTurnNow"></div>
+        <div class="btn-row"><button type="button" id="gtPrevTurn" class="secondary">Back</button><button type="button" id="gtNextTurn">Next turn</button><button type="button" id="gtRandomPlayer" class="secondary">Random player</button></div>
+        <div id="gtTurnList" class="gt-turn-list"></div>
+      </div>
+      <div class="gt-tabpane" id="gtTab-mana">
+        <p class="hint">Track floating mana during a turn. It empties between steps and phases.</p>
+        <div class="mana-pool-row" id="manaPoolRow"></div>
+        <div class="btn-row" style="margin-top:14px;"><button type="button" id="clearManaPoolBtn" class="secondary">Clear pool</button></div>
+      </div>
+      <div class="gt-tabpane" id="gtTab-log">
+        <div class="btn-row"><button type="button" id="gtUndo" class="secondary">Undo last change</button></div>
+        <div id="gtLog" class="gt-log"></div>
+      </div>
+      <div class="gt-tabpane" id="gtTab-game">
+        <div class="gt-grid2">
+          <div class="field"><label>Day / night</label><div class="gt-seg" id="gtDay"><button type="button" data-v="">Off</button><button type="button" data-v="day">Day</button><button type="button" data-v="night">Night</button></div></div>
+          <div class="field"><label>Time</label><div class="gt-clock" id="gtClock">0:00</div><button type="button" class="secondary" id="gtClockBtn" style="min-height:0;padding:6px 12px;font-size:.8rem;">Pause</button></div>
+        </div>
+        <label class="cc-check"><input type="checkbox" id="gtSAutoCmd"> Commander damage also lowers life</label>
+        <label class="cc-check"><input type="checkbox" id="gtSTabletop"> Turn cards to face their seats</label>
+        <label class="cc-check" id="gtWakeRow"><input type="checkbox" id="gtWake"> Keep the screen awake</label>
+        <div class="btn-row" style="margin-top:14px;">
+          <button type="button" class="secondary" id="gtFullscreen">Full screen</button>
+          <button type="button" class="secondary" id="gtResetLife">New game, same players</button>
+        </div>
+        <div class="btn-row" style="margin-top:10px;">
+          <button type="button" id="gtExit">Close table</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -4682,334 +4820,703 @@
   })();
 
   /* ---------------------------------------------------------------------
-   * Game Tools (dice roller, mana pool, life & counters)
+   * Commander game table (life, commander damage, counters, turns, dice)
    * ------------------------------------------------------------------- */
-  (function wireGameTools() {
-    const GAME_STATE_KEY = "mtgAnalyzer.gameState";
-    const MANA_COLORS = ["W", "U", "B", "R", "G", "C"];
-    const BUILTIN_COUNTERS = [
-      { key: "poison", label: "Poison", max: 10 },
-      { key: "experience", label: "Experience", max: null },
-      { key: "energy", label: "Energy", max: null }
-    ];
-
-    let idSeq = Date.now();
-    function newId() { return "g" + (idSeq++); }
-
-    function defaultState() {
-      const mana = {};
-      MANA_COLORS.forEach(c => mana[c] = 0);
-      const counters = {};
-      BUILTIN_COUNTERS.forEach(c => counters[c.key] = 0);
-      return {
-        dice: { history: [] },
-        mana,
-        life: { current: 40, starting: 40 },
-        opponents: [],
-        counters,
-        customCounters: []
-      };
-    }
-
-    let state = defaultState();
+  (function wireGameTable() {
     try {
-      const saved = localStorage.getItem(GAME_STATE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        state = Object.assign(defaultState(), parsed);
-        state.mana = Object.assign(defaultState().mana, parsed.mana || {});
-        state.counters = Object.assign(defaultState().counters, parsed.counters || {});
-        state.life = Object.assign(defaultState().life, parsed.life || {});
-        state.opponents = Array.isArray(parsed.opponents) ? parsed.opponents : [];
-        state.customCounters = Array.isArray(parsed.customCounters) ? parsed.customCounters : [];
-        state.dice = Object.assign(defaultState().dice, parsed.dice || {});
+      const KEY = "mtgAnalyzer.table", CFG_KEY = "mtgAnalyzer.tableSetup", TOOLS_KEY = "mtgAnalyzer.tableTools";
+      const PALETTE = [
+        { id: "W", c: "#b59b3c", n: "White" }, { id: "U", c: "#2f6fb0", n: "Blue" }, { id: "B", c: "#4a3f55", n: "Black" },
+        { id: "R", c: "#b3382c", n: "Red" }, { id: "G", c: "#3a7d44", n: "Green" }, { id: "teal", c: "#1f8a8a", n: "Teal" },
+        { id: "violet", c: "#7a4fb3", n: "Violet" }, { id: "orange", c: "#c4661f", n: "Orange" }, { id: "rose", c: "#b23a6e", n: "Rose" },
+        { id: "slate", c: "#4a5a6a", n: "Slate" }
+      ];
+      const DEFAULT_COLORS = ["U", "R", "G", "B", "W", "violet"];
+      const hexOf = id => (PALETTE.find(p => p.id === id) || { c: /^#[0-9a-f]{6}$/i.test(id) ? id : "#3a7d44" }).c;
+      const BUILTIN = [["poison", "Poison", "10 is lethal"], ["energy", "Energy", ""], ["experience", "Experience", ""], ["rad", "Rad", ""]];
+      const ROT_PORTRAIT = { 2: [180, 0], 3: [180, 0, 0], 4: [180, 180, 0, 0], 5: [180, 180, 90, 270, 0], 6: [180, 180, 90, 270, 0, 0] };
+      const ROT_WIDE = { 2: [180, 0], 3: [180, 180, 0], 4: [180, 180, 0, 0], 5: [180, 180, 180, 0, 0], 6: [180, 180, 180, 0, 0, 0] };
+      const ORDER_PORTRAIT = { 2: [0, 1], 3: [0, 2, 1], 4: [0, 1, 3, 2], 5: [0, 1, 3, 4, 2], 6: [0, 1, 3, 5, 4, 2] };
+      const ORDER_WIDE = { 2: [0, 1], 3: [0, 1, 2], 4: [0, 1, 3, 2], 5: [0, 1, 2, 4, 3], 6: [0, 1, 2, 5, 4, 3] };
+      const wideMQ = window.matchMedia ? window.matchMedia("(min-aspect-ratio: 5/4)") : { matches: false, addEventListener() {} };
+
+      const read = (k, d) => { try { const v = JSON.parse(localStorage.getItem(k) || "null"); return v == null ? d : v; } catch (e) { return d; } };
+      const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+      const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+      const fmtTime = ms => { const s = Math.max(0, Math.floor(ms / 1000)); const m = Math.floor(s / 60); return m >= 60 ? `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}` : `${m}:${String(s % 60).padStart(2, "0")}`; };
+      const clockOf = t => (t ? new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "");
+
+      /* ================= setup ================= */
+      let cfg = Object.assign({ n: 4, life: 40, auto: true, tabletop: true, random: true, players: [] }, read(CFG_KEY, {}));
+      cfg.n = clamp(cfg.n | 0, 2, 6);
+      const planName = i => `Player ${i + 1}`;
+      function ensureCfgPlayers() {
+        for (let i = 0; i < 6; i++) if (!cfg.players[i]) cfg.players[i] = { name: "", color: DEFAULT_COLORS[i] };
       }
-    } catch (e) { /* storage unavailable or corrupt - start fresh */ }
+      ensureCfgPlayers();
+      const saveCfg = () => write(CFG_KEY, cfg);
 
-    function saveState() {
-      try { localStorage.setItem(GAME_STATE_KEY, JSON.stringify(state)); } catch (e) {}
-    }
-
-    /* ---- Dice roller ---- */
-    let selectedSides = 6;
-    const diceSidesRowEl = $("#diceSidesRow");
-    const diceCustomSidesFieldEl = $("#diceCustomSidesField");
-    const diceCustomSidesEl = $("#diceCustomSides");
-    const diceCountEl = $("#diceCount");
-    const diceResultEl = $("#diceResult");
-    const diceHistoryEl = $("#diceHistory");
-
-    function currentSides() {
-      if (selectedSides === "custom") {
-        const n = parseInt(diceCustomSidesEl.value, 10);
-        return (Number.isFinite(n) && n >= 2) ? n : 6;
+      function swatchHtml(sel, extra) {
+        return PALETTE.map(p => `<button type="button" class="gt-sw" data-color="${p.id}" aria-label="${p.n}" aria-pressed="${sel === p.id}" title="${p.n}" style="background:${p.c}" ${extra || ""}>${"WUBRG".includes(p.id) && p.id.length === 1 ? manaSym(p.id) : ""}</button>`).join("");
       }
-      return selectedSides;
-    }
-
-    function renderDiceHistory() {
-      if (!state.dice.history.length) {
-        diceHistoryEl.innerHTML = `<p class="empty-note-inline">No rolls yet.</p>`;
-        return;
+      function renderSetup() {
+        $("#gtCount").querySelectorAll("button").forEach(b => b.classList.toggle("active", Number(b.dataset.n) === cfg.n));
+        const lifeBtns = $("#gtLife").querySelectorAll("button");
+        let matched = false;
+        lifeBtns.forEach(b => { const on = Number(b.dataset.v) === cfg.life; b.classList.toggle("active", on); if (on) matched = true; });
+        $("#gtLifeCustom").value = matched ? "" : cfg.life;
+        $("#gtAutoCmd").checked = cfg.auto; $("#gtTabletop").checked = cfg.tabletop; $("#gtRandomFirst").checked = cfg.random;
+        $("#gtSetupPlayers").innerHTML = Array.from({ length: cfg.n }, (_, i) => `<div class="gt-sp" data-i="${i}">
+          <input type="text" maxlength="24" value="${esc(cfg.players[i].name)}" placeholder="${planName(i)}" aria-label="Name of player ${i + 1}">
+          <div class="gt-swatches" role="group" aria-label="Color of player ${i + 1}">${swatchHtml(cfg.players[i].color)}</div></div>`).join("");
       }
-      diceHistoryEl.innerHTML = state.dice.history.map(h =>
-        `<div class="dice-history-entry"><span>${h.count}d${h.sides}: ${h.rolls.join(", ")}</span><strong>${h.total}</strong></div>`
-      ).join("");
-    }
-
-    function renderDiceResult(entry) {
-      const faces = entry.rolls.map(r => {
-        const cls = r === entry.sides ? "die-max" : (r === 1 ? "die-min" : "");
-        return `<div class="die-face ${cls}">${r}</div>`;
-      }).join("");
-      diceResultEl.innerHTML = `
-        <div class="dice-total"><span class="dice-total-label">${entry.count}d${entry.sides} total:</span> ${entry.total}</div>
-        <div class="dice-faces">${faces}</div>
-      `;
-    }
-
-    function rollDice() {
-      const sides = currentSides();
-      let count = parseInt(diceCountEl.value, 10);
-      if (!Number.isFinite(count) || count < 1) count = 1;
-      count = Math.min(count, 20);
-      diceCountEl.value = count;
-      const rolls = [];
-      for (let i = 0; i < count; i++) rolls.push(1 + Math.floor(Math.random() * sides));
-      const total = rolls.reduce((a, b) => a + b, 0);
-      const entry = { sides, count, rolls, total };
-      state.dice.history.unshift(entry);
-      state.dice.history = state.dice.history.slice(0, 20);
-      renderDiceResult(entry);
-      renderDiceHistory();
-      saveState();
-    }
-
-    diceSidesRowEl.querySelectorAll(".die-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        diceSidesRowEl.querySelectorAll(".die-btn").forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        const v = btn.dataset.sides;
-        selectedSides = v === "custom" ? "custom" : parseInt(v, 10);
-        diceCustomSidesFieldEl.style.display = selectedSides === "custom" ? "" : "none";
+      $("#gtCount").addEventListener("click", ev => { const b = ev.target.closest("button[data-n]"); if (!b) return; cfg.n = Number(b.dataset.n); saveCfg(); renderSetup(); });
+      $("#gtLife").addEventListener("click", ev => { const b = ev.target.closest("button[data-v]"); if (!b) return; cfg.life = Number(b.dataset.v); saveCfg(); renderSetup(); });
+      $("#gtLifeCustom").addEventListener("input", ev => {
+        const v = parseInt(ev.target.value, 10);
+        if (v >= 1 && v <= 999) { cfg.life = v; saveCfg(); $("#gtLife").querySelectorAll("button").forEach(b => b.classList.toggle("active", Number(b.dataset.v) === v)); }
       });
-    });
-    $("#rollDiceBtn").addEventListener("click", rollDice);
-    $("#clearDiceHistoryBtn").addEventListener("click", () => {
-      state.dice.history = [];
-      diceResultEl.innerHTML = "";
+      [["#gtAutoCmd", "auto"], ["#gtTabletop", "tabletop"], ["#gtRandomFirst", "random"]].forEach(([s, k]) => $(s).addEventListener("change", ev => { cfg[k] = ev.target.checked; saveCfg(); }));
+      $("#gtSetupPlayers").addEventListener("input", ev => { const row = ev.target.closest(".gt-sp"); if (row && ev.target.matches("input")) { cfg.players[Number(row.dataset.i)].name = ev.target.value; saveCfg(); } });
+      $("#gtSetupPlayers").addEventListener("click", ev => {
+        const b = ev.target.closest(".gt-sw"), row = ev.target.closest(".gt-sp");
+        if (!b || !row) return;
+        cfg.players[Number(row.dataset.i)].color = b.dataset.color; saveCfg();
+        row.querySelectorAll(".gt-sw").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+      });
+
+      /* ================= game state ================= */
+      let state = null;
+      const undoStack = [];
+      const ui = { pm: null, bubbles: {}, spin: -1 };
+      const tools = Object.assign({ dice: [], mana: { W: 0, U: 0, B: 0, R: 0, G: 0, C: 0 } }, read(TOOLS_KEY, {}));
+      const saveTools = () => write(TOOLS_KEY, tools);
+
+      function loadState() {
+        const s = read(KEY, null);
+        if (!s || !Array.isArray(s.players) || s.players.length < 2 || s.players.length > 6) return null;
+        s.log = Array.isArray(s.log) ? s.log : [];
+        s.clock = s.clock || { acc: 0, since: null };
+        if (s.clock.since) s.clock.since = Date.now();
+        s.turn = s.turn || { n: 1, active: 0, start: Date.now() };
+        return s;
+      }
+      state = loadState();
+      const saveState = () => { if (state) write(KEY, state); };
+
+      function newGame() {
+        const n = cfg.n;
+        const players = Array.from({ length: n }, (_, i) => ({
+          id: i, name: (cfg.players[i].name || "").trim() || planName(i), color: cfg.players[i].color, life: cfg.life,
+          cmd: [{ name: "", art: "" }, { name: "", art: "" }], partner: false, dmg: {}, tax: [0, 0],
+          cnt: { poison: 0, energy: 0, experience: 0, rad: 0 }, custom: [], citys: false, rot: null, conceded: false, dismissed: null
+        }));
+        const first = cfg.random ? Math.floor(Math.random() * n) : 0;
+        state = {
+          v: 1, start: cfg.life, auto: cfg.auto, tabletop: cfg.tabletop, players, monarch: null, initiative: null, day: "",
+          turn: { n: 1, active: first, start: Date.now() }, winner: null, log: [], clock: { acc: 0, since: Date.now() }
+        };
+        undoStack.length = 0;
+        addLog(`Game started: ${n} players, ${cfg.life} life.${cfg.random ? ` ${players[first].name} goes first.` : ""}`);
+        saveState();
+      }
+      function resetSameGame() {
+        if (!state) return;
+        snapshot();
+        state.players.forEach(p => { p.life = state.start; p.dmg = {}; p.tax = [0, 0]; p.cnt = { poison: 0, energy: 0, experience: 0, rad: 0 }; p.custom.forEach(c => c.v = 0); p.citys = false; p.conceded = false; p.dismissed = null; });
+        state.monarch = null; state.initiative = null; state.day = ""; state.winner = null;
+        state.turn = { n: 1, active: 0, start: Date.now() };
+        state.clock = { acc: 0, since: Date.now() };
+        addLog(`New game with the same players, ${state.start} life.`);
+        saveState(); renderTable(); renderMenuPanes();
+      }
+
+      function snapshot() {
+        if (!state) return;
+        const { players, monarch, initiative, day, turn, winner } = state;
+        undoStack.push(JSON.stringify({ players, monarch, initiative, day, turn, winner }));
+        if (undoStack.length > 60) undoStack.shift();
+      }
+      function undo() {
+        if (!undoStack.length) { toast("Nothing to undo"); return; }
+        flushBubbles(true);
+        Object.assign(state, JSON.parse(undoStack.pop()));
+        addLog("Undid the last change.");
+        saveState(); renderTable(); renderMenuPanes();
+      }
+      function addLog(msg) {
+        state.log.push({ t: Date.now(), msg });
+        if (state.log.length > 400) state.log.shift();
+        if (!$("#gtMenu").hidden) renderLog();
+      }
+
+      /* ================= helpers ================= */
+      const P = i => state.players[i];
+      const rotOf = i => {
+        const p = P(i);
+        if (p.rot != null) return p.rot;
+        if (!state.tabletop) return 0;
+        return (wideMQ.matches ? ROT_WIDE : ROT_PORTRAIT)[state.players.length][i];
+      };
+      const orderNow = () => (wideMQ.matches ? ORDER_WIDE : ORDER_PORTRAIT)[state.players.length];
+      function lethal(p) {
+        if (p.conceded) return "Conceded";
+        if (p.life <= 0) return "Out of life";
+        if (p.cnt.poison >= 10) return "10 poison counters";
+        for (const k of Object.keys(p.dmg)) {
+          const arr = p.dmg[k];
+          if (arr.some(v => v >= 21)) return `21 commander damage from ${state.players[Number(k)].name}`;
+        }
+        return null;
+      }
+      const defeatedReason = p => { const r = lethal(p); return r && p.dismissed !== r ? r : null; };
+      const isOut = p => !!defeatedReason(p);
+      const maxCmdDmg = p => Math.max(0, ...Object.values(p.dmg).flat());
+
+      let toastTimer = 0;
+      function toast(msg) {
+        const t = $("#gtToast");
+        t.textContent = msg; t.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+      }
+
+      /* ================= table rendering ================= */
+      const grid = $("#gtGrid");
+      function bgOf(p) {
+        const arts = (p.partner ? p.cmd : [p.cmd[0]]).map(c => c.art).filter(Boolean);
+        if (!arts.length) return "";
+        if (arts.length === 1) return `background-image:url('${arts[0]}');background-size:cover;background-position:center 20%;`;
+        return `background-image:url('${arts[0]}'),url('${arts[1]}');background-size:50% 100%,50% 100%;background-position:left center,right center;background-repeat:no-repeat;`;
+      }
+      function seatHtml(i) {
+        const p = P(i);
+        return `<div class="gt-card${p.cmd[0].art ? " art" : ""}" data-i="${i}" style="--pc:${hexOf(p.color)};${bgOf(p)}">
+          <div class="gt-name"></div><div class="gt-life" aria-live="off"></div><div class="gt-bubble" hidden role="status"></div>
+          <button type="button" class="gt-zone minus" data-d="-1" aria-label="Lower ${esc(p.name)}'s life"><span aria-hidden="true">&minus;</span></button>
+          <button type="button" class="gt-zone plus" data-d="1" aria-label="Raise ${esc(p.name)}'s life"><span aria-hidden="true">+</span></button>
+          <div class="gt-badges"></div>
+          <button type="button" class="gt-more" data-act="menu" aria-label="Open ${esc(p.name)}'s menu">&hellip;</button>
+          <div class="gt-out" hidden></div>
+          ${ui.pm && ui.pm.i === i ? panelHtml(i) : ""}
+        </div>`;
+      }
+      function renderTable() {
+        if (!state) return;
+        const n = state.players.length;
+        grid.className = `gt-grid gt-n${n}`;
+        grid.innerHTML = state.players.map((p, i) => `<div class="gt-seat r${rotOf(i)}" data-i="${i}">${seatHtml(i)}</div>`).join("");
+        state.players.forEach((_, i) => refreshCard(i));
+        refreshHub();
+      }
+      function renderSeat(i) {
+        const seat = grid.querySelector(`.gt-seat[data-i="${i}"]`);
+        if (!seat) return;
+        seat.className = `gt-seat r${rotOf(i)}`;
+        seat.innerHTML = seatHtml(i);
+        refreshCard(i);
+      }
+      function badgesOf(i) {
+        const p = P(i), b = [];
+        const mc = maxCmdDmg(p);
+        if (state.monarch === i) b.push(`<span class="gt-b pill">Monarch</span>`);
+        if (state.initiative === i) b.push(`<span class="gt-b pill">Initiative</span>`);
+        if (p.citys) b.push(`<span class="gt-b pill">City's blessing</span>`);
+        if (p.cnt.poison) b.push(`<span class="gt-b${p.cnt.poison >= 10 ? " warn" : ""}">Poison ${p.cnt.poison}</span>`);
+        if (mc) b.push(`<span class="gt-b${mc >= 21 ? " warn" : ""}">Cmdr dmg ${mc}</span>`);
+        if (p.cnt.energy) b.push(`<span class="gt-b">Energy ${p.cnt.energy}</span>`);
+        if (p.cnt.experience) b.push(`<span class="gt-b">Exp ${p.cnt.experience}</span>`);
+        if (p.cnt.rad) b.push(`<span class="gt-b">Rad ${p.cnt.rad}</span>`);
+        p.custom.forEach(c => { if (c.v) b.push(`<span class="gt-b">${esc(c.name)} ${c.v}</span>`); });
+        const tax = p.tax[0] + (p.partner ? p.tax[1] : 0);
+        if (tax) b.push(`<span class="gt-b">Tax +${tax * 2}</span>`);
+        return b.join("");
+      }
+      function refreshCard(i) {
+        const card = grid.querySelector(`.gt-card[data-i="${i}"]`);
+        if (!card) return;
+        const p = P(i);
+        card.querySelector(".gt-name").textContent = p.name;
+        const life = card.querySelector(".gt-life");
+        life.textContent = p.life;
+        life.className = "gt-life" + (String(p.life).length >= 4 ? " l4" : String(p.life).length === 3 ? " l3" : "");
+        card.querySelector(".gt-badges").innerHTML = badgesOf(i);
+        card.classList.toggle("active", state.turn.active === i);
+        const bub = ui.bubbles[i], bEl = card.querySelector(".gt-bubble");
+        if (bub && bub.sum) { bEl.hidden = false; bEl.textContent = (bub.sum > 0 ? "+" : "\u2212") + Math.abs(bub.sum); } else bEl.hidden = true;
+        const out = card.querySelector(".gt-out"), r = defeatedReason(p);
+        if (r) {
+          out.hidden = false;
+          out.innerHTML = `<strong>Defeated</strong><span>${esc(r)}</span><div class="btn-row" style="justify-content:center">${p.conceded ? `<button type="button" data-act="revive">Revive</button>` : `<button type="button" data-act="dismiss">Keep playing</button>`}</div>`;
+        } else out.hidden = true;
+      }
+      function refreshHub() {
+        if (!state) return;
+        $("#gtHubTop").textContent = `Round ${state.turn.n}`;
+        $("#gtHubSub").textContent = state.day ? (state.day === "day" ? "Day" : "Night") : P(state.turn.active).name.slice(0, 10);
+      }
+
+      /* ================= life ================= */
+      function checkWin() {
+        const alive = state.players.filter(p => !isOut(p));
+        if (state.players.length > 1 && alive.length === 1) {
+          if (state.winner !== alive[0].id) { state.winner = alive[0].id; addLog(`${alive[0].name} wins!`); toast(`${alive[0].name} wins!`); }
+        } else state.winner = null;
+      }
+      function noteDefeats(before) {
+        state.players.forEach((p, i) => {
+          const r = defeatedReason(p);
+          if (r && !before[i]) { addLog(`${p.name} is defeated: ${r}.`); toast(`${p.name} is defeated`); }
+        });
+        checkWin();
+      }
+      const beforeDefeats = () => state.players.map(p => !!defeatedReason(p));
+      function flushBubbles(silent) {
+        Object.keys(ui.bubbles).forEach(k => {
+          const b = ui.bubbles[k];
+          clearTimeout(b.timer);
+          if (b.sum && !silent) addLog(`${P(Number(k)).name}: ${b.sum > 0 ? "+" : "\u2212"}${Math.abs(b.sum)} (${P(Number(k)).life} life)`);
+          delete ui.bubbles[k];
+        });
+        if (state) state.players.forEach((_, i) => refreshCard(i));
+      }
+      function bump(i, d) {
+        const p = P(i);
+        const had = ui.bubbles[i];
+        if (!had) snapshot();
+        const before = beforeDefeats();
+        p.life += d;
+        const b = ui.bubbles[i] || (ui.bubbles[i] = { sum: 0, timer: 0 });
+        b.sum += d;
+        clearTimeout(b.timer);
+        b.timer = setTimeout(() => {
+          if (b.sum) addLog(`${p.name}: ${b.sum > 0 ? "+" : "\u2212"}${Math.abs(b.sum)} (${p.life} life)`);
+          delete ui.bubbles[i]; refreshCard(i); saveState();
+        }, 1500);
+        noteDefeats(before);
+        saveState(); refreshCard(i); refreshHub();
+        if (ui.pm && ui.pm.i === i) refreshPanelValues();
+      }
+
+      /* press handling: tap = 1, hold = 10 */
+      let press = null;
+      grid.addEventListener("pointerdown", ev => {
+        const z = ev.target.closest(".gt-zone");
+        if (!z) return;
+        const i = Number(z.closest(".gt-card").dataset.i), d = Number(z.dataset.d);
+        press = { i, d, fired: false, timer: setTimeout(() => { press.fired = true; bump(i, d * 10); }, 450) };
+      });
+      const endPress = ev => {
+        if (!press) return;
+        clearTimeout(press.timer);
+        if (!press.fired && ev.type === "pointerup") bump(press.i, press.d);
+        press = null;
+      };
+      ["pointerup", "pointercancel"].forEach(t => document.addEventListener(t, endPress));
+      grid.addEventListener("contextmenu", ev => { if (ev.target.closest(".gt-zone")) ev.preventDefault(); });
+      grid.addEventListener("keydown", ev => {
+        const z = ev.target.closest && ev.target.closest(".gt-zone");
+        if (z && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); bump(Number(z.closest(".gt-card").dataset.i), Number(z.dataset.d)); }
+      });
+
+      /* ================= player menu ================= */
+      function stepHtml(act, attrs, val, lethalAt) {
+        return `<span class="gt-step"><button type="button" class="secondary" data-act="${act}" ${attrs} data-d="-1" aria-label="Decrease">&minus;</button><span class="v${lethalAt && val >= lethalAt ? " bad" : ""}">${val}</span><button type="button" class="secondary" data-act="${act}" ${attrs} data-d="1" aria-label="Increase">+</button></span>`;
+      }
+      function panelBody(i) {
+        const p = P(i), tab = ui.pm.tab;
+        if (tab === "counters") {
+          return `<div class="gt-st"><span class="lab">Poison<small>10 is lethal</small></span>${stepHtml("cnt", 'data-k="poison"', p.cnt.poison, 10)}</div>
+            <div class="gt-st"><span class="lab">Energy</span>${stepHtml("cnt", 'data-k="energy"', p.cnt.energy)}</div>
+            <div class="gt-st"><span class="lab">Experience</span>${stepHtml("cnt", 'data-k="experience"', p.cnt.experience)}</div>
+            <div class="gt-st"><span class="lab">Rad</span>${stepHtml("cnt", 'data-k="rad"', p.cnt.rad)}</div>
+            ${p.custom.map((c, j) => `<div class="gt-st"><span class="lab">${esc(c.name)}</span><span style="display:inline-flex;gap:6px;align-items:center">${stepHtml("cust", `data-j="${j}"`, c.v)}<button type="button" class="secondary" data-act="custdel" data-j="${j}" aria-label="Remove ${esc(c.name)}" style="min-height:0;padding:3px 8px">&times;</button></span></div>`).join("")}
+            <div class="gt-inline"><input type="text" id="gtCustName" maxlength="20" placeholder="Add a counter (e.g. Shield)" aria-label="New counter name"><button type="button" data-act="custadd">Add</button></div>
+            <h5>Status</h5>
+            <label class="gt-toggle"><input type="checkbox" data-act="flag" data-k="monarch" ${state.monarch === i ? "checked" : ""}> Monarch</label>
+            <label class="gt-toggle"><input type="checkbox" data-act="flag" data-k="initiative" ${state.initiative === i ? "checked" : ""}> Initiative</label>
+            <label class="gt-toggle"><input type="checkbox" data-act="flag" data-k="citys" ${p.citys ? "checked" : ""}> City's blessing</label>`;
+        }
+        if (tab === "cmd") {
+          const others = state.players.filter(o => o.id !== i);
+          let html = `<p class="gt-status">${state.auto ? "Commander damage also lowers life." : "Commander damage is tracked separately from life."} 21 from one commander is lethal.</p>`;
+          html += others.map(o => {
+            const arr = p.dmg[o.id] || [0, 0];
+            const rows = [0].concat(o.partner ? [1] : []).map(k => `<div class="gt-st"><span class="lab">${esc(o.cmd[k].name || (k ? "Partner" : "Commander"))}<small>from ${esc(o.name)}</small></span>${stepHtml("dmg", `data-src="${o.id}" data-k="${k}"`, arr[k], 21)}</div>`).join("");
+            return rows;
+          }).join("");
+          html += `<h5>Commander tax</h5>` + [0].concat(p.partner ? [1] : []).map(k => `<div class="gt-st"><span class="lab">${esc(p.cmd[k].name || (k ? "Partner" : "Your commander"))}<small>cast ${p.tax[k]}\u00d7 &middot; next costs +${p.tax[k] * 2}</small></span>${stepHtml("tax", `data-k="${k}"`, p.tax[k])}</div>`).join("");
+          return html;
+        }
+        // player tab
+        return `<h5>Name</h5><div class="gt-inline"><input type="text" id="gtPName" maxlength="24" value="${esc(p.name)}" aria-label="Player name"></div>
+          <h5>Color</h5><div class="gt-swatches">${swatchHtml(p.color, 'data-act="color"')}</div>
+          <h5>Commander (sets the card art)</h5>
+          <div class="gt-inline"><input type="text" id="gtCmd0" list="gtCmdList" value="${esc(p.cmd[0].name)}" placeholder="e.g. Atraxa, Praetors' Voice" aria-label="Commander"><button type="button" data-act="setcmd" data-k="0">Set</button></div>
+          <label class="gt-toggle"><input type="checkbox" data-act="partner" ${p.partner ? "checked" : ""}> Has a partner or background</label>
+          ${p.partner ? `<div class="gt-inline"><input type="text" id="gtCmd1" list="gtCmdList" value="${esc(p.cmd[1].name)}" placeholder="Partner" aria-label="Partner commander"><button type="button" data-act="setcmd" data-k="1">Set</button></div>` : ""}
+          <div class="gt-status" id="gtCmdStatus"></div>
+          <h5>Seat</h5>
+          <div class="gt-inline"><button type="button" class="secondary" data-act="rot" data-d="-90">Turn left</button><button type="button" class="secondary" data-act="rot" data-d="90">Turn right</button><button type="button" class="secondary" data-act="rot" data-d="auto">Auto</button></div>
+          <h5>Player</h5>
+          <div class="gt-inline"><button type="button" class="secondary" data-act="concede">${p.conceded ? "Revive" : "Concede"}</button></div>`;
+      }
+      function panelHtml(i) {
+        const p = P(i), tab = ui.pm.tab;
+        return `<div class="gt-pm" role="dialog" aria-label="${esc(p.name)} menu">
+          <div class="gt-pm-head"><strong>${esc(p.name)}</strong><span class="gt-b" style="background:var(--accent-dim);color:var(--accent)">${p.life} life</span><button type="button" data-act="closepm">Done</button></div>
+          <div class="gt-pm-tabs">${[["counters", "Counters"], ["cmd", "Commander"], ["player", "Player"]].map(([k, l]) => `<button type="button" data-act="pmtab" data-tab="${k}" class="${tab === k ? "active" : ""}">${l}</button>`).join("")}</div>
+          <div class="gt-pm-body">${panelBody(i)}</div></div>`;
+      }
+      function renderPanel(i) {
+        const pm = grid.querySelector(`.gt-card[data-i="${i}"] .gt-pm`);
+        if (!pm) return renderSeat(i);
+        const body = pm.querySelector(".gt-pm-body"), top = body.scrollTop;
+        const tmp = document.createElement("div"); tmp.innerHTML = panelHtml(i);
+        pm.replaceWith(tmp.firstElementChild);
+        grid.querySelector(`.gt-card[data-i="${i}"] .gt-pm-body`).scrollTop = top;
+      }
+      function refreshPanelValues() {
+        const pm = grid.querySelector(`.gt-card[data-i="${ui.pm.i}"] .gt-pm-head .gt-b`);
+        if (pm) pm.textContent = `${P(ui.pm.i).life} life`;
+      }
+
+      // autocomplete for commander names
+      let acT = 0, acTok = 0;
+      const dl = document.createElement("datalist"); dl.id = "gtCmdList"; document.body.appendChild(dl);
+      grid.addEventListener("input", ev => {
+        const t = ev.target;
+        const card = t.closest && t.closest(".gt-card");
+        if (!card) return;
+        const i = Number(card.dataset.i);
+        if (t.id === "gtPName") { P(i).name = t.value.trim() || planName(i); card.querySelector(".gt-name").textContent = P(i).name; saveState(); refreshHub(); return; }
+        if (t.id === "gtCmd0" || t.id === "gtCmd1") {
+          clearTimeout(acT);
+          const q = t.value.trim();
+          if (q.length < 3) return;
+          acT = setTimeout(async () => {
+            const tok = ++acTok;
+            try {
+              const words = q.split(/\s+/).map(w => `name:"${w.replace(/["\\]/g, "")}"`).join(" ");
+              const r = await fetch("https://api.scryfall.com/cards/search?q=" + encodeURIComponent(`is:commander ${words}`) + "&unique=cards&order=edhrec");
+              if (!r.ok || tok !== acTok) return;
+              const d = await r.json();
+              dl.innerHTML = (d.data || []).slice(0, 10).map(c => `<option value="${esc(c.name)}"></option>`).join("");
+            } catch (e) {}
+          }, 300);
+        }
+      });
+      async function setCommander(i, k) {
+        const input = grid.querySelector(`.gt-card[data-i="${i}"] #gtCmd${k}`);
+        const status = grid.querySelector(`.gt-card[data-i="${i}"] #gtCmdStatus`);
+        const q = input ? input.value.trim() : "";
+        const p = P(i);
+        if (!q) { snapshot(); p.cmd[k] = { name: "", art: "" }; saveState(); renderSeat(i); return; }
+        if (status) status.textContent = "Looking up\u2026";
+        try {
+          const res = await fetch(SCRYFALL_NAMED + "?fuzzy=" + encodeURIComponent(q));
+          if (res.status === 404) { if (status) status.textContent = "No card found with that name."; return; }
+          if (!res.ok) throw new Error("status " + res.status);
+          const c = await res.json();
+          const face = c.card_faces && c.card_faces.length && !c.image_uris ? c.card_faces[0] : c;
+          const art = (face.image_uris || {}).art_crop || (c.image_uris || {}).art_crop || "";
+          p.cmd[k] = { name: (c.name || q).split(" // ")[0], art };
+          addLog(`${p.name}'s commander: ${p.cmd[k].name}.`);
+          saveState(); renderSeat(i);
+          const st = grid.querySelector(`.gt-card[data-i="${i}"] #gtCmdStatus`);
+          if (st) st.textContent = art ? `Set to ${p.cmd[k].name}.` : `Set to ${p.cmd[k].name} (no art found).`;
+        } catch (e) { if (status) status.textContent = "Couldn't reach Scryfall."; }
+      }
+
+      /* ================= grid clicks (menu, steppers, status) ================= */
+      grid.addEventListener("click", ev => {
+        const el = ev.target.closest("[data-act]");
+        if (!el) return;
+        const card = el.closest(".gt-card");
+        const i = Number(card.dataset.i), p = P(i), act = el.dataset.act, d = el.dataset.d;
+        const before = beforeDefeats();
+        const done = (log) => { if (log) addLog(log); noteDefeats(before); saveState(); refreshCard(i); state.players.forEach((_, j) => refreshCard(j)); if (ui.pm) renderPanel(ui.pm.i); refreshHub(); };
+        switch (act) {
+          case "menu": ui.pm = { i, tab: "counters" }; renderSeat(i); break;
+          case "closepm": { const was = ui.pm.i; ui.pm = null; renderSeat(was); break; }
+          case "pmtab": ui.pm.tab = el.dataset.tab; renderPanel(i); break;
+          case "dismiss": p.dismissed = lethal(p); saveState(); refreshCard(i); checkWin(); refreshHub(); break;
+          case "revive": snapshot(); p.conceded = false; p.dismissed = null; done(`${p.name} is back in the game.`); break;
+          case "concede": snapshot(); p.conceded = !p.conceded; p.dismissed = null; done(p.conceded ? `${p.name} conceded.` : `${p.name} is back in the game.`); break;
+          case "cnt": { snapshot(); const k = el.dataset.k; p.cnt[k] = Math.max(0, p.cnt[k] + Number(d)); done(); break; }
+          case "cust": { snapshot(); const c = p.custom[Number(el.dataset.j)]; c.v = Math.max(0, c.v + Number(d)); done(); break; }
+          case "custdel": snapshot(); p.custom.splice(Number(el.dataset.j), 1); done(); break;
+          case "custadd": {
+            const inp = card.querySelector("#gtCustName"), name = inp.value.trim();
+            if (!name) { inp.focus(); break; }
+            snapshot(); p.custom.push({ name, v: 0 }); done(); break;
+          }
+          case "dmg": {
+            snapshot();
+            const src = el.dataset.src, k = Number(el.dataset.k), delta = Number(d);
+            const arr = p.dmg[src] || (p.dmg[src] = [0, 0]);
+            const nv = Math.max(0, arr[k] + delta), real = nv - arr[k];
+            if (!real) { undoStack.pop(); break; }
+            arr[k] = nv;
+            if (state.auto) p.life -= real;
+            done(`${P(Number(src)).name}'s commander dealt ${real > 0 ? "" : "\u2212"}${Math.abs(real)} to ${p.name} (${nv} total).`);
+            break;
+          }
+          case "tax": { snapshot(); const k = Number(el.dataset.k); p.tax[k] = Math.max(0, p.tax[k] + Number(d)); done(); break; }
+          case "rot": {
+            snapshot();
+            if (d === "auto") p.rot = null; else p.rot = ((rotOf(i) + Number(d)) % 360 + 360) % 360;
+            saveState(); const open = ui.pm; renderSeat(i); if (open) {} break;
+          }
+          case "color": snapshot(); p.color = el.dataset.color; saveState(); renderSeat(i); break;
+          case "partner": p.partner = el.checked; saveState(); renderSeat(i); break;
+          case "setcmd": setCommander(i, Number(el.dataset.k)); break;
+          case "flag": {
+            snapshot();
+            const k = el.dataset.k;
+            if (k === "citys") { p.citys = el.checked; done(`${p.name} ${p.citys ? "has" : "lost"} the city's blessing.`); }
+            else { state[k] = el.checked ? i : (state[k] === i ? null : state[k]); done(el.checked ? `${p.name} became the ${k}.` : `${p.name} is no longer the ${k}.`); }
+            break;
+          }
+        }
+      });
+      grid.addEventListener("keydown", ev => {
+        if (ev.key === "Enter" && ev.target.id === "gtCustName") { ev.preventDefault(); const b = ev.target.closest(".gt-pm").querySelector('[data-act="custadd"]'); if (b) b.click(); }
+        if (ev.key === "Enter" && (ev.target.id === "gtCmd0" || ev.target.id === "gtCmd1")) { ev.preventDefault(); setCommander(Number(ev.target.closest(".gt-card").dataset.i), Number(ev.target.id.slice(-1))); }
+      });
+
+      /* ================= open / close the table ================= */
+      function openTable() {
+        if (!state) return;
+        $("#gtTable").hidden = false;
+        document.body.style.overflow = "hidden";
+        ui.pm = null;
+        renderTable();
+        $("#gtHub").focus({ preventScroll: true });
+      }
+      function closeTable() {
+        flushBubbles(false);
+        saveState();
+        closeMenu();
+        $("#gtTable").hidden = true;
+        document.body.style.overflow = "";
+        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        releaseWake();
+        renderResume();
+      }
+      function renderResume() {
+        $("#gtResume").hidden = !state;
+        if (state) $("#gtResumeInfo").textContent = `${state.players.length} players, round ${state.turn.n}, ${fmtTime(clockElapsed())} played. ${state.players.map(p => `${p.name} ${p.life}`).join(" \u00b7 ")}`;
+      }
+      $("#gtStartBtn").addEventListener("click", () => {
+        if (state && !confirm("Starting a new game replaces the one in progress. Continue?")) return;
+        newGame(); openTable(); renderResume();
+      });
+      $("#gtResumeBtn").addEventListener("click", openTable);
+      $("#gtDiscardBtn").addEventListener("click", () => {
+        if (!confirm("Discard the game in progress?")) return;
+        state = null; try { localStorage.removeItem(KEY); } catch (e) {} renderResume();
+      });
+      wideMQ.addEventListener && wideMQ.addEventListener("change", () => { if (state && !$("#gtTable").hidden) { ui.pm = null; renderTable(); } });
+
+      /* ================= hub menu ================= */
+      const menu = $("#gtMenu");
+      let menuTab = "dice";
+      function openMenu(tab) {
+        const hasGame = !!state && !$("#gtTable").hidden;
+        menu.querySelectorAll("#gtMenuTabs button").forEach(b => { b.hidden = !hasGame && ["turn", "log", "game"].includes(b.dataset.t); });
+        $("#highRollBtn").hidden = !hasGame;
+        menu.hidden = false;
+        showTab(hasGame || ["dice", "mana"].includes(tab) ? tab : "dice");
+        renderMenuPanes();
+      }
+      function closeMenu() { menu.hidden = true; }
+      function showTab(t) {
+        menuTab = t;
+        menu.querySelectorAll("#gtMenuTabs button").forEach(b => b.classList.toggle("active", b.dataset.t === t));
+        menu.querySelectorAll(".gt-tabpane").forEach(p => p.classList.toggle("active", p.id === "gtTab-" + t));
+        renderMenuPanes();
+      }
+      $("#gtHub").addEventListener("click", () => openMenu("turn"));
+      $("#gtToolsBtn").addEventListener("click", () => openMenu("dice"));
+      $("#gtMenuClose").addEventListener("click", closeMenu);
+      menu.addEventListener("click", ev => { if (ev.target === menu) closeMenu(); });
+      $("#gtMenuTabs").addEventListener("click", ev => { const b = ev.target.closest("[data-t]"); if (b) showTab(b.dataset.t); });
+      document.addEventListener("keydown", ev => {
+        if (ev.key !== "Escape") return;
+        if (!menu.hidden) closeMenu();
+        else if (ui.pm && !$("#gtTable").hidden) { const was = ui.pm.i; ui.pm = null; renderSeat(was); }
+        else if (!$("#gtTable").hidden) closeTable();
+      });
+
+      function clockElapsed() { return state ? state.clock.acc + (state.clock.since ? Date.now() - state.clock.since : 0) : 0; }
+      function renderMenuPanes() {
+        if (menu.hidden) return;
+        if (menuTab === "turn" && state) renderTurn();
+        if (menuTab === "mana") renderMana();
+        if (menuTab === "log" && state) renderLog();
+        if (menuTab === "game" && state) renderGameTab();
+        if (menuTab === "dice") renderDiceHistory();
+      }
+      setInterval(() => {
+        if (!state || menu.hidden) return;
+        if (menuTab === "game") { $("#gtClock").textContent = fmtTime(clockElapsed()); }
+        if (menuTab === "turn") { const el = $("#gtTurnTime"); if (el) el.textContent = fmtTime(Date.now() - state.turn.start); }
+      }, 1000);
+
+      /* ----- turn tab ----- */
+      function renderTurn() {
+        const a = P(state.turn.active);
+        $("#gtTurnNow").innerHTML = `<strong>${esc(a.name)}</strong>'s turn<small>Round ${state.turn.n} &middot; this turn <span id="gtTurnTime">${fmtTime(Date.now() - state.turn.start)}</span></small>`;
+        $("#gtTurnList").innerHTML = orderNow().map(i => { const p = P(i); return `<button type="button" data-i="${i}" class="${i === state.turn.active ? "active" : ""}"><i style="background:${hexOf(p.color)}"></i><span style="flex:1">${esc(p.name)}</span><span>${isOut(p) ? "Defeated" : p.life + " life"}</span></button>`; }).join("");
+      }
+      function setActive(i, logIt) {
+        snapshot();
+        state.turn.active = i; state.turn.start = Date.now();
+        if (logIt) addLog(`${P(i).name}'s turn (round ${state.turn.n}).`);
+        saveState(); renderTable(); renderMenuPanes();
+      }
+      function advance(dir) {
+        const order = orderNow();
+        let pos = order.indexOf(state.turn.active);
+        let rounds = state.turn.n;
+        for (let s = 0; s < order.length; s++) {
+          const next = pos + dir;
+          if (dir > 0 && next >= order.length) rounds++;
+          if (dir < 0 && next < 0) rounds = Math.max(1, rounds - 1);
+          pos = (next + order.length) % order.length;
+          if (!isOut(P(order[pos]))) break;
+        }
+        snapshot();
+        state.turn = { n: rounds, active: order[pos], start: Date.now() };
+        addLog(`${P(order[pos]).name}'s turn (round ${rounds}).`);
+        saveState(); renderTable(); renderMenuPanes();
+      }
+      $("#gtNextTurn").addEventListener("click", () => advance(1));
+      $("#gtPrevTurn").addEventListener("click", () => advance(-1));
+      $("#gtTurnList").addEventListener("click", ev => { const b = ev.target.closest("button[data-i]"); if (b) setActive(Number(b.dataset.i), true); });
+      $("#gtRandomPlayer").addEventListener("click", () => {
+        const alive = state.players.filter(p => !isOut(p)).map(p => p.id);
+        const pick = alive[Math.floor(Math.random() * alive.length)];
+        closeMenu();
+        let step = 0;
+        const total = 14 + Math.floor(Math.random() * alive.length);
+        const tick = () => {
+          grid.querySelectorAll(".gt-card").forEach(c => c.classList.remove("spin"));
+          const cur = step >= total ? pick : alive[step % alive.length];
+          const el = grid.querySelector(`.gt-card[data-i="${cur}"]`);
+          if (el) el.classList.add("spin");
+          if (step >= total) {
+            setTimeout(() => { grid.querySelectorAll(".gt-card").forEach(c => c.classList.remove("spin")); setActive(pick, true); toast(`${P(pick).name} goes first`); }, 1100);
+            return;
+          }
+          step++;
+          setTimeout(tick, 70 + step * 14);
+        };
+        tick();
+      });
+
+      /* ----- mana tab ----- */
+      function renderMana() {
+        $("#manaPoolRow").innerHTML = ["W", "U", "B", "R", "G", "C"].map(c => `<div class="mana-counter">${manaSym(c)}<div class="mana-value">${tools.mana[c]}</div><div class="mana-btn-row">
+          <button type="button" class="secondary" data-mana="${c}" data-d="-1" aria-label="Remove ${COLOR_NAMES[c]} mana">&minus;</button><button type="button" class="secondary" data-mana="${c}" data-d="1" aria-label="Add ${COLOR_NAMES[c]} mana">+</button></div></div>`).join("");
+      }
+      $("#manaPoolRow").addEventListener("click", ev => {
+        const b = ev.target.closest("[data-mana]"); if (!b) return;
+        tools.mana[b.dataset.mana] = Math.max(0, tools.mana[b.dataset.mana] + Number(b.dataset.d)); saveTools(); renderMana();
+      });
+      $("#clearManaPoolBtn").addEventListener("click", () => { Object.keys(tools.mana).forEach(k => tools.mana[k] = 0); saveTools(); renderMana(); });
+
+      /* ----- log tab ----- */
+      function renderLog() {
+        if (!state) return;
+        $("#gtLog").innerHTML = state.log.slice().reverse().map(e => `<div><time>${esc(clockOf(e.t))}</time><span>${esc(e.msg)}</span></div>`).join("") || `<div class="gt-status">Nothing yet.</div>`;
+      }
+      $("#gtUndo").addEventListener("click", undo);
+
+      /* ----- game tab ----- */
+      function renderGameTab() {
+        $("#gtDay").querySelectorAll("button").forEach(b => b.classList.toggle("active", b.dataset.v === (state.day || "")));
+        $("#gtSAutoCmd").checked = state.auto; $("#gtSTabletop").checked = state.tabletop;
+        $("#gtClock").textContent = fmtTime(clockElapsed());
+        $("#gtClockBtn").textContent = state.clock.since ? "Pause" : "Resume";
+        $("#gtFullscreen").hidden = !(document.fullscreenEnabled);
+        $("#gtWakeRow").hidden = !("wakeLock" in navigator);
+      }
+      $("#gtDay").addEventListener("click", ev => { const b = ev.target.closest("[data-v]"); if (!b) return; snapshot(); state.day = b.dataset.v; addLog(state.day ? `It becomes ${state.day}.` : "Day/night turned off."); saveState(); refreshHub(); renderGameTab(); });
+      $("#gtSAutoCmd").addEventListener("change", ev => { state.auto = ev.target.checked; saveState(); });
+      $("#gtSTabletop").addEventListener("change", ev => { state.tabletop = ev.target.checked; if (ev.target.checked) state.players.forEach(p => p.rot = null); ui.pm = null; saveState(); renderTable(); });
+      $("#gtClockBtn").addEventListener("click", () => {
+        if (state.clock.since) { state.clock.acc += Date.now() - state.clock.since; state.clock.since = null; } else state.clock.since = Date.now();
+        saveState(); renderGameTab();
+      });
+      $("#gtResetLife").addEventListener("click", () => { if (confirm("Reset life, counters and the turn order for everyone?")) { resetSameGame(); closeMenu(); } });
+      $("#gtExit").addEventListener("click", closeTable);
+      $("#gtFullscreen").addEventListener("click", () => {
+        const el = $("#gtTable");
+        if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+        else if (el.requestFullscreen) el.requestFullscreen().catch(() => toast("Full screen isn't available here."));
+      });
+      let wake = null;
+      async function takeWake() { try { wake = await navigator.wakeLock.request("screen"); } catch (e) { $("#gtWake").checked = false; } }
+      function releaseWake() { try { if (wake) wake.release(); } catch (e) {} wake = null; const w = $("#gtWake"); if (w) w.checked = false; }
+      $("#gtWake").addEventListener("change", ev => { if (ev.target.checked) takeWake(); else releaseWake(); });
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && $("#gtWake").checked && !wake) takeWake(); });
+
+      /* ----- dice tab ----- */
+      let sides = 20;
+      $("#diceSidesRow").addEventListener("click", ev => {
+        const b = ev.target.closest(".die-btn"); if (!b) return;
+        $("#diceSidesRow").querySelectorAll(".die-btn").forEach(x => x.classList.toggle("active", x === b));
+        sides = b.dataset.sides === "custom" ? "custom" : Number(b.dataset.sides);
+        $("#diceCustomSidesField").style.display = sides === "custom" ? "" : "none";
+      });
+      const rnd = n => { const a = new Uint32Array(1); const lim = Math.floor(4294967296 / n) * n; do { crypto.getRandomValues(a); } while (a[0] >= lim); return (a[0] % n) + 1; };
+      function pushDice(entry) { tools.dice.unshift(Object.assign({ t: Date.now() }, entry)); tools.dice = tools.dice.slice(0, 40); saveTools(); renderDiceHistory(); }
+      function renderDiceHistory() {
+        $("#diceHistory").innerHTML = tools.dice.map(h => `<div class="dice-history-entry"><span>${esc(h.label)}</span><strong>${esc(h.result)}</strong></div>`).join("");
+      }
+      $("#rollDiceBtn").addEventListener("click", () => {
+        const s = sides === "custom" ? clamp(parseInt($("#diceCustomSides").value, 10) || 2, 2, 1000) : sides;
+        const n = clamp(parseInt($("#diceCount").value, 10) || 1, 1, 20);
+        const rolls = Array.from({ length: n }, () => rnd(s));
+        const total = rolls.reduce((a, b) => a + b, 0);
+        $("#diceResult").innerHTML = `<div class="dice-total">${total}${n > 1 ? ` <span class="dice-total-label">total of ${n}d${s}</span>` : ` <span class="dice-total-label">d${s}</span>`}</div>
+          <div class="dice-faces">${rolls.map(r => `<span class="die-face${r === s ? " die-max" : r === 1 ? " die-min" : ""}">${r}</span>`).join("")}</div>`;
+        pushDice({ label: `${n}d${s}`, result: n > 1 ? `${rolls.join(" + ")} = ${total}` : String(total) });
+        if (state && !$("#gtTable").hidden) addLog(`Rolled ${n}d${s}: ${total}.`);
+      });
+      $("#flipCoinBtn").addEventListener("click", () => {
+        const heads = rnd(2) === 1;
+        $("#diceResult").innerHTML = `<div class="gt-coin" aria-hidden="true">${heads ? "H" : "T"}</div><div class="dice-total" style="margin-top:6px">${heads ? "Heads" : "Tails"}</div>`;
+        pushDice({ label: "Coin flip", result: heads ? "Heads" : "Tails" });
+        if (state && !$("#gtTable").hidden) addLog(`Coin flip: ${heads ? "heads" : "tails"}.`);
+      });
+      $("#highRollBtn").addEventListener("click", () => {
+        let pool = state.players.map(p => p.id);
+        const lines = [];
+        let winner = pool[0];
+        for (let round = 1; round <= 10; round++) {
+          const rolls = pool.map(id => ({ id, r: rnd(20) }));
+          lines.push(`<div class="dice-history-entry"><span>${round > 1 ? "Re-roll: " : ""}${rolls.map(x => `${esc(P(x.id).name)} ${x.r}`).join(", ")}</span></div>`);
+          const top = Math.max(...rolls.map(x => x.r));
+          pool = rolls.filter(x => x.r === top).map(x => x.id);
+          if (pool.length === 1) { winner = pool[0]; break; }
+          winner = pool[Math.floor(Math.random() * pool.length)];
+        }
+        $("#diceResult").innerHTML = `<div class="dice-total">${esc(P(winner).name)} goes first <span class="dice-total-label">highest d20</span></div>${lines.join("")}`;
+        pushDice({ label: "Roll for first player", result: P(winner).name });
+        setActive(winner, true);
+      });
+      $("#clearDiceHistoryBtn").addEventListener("click", () => { tools.dice = []; saveTools(); renderDiceHistory(); $("#diceResult").innerHTML = ""; });
+
+      renderSetup();
+      renderResume();
+      renderMana();
       renderDiceHistory();
-      saveState();
-    });
-
-    /* ---- Mana pool ---- */
-    const manaPoolRowEl = $("#manaPoolRow");
-    function renderMana() {
-      manaPoolRowEl.innerHTML = MANA_COLORS.map(c => `
-        <div class="mana-counter" data-color="${c}">
-          ${manaSym(c)}
-          <div class="mana-value">${state.mana[c]}</div>
-          <div class="mana-btn-row">
-            <button type="button" class="secondary" data-mana-delta="-1" data-color="${c}">&minus;</button>
-            <button type="button" class="secondary" data-mana-delta="1" data-color="${c}">+</button>
-          </div>
-        </div>
-      `).join("");
+    } catch (err) {
+      console.error("Game table failed to initialise", err);
     }
-    manaPoolRowEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-mana-delta]");
-      if (!btn) return;
-      const color = btn.dataset.color;
-      const delta = parseInt(btn.dataset.manaDelta, 10);
-      state.mana[color] = Math.max(0, (state.mana[color] || 0) + delta);
-      renderMana();
-      saveState();
-    });
-    $("#clearManaPoolBtn").addEventListener("click", () => {
-      MANA_COLORS.forEach(c => state.mana[c] = 0);
-      renderMana();
-      saveState();
-    });
-
-    /* ---- Life ---- */
-    const lifeValueEl = $("#lifeValue");
-    const startingLifeInputEl = $("#startingLifeInput");
-    function renderLife() {
-      lifeValueEl.textContent = state.life.current;
-      lifeValueEl.classList.toggle("life-dead", state.life.current <= 0);
-      startingLifeInputEl.value = state.life.starting;
-    }
-    const lifeTrackerEl = document.querySelector(".life-tracker");
-    lifeTrackerEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-life-delta]");
-      if (!btn) return;
-      const delta = parseInt(btn.dataset.lifeDelta, 10);
-      state.life.current += delta;
-      renderLife();
-      saveState();
-    });
-    $("#resetLifeBtn").addEventListener("click", () => {
-      state.life.current = state.life.starting;
-      renderLife();
-      saveState();
-    });
-    startingLifeInputEl.addEventListener("change", () => {
-      let n = parseInt(startingLifeInputEl.value, 10);
-      if (!Number.isFinite(n) || n < 1) n = 40;
-      state.life.starting = n;
-      saveState();
-    });
-
-    /* ---- Commander damage (opponents) ---- */
-    const commanderDamageListEl = $("#commanderDamageList");
-    function renderOpponents() {
-      if (!state.opponents.length) {
-        commanderDamageListEl.innerHTML = `<p class="empty-note-inline">No opponents added yet.</p>`;
-        return;
-      }
-      commanderDamageListEl.innerHTML = state.opponents.map(o => `
-        <div class="opponent-row" data-id="${o.id}">
-          <input type="text" class="opponent-name" data-id="${o.id}" value="${esc(o.name)}" placeholder="Opponent name">
-          <div class="counter-value ${o.dmg >= 21 ? "counter-lethal" : ""}">${o.dmg}</div>
-          <div class="counter-btn-row">
-            <button type="button" class="secondary" data-opp-delta="-1" data-id="${o.id}">&minus;</button>
-            <button type="button" class="secondary" data-opp-delta="1" data-id="${o.id}">+</button>
-            <button type="button" class="remove-row" data-opp-remove="${o.id}">&times;</button>
-          </div>
-        </div>
-      `).join("");
-    }
-    commanderDamageListEl.addEventListener("click", (e) => {
-      const deltaBtn = e.target.closest("[data-opp-delta]");
-      if (deltaBtn) {
-        const id = deltaBtn.dataset.id;
-        const delta = parseInt(deltaBtn.dataset.oppDelta, 10);
-        const o = state.opponents.find(x => x.id === id);
-        if (o) { o.dmg = Math.max(0, o.dmg + delta); renderOpponents(); saveState(); }
-        return;
-      }
-      const removeBtn = e.target.closest("[data-opp-remove]");
-      if (removeBtn) {
-        const id = removeBtn.dataset.oppRemove;
-        state.opponents = state.opponents.filter(x => x.id !== id);
-        renderOpponents();
-        saveState();
-      }
-    });
-    commanderDamageListEl.addEventListener("input", (e) => {
-      const input = e.target.closest(".opponent-name");
-      if (!input) return;
-      const id = input.dataset.id;
-      const o = state.opponents.find(x => x.id === id);
-      if (o) { o.name = input.value; saveState(); }
-    });
-    $("#addOpponentBtn").addEventListener("click", () => {
-      state.opponents.push({ id: newId(), name: `Opponent ${state.opponents.length + 1}`, dmg: 0 });
-      renderOpponents();
-      saveState();
-    });
-
-    /* ---- Built-in common counters ---- */
-    const builtinCountersRowEl = $("#builtinCountersRow");
-    function renderBuiltinCounters() {
-      builtinCountersRowEl.innerHTML = BUILTIN_COUNTERS.map(c => {
-        const val = state.counters[c.key] || 0;
-        const lethal = c.max != null && val >= c.max;
-        return `
-          <div class="counter-row">
-            <div class="counter-label">${esc(c.label)}${c.max != null ? ` <span class="hint">(lethal at ${c.max})</span>` : ""}</div>
-            <div class="counter-value ${lethal ? "counter-lethal" : ""}">${val}</div>
-            <div class="counter-btn-row">
-              <button type="button" class="secondary" data-builtin-delta="-1" data-key="${c.key}">&minus;</button>
-              <button type="button" class="secondary" data-builtin-delta="1" data-key="${c.key}">+</button>
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-    builtinCountersRowEl.addEventListener("click", (e) => {
-      const btn = e.target.closest("[data-builtin-delta]");
-      if (!btn) return;
-      const key = btn.dataset.key;
-      const delta = parseInt(btn.dataset.builtinDelta, 10);
-      state.counters[key] = Math.max(0, (state.counters[key] || 0) + delta);
-      renderBuiltinCounters();
-      saveState();
-    });
-
-    /* ---- Custom counters ---- */
-    const customCountersListEl = $("#customCountersList");
-    function renderCustomCounters() {
-      if (!state.customCounters.length) {
-        customCountersListEl.innerHTML = `<p class="empty-note-inline">No custom counters yet.</p>`;
-        return;
-      }
-      customCountersListEl.innerHTML = state.customCounters.map(c => `
-        <div class="counter-row" data-id="${c.id}">
-          <div class="counter-label">${esc(c.name)}</div>
-          <div class="counter-value">${c.value}</div>
-          <div class="counter-btn-row">
-            <button type="button" class="secondary" data-custom-delta="-1" data-id="${c.id}">&minus;</button>
-            <button type="button" class="secondary" data-custom-delta="1" data-id="${c.id}">+</button>
-            <button type="button" class="remove-row" data-custom-remove="${c.id}">&times;</button>
-          </div>
-        </div>
-      `).join("");
-    }
-    customCountersListEl.addEventListener("click", (e) => {
-      const deltaBtn = e.target.closest("[data-custom-delta]");
-      if (deltaBtn) {
-        const id = deltaBtn.dataset.id;
-        const delta = parseInt(deltaBtn.dataset.customDelta, 10);
-        const c = state.customCounters.find(x => x.id === id);
-        if (c) { c.value = Math.max(0, c.value + delta); renderCustomCounters(); saveState(); }
-        return;
-      }
-      const removeBtn = e.target.closest("[data-custom-remove]");
-      if (removeBtn) {
-        const id = removeBtn.dataset.customRemove;
-        state.customCounters = state.customCounters.filter(x => x.id !== id);
-        renderCustomCounters();
-        saveState();
-      }
-    });
-    function addCustomCounter() {
-      const input = $("#customCounterNameInput");
-      const name = input.value.trim();
-      if (!name) return;
-      state.customCounters.push({ id: newId(), name, value: 0 });
-      input.value = "";
-      renderCustomCounters();
-      saveState();
-    }
-    $("#addCustomCounterBtn").addEventListener("click", addCustomCounter);
-    $("#customCounterNameInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") { e.preventDefault(); addCustomCounter(); }
-    });
-
-    /* ---- Reset all ---- */
-    $("#resetGameBtn").addEventListener("click", () => {
-      state.life.current = state.life.starting;
-      MANA_COLORS.forEach(c => state.mana[c] = 0);
-      BUILTIN_COUNTERS.forEach(c => state.counters[c.key] = 0);
-      state.opponents.forEach(o => o.dmg = 0);
-      state.customCounters.forEach(c => c.value = 0);
-      renderLife();
-      renderMana();
-      renderBuiltinCounters();
-      renderOpponents();
-      renderCustomCounters();
-      saveState();
-    });
-
-    /* ---- Initial render ---- */
-    if (state.dice.history.length) renderDiceResult(state.dice.history[0]);
-    renderDiceHistory();
-    renderMana();
-    renderLife();
-    renderOpponents();
-    renderBuiltinCounters();
-    renderCustomCounters();
   })();
 
   /* ---------------------------------------------------------------------
