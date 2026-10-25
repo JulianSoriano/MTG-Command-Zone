@@ -3381,9 +3381,9 @@
           }
         } else {
           const label = t.replace("/", "");
-          ctx.font = `700 ${s * (label.length > 1 ? 0.5 : 0.62)}px ${BODY_FONT}`;
+          ctx.font = `700 ${s * (label.length > 1 ? 0.64 : 0.86)}px ${DISPLAY_FONT}`;
           ctx.textAlign = "center"; ctx.textBaseline = "middle";
-          ctx.fillText(label, x + s / 2, y + s / 2 + s * 0.04);
+          ctx.fillText(label, x + s / 2, y + s / 2 + s * 0.03);
         }
         ctx.restore();
       }
@@ -3504,10 +3504,10 @@
 
         // name bar
         rr(44, 46, W - 88, 66, 16); ctx.fillStyle = barFill; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
-        const toks = costTokens(f.Cost), symS = 40, symGap = 3;
+        const toks = costTokens(f.Cost), symS = 46, symGap = 3;
         const costW = toks.length ? toks.length * (symS + symGap) - symGap : 0;
         let sx = W - 62 - costW;
-        toks.forEach(t => { drawSymbol(t, sx, 59, symS); sx += symS + symGap; });
+        toks.forEach(t => { drawSymbol(t, sx, 56, symS); sx += symS + symGap; });
         ctx.fillStyle = "#1c140b"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
         fitFont(f.Name || " ", 700, DISPLAY_FONT, 42, 16, W - 124 - costW - (costW ? 14 : 0));
         ctx.fillText(f.Name, 64, 81);
@@ -3534,12 +3534,12 @@
         ctx.lineWidth = 4; ctx.strokeStyle = dark; ctx.strokeRect(ax, ay, aw, ah);
 
         // type bar + rarity gem
-        rr(44, 584, W - 88, 58, 16); ctx.fillStyle = barFill; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
+        rr(44, 584, W - 88, 58, 16); ctx.fillStyle = "#000000"; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
         const GEM = { common: ["#2a2a2a", "#888"], uncommon: ["#b9c6cf", "#4f5c66"], rare: ["#e2bd4f", "#7a5a12"], mythic: ["#ef6a2c", "#7a2a08"] };
         const gem = GEM[f.Rarity] || GEM.rare;
         ctx.beginPath(); ctx.moveTo(W - 78, 597); ctx.lineTo(W - 62, 613); ctx.lineTo(W - 78, 629); ctx.lineTo(W - 94, 613); ctx.closePath();
         ctx.fillStyle = gem[0]; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = gem[1]; ctx.stroke();
-        ctx.fillStyle = "#1c140b"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
+        ctx.fillStyle = "#ffffff"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
         fitFont(f.Type || " ", 700, DISPLAY_FONT, 34, 14, W - 170);
         ctx.fillText(f.Type, 64, 614);
 
