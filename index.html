@@ -867,6 +867,13 @@
   /* ---------------------------------------------------------------------
    * Card Creator
    * ------------------------------------------------------------------- */
+  .cc-sheet .proxy-print-pick, .cc-sheet .proxy-tip { display: none !important; }
+  .cc-sheetbtns { margin: 6px 0 0; }
+  @media print {
+    body.print-cc * { visibility: hidden; }
+    body.print-cc #ccSheetPreview, body.print-cc #ccSheetPreview * { visibility: visible; }
+    body.print-cc #ccSheetPreview { position: absolute; top: 0; left: 0; margin: 0; padding: 0; }
+  }
   .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .cc-inline input[type=text] { flex: 1 1 220px; }
@@ -1227,6 +1234,16 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div id="ccSheetWrap" hidden>
+        <h3>Print sheet preview</h3>
+        <p class="hint" id="ccSheetNote"></p>
+        <div class="cc-inline cc-sheetbtns">
+          <button type="button" id="ccSheetPrint">Print / Save as PDF&hellip;</button>
+          <button type="button" class="secondary" id="ccSheetOpen">Open the Print Proxy Sheets tab</button>
+        </div>
+        <div class="proxy-preview-wrap cc-sheet" id="ccSheetPreview"></div>
       </div>
 
       <div id="ccSavedWrap" hidden>
@@ -3437,7 +3454,7 @@
       }
       function layoutText(rules, flavor, fs, width) {
         const lh = fs * 1.2, symS = fs * 0.86, lines = [];
-        const fontFor = it => `${it ? "italic " : ""}400 ${fs}px ${BODY_FONT}`;
+        const fontFor = it => `${it ? "italic " : ""}600 ${fs}px ${BODY_FONT}`;
         ctx.font = fontFor(false);
         const spaceW = ctx.measureText(" ").width;
         let y = 0;
@@ -3492,7 +3509,7 @@
         let sx = W - 62 - costW;
         toks.forEach(t => { drawSymbol(t, sx, 59, symS); sx += symS + symGap; });
         ctx.fillStyle = "#1c140b"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-        fitFont(f.Name || " ", 700, DISPLAY_FONT, 38, 16, W - 124 - costW - (costW ? 14 : 0));
+        fitFont(f.Name || " ", 700, DISPLAY_FONT, 42, 16, W - 124 - costW - (costW ? 14 : 0));
         ctx.fillText(f.Name, 64, 81);
 
         // art
@@ -3523,7 +3540,7 @@
         ctx.beginPath(); ctx.moveTo(W - 78, 597); ctx.lineTo(W - 62, 613); ctx.lineTo(W - 78, 629); ctx.lineTo(W - 94, 613); ctx.closePath();
         ctx.fillStyle = gem[0]; ctx.fill(); ctx.lineWidth = 2; ctx.strokeStyle = gem[1]; ctx.stroke();
         ctx.fillStyle = "#1c140b"; ctx.textAlign = "left"; ctx.textBaseline = "middle";
-        fitFont(f.Type || " ", 600, DISPLAY_FONT, 30, 14, W - 170);
+        fitFont(f.Type || " ", 700, DISPLAY_FONT, 34, 14, W - 170);
         ctx.fillText(f.Type, 64, 614);
 
         // text box
@@ -3533,13 +3550,13 @@
         const hasPT = (f.Pow || f.Tou).trim() !== "", hasLoy = !hasPT && f.Loy.trim() !== "";
         const pad = 22, availH = bh - pad * 2 - (hasPT || hasLoy ? 28 : 0);
         let L = null;
-        for (let fs = 32; fs >= 13; fs--) { L = layoutText(f.Rules, f.Flavor, fs, bw - pad * 2); if (L.height <= availH) break; }
+        for (let fs = 36; fs >= 14; fs--) { L = layoutText(f.Rules, f.Flavor, fs, bw - pad * 2); if (L.height <= availH) break; }
         const top = by + pad + Math.max(0, (availH - L.height) / 2);
         ctx.fillStyle = "#1a130b"; ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
         L.lines.forEach(ln => ln.items.forEach(it => {
           const baseY = top + ln.y + L.fs * 0.92;
           if (it.sym) drawSymbol(it.sym, bx + pad + it.x + L.fs * 0.03, baseY - L.symS * 0.82, L.symS);
-          else { ctx.font = `${it.italic ? "italic " : ""}400 ${L.fs}px ${BODY_FONT}`; ctx.fillStyle = "#1a130b"; ctx.fillText(it.text, bx + pad + it.x, baseY); }
+          else { ctx.font = `${it.italic ? "italic " : ""}600 ${L.fs}px ${BODY_FONT}`; ctx.fillStyle = "#1a130b"; ctx.fillText(it.text, bx + pad + it.x, baseY); }
         }));
         if (L.divider != null) {
           const dy = top + L.divider;
@@ -3550,7 +3567,7 @@
         if (hasPT) {
           rr(W - 196, 930, 150, 62, 16); ctx.fillStyle = barFill; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = dark; ctx.stroke();
           ctx.fillStyle = "#1c140b"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-          fitFont(`${f.Pow}/${f.Tou}`, 700, DISPLAY_FONT, 38, 16, 130);
+          fitFont(`${f.Pow}/${f.Tou}`, 700, DISPLAY_FONT, 44, 16, 134);
           ctx.fillText(`${f.Pow}/${f.Tou}`, W - 121, 962);
         } else if (hasLoy) {
           const cx = W - 104, cy = 958;
@@ -3558,15 +3575,15 @@
           ctx.quadraticCurveTo(cx + 40, cy + 30, cx, cy + 40); ctx.quadraticCurveTo(cx - 40, cy + 30, cx - 46, cy + 4); ctx.closePath();
           ctx.fillStyle = "#211b16"; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = "#cfc6b6"; ctx.stroke();
           ctx.fillStyle = "#ffffff"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-          fitFont(f.Loy, 700, DISPLAY_FONT, 36, 14, 80); ctx.fillText(f.Loy, cx, cy - 1);
+          fitFont(f.Loy, 700, DISPLAY_FONT, 40, 14, 80); ctx.fillText(f.Loy, cx, cy - 1);
         }
 
         // footer on the black border
         ctx.textBaseline = "middle";
         ctx.fillStyle = "#f2ede2"; ctx.textAlign = "left";
-        ctx.font = `italic 400 21px ${BODY_FONT}`;
+        ctx.font = `italic 600 24px ${BODY_FONT}`;
         if (f.Artist.trim()) ctx.fillText("Illus. " + f.Artist.trim(), 46, 1012);
-        ctx.fillStyle = "#bdb6a8"; ctx.textAlign = "right"; ctx.font = `400 18px ${BODY_FONT}`;
+        ctx.fillStyle = "#bdb6a8"; ctx.textAlign = "right"; ctx.font = `600 21px ${BODY_FONT}`;
         if (f.Footer.trim()) ctx.fillText(f.Footer.trim(), W - 46, 1012);
         ctx.restore();
         canvas.setAttribute("aria-label", "Card preview: " + (f.Name || "untitled"));
@@ -3579,7 +3596,7 @@
 
       // Redraw once the display fonts arrive (they load from Google Fonts).
       if (document.fonts) {
-        [`700 38px ${DISPLAY_FONT}`, `400 30px ${BODY_FONT}`, `italic 400 30px ${BODY_FONT}`].forEach(sp => document.fonts.load(sp).then(redraw, () => {}));
+        [`700 38px ${DISPLAY_FONT}`, `400 30px ${BODY_FONT}`, `italic 600 30px ${BODY_FONT}`, `600 30px ${BODY_FONT}`].forEach(sp => document.fonts.load(sp).then(redraw, () => {}));
         document.fonts.ready.then(redraw, () => {});
       }
 
@@ -3687,7 +3704,8 @@
         if (!url) return;
         const n = Math.max(1, Math.min(99, parseInt(val("Copies"), 10) || 1));
         const total = printBridge.addCustom ? printBridge.addCustom(val("Name").trim() || "Custom card", url, n) : 0;
-        status(`Added ${n} cop${n === 1 ? "y" : "ies"} to the Print Proxy sheet (${total} custom card${total === 1 ? "" : "s"} there now). Open the Print Proxy Sheets tab to print.`);
+        status(`Added ${n} cop${n === 1 ? "y" : "ies"} to the Print Proxy sheet (${total} custom card${total === 1 ? "" : "s"} there now). The sheet preview is below.`);
+        const sw = $("#ccSheetWrap"); if (sw && !sw.hidden) sw.scrollIntoView({ behavior: "smooth", block: "start" });
       });
 
       /* ---------- saved designs ---------- */
@@ -4057,7 +4075,7 @@
       // Display fonts load from Google Fonts; offline, system serif fonts are used.
       const l = document.createElement("link");
       l.id = "fantasyFonts"; l.rel = "stylesheet";
-      l.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap";
+      l.href = "https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap";
       document.head.appendChild(l);
     } catch (err) {
       console.error("Theme setup failed", err);
@@ -4653,14 +4671,27 @@
       const tiles = printTiles;
       const pages = [];
       for (let i = 0; i < tiles.length; i += 9) pages.push(tiles.slice(i, i + 9).map((t, j) => ({ t, idx: i + j })));
-      if (!pages.length) { printPreviewWrapEl.innerHTML = ""; return; }
+      if (!pages.length) { printPreviewWrapEl.innerHTML = ""; mirrorSheet(); return; }
       printPreviewWrapEl.innerHTML = `<div class="proxy-tip"><strong>Want a different print?</strong> Use the <em>Change print…</em> dropdown at the bottom of any card to pick a specific printing of it. (The dropdowns don't appear on the printed page.)</div>` + pages.map((page, i) => `
         <div class="proxy-page-label">Page ${i + 1} of ${pages.length}</div>
         <div class="proxy-preview-scroll">
           <div class="proxy-page">${page.map(({ t, idx }) => proxyCardTileHtml(t, idx)).join("")}</div>
         </div>
       `).join("");
+      mirrorSheet();
     }
+
+    // The Card Creator tab shows the same sheet below its form, so a new card can be checked without switching tabs.
+    function mirrorSheet() {
+      const wrap = $("#ccSheetWrap");
+      if (!wrap) return;
+      const n = printTiles.length;
+      wrap.hidden = !n;
+      $("#ccSheetPreview").innerHTML = n ? printPreviewWrapEl.innerHTML : "";
+      const pg = Math.ceil(n / 9);
+      $("#ccSheetNote").textContent = n ? `${n} card${n === 1 ? "" : "s"} on the sheet, ${pg} page${pg === 1 ? "" : "s"} at 9 per page. This is the same sheet as the Print Proxy Sheets tab. Use Remove on a custom card to take it off.` : "";
+    }
+    printBridge.mirror = mirrorSheet;
 
     function rerenderTile(idx) {
       const el = printPreviewWrapEl.querySelector(`.proxy-card[data-idx="${idx}"]`);
@@ -4668,6 +4699,7 @@
       const tmp = document.createElement("div");
       tmp.innerHTML = proxyCardTileHtml(printTiles[idx], idx);
       el.replaceWith(tmp.firstElementChild);
+      mirrorSheet();
     }
 
     // Fill the existing dropdown in place (replacing the element could close it
@@ -4838,7 +4870,7 @@
       printStatusEl.textContent = `${customTiles.length} custom card${customTiles.length === 1 ? "" : "s"} added from the Card Creator. ${printTiles.length} card${printTiles.length === 1 ? "" : "s"} on the sheet.`;
       return customTiles.length;
     };
-    printPreviewWrapEl.addEventListener("click", ev => {
+    const removeCustomClick = ev => {
       const btn = ev.target.closest && ev.target.closest("[data-remove-custom]");
       if (!btn) return;
       const tile = printTiles[Number(btn.dataset.removeCustom)];
@@ -4848,8 +4880,17 @@
       renderProxyPreview();
       printBtnEl.disabled = !printTiles.length;
       printStatusEl.textContent = `Removed ${tile.name}. ${printTiles.length} card${printTiles.length === 1 ? "" : "s"} on the sheet.`;
-    });
+    };
+    printPreviewWrapEl.addEventListener("click", removeCustomClick);
+    $("#ccSheetPreview").addEventListener("click", removeCustomClick);
     $("#printBtn").addEventListener("click", () => window.print());
+    $("#ccSheetPrint").addEventListener("click", () => {
+      document.body.classList.add("print-cc");
+      const done = () => { document.body.classList.remove("print-cc"); window.removeEventListener("afterprint", done); };
+      window.addEventListener("afterprint", done);
+      window.print();
+    });
+    $("#ccSheetOpen").addEventListener("click", () => { $("#navPrint").click(); window.scrollTo(0, 0); });
     $("#useAnalyzerListBtn").addEventListener("click", () => {
       $("#printCommanderInput").value = $("#commanderInput").value;
       $("#printDecklistInput").value = $("#decklistInput").value;
