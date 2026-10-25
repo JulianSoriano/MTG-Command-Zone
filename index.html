@@ -1201,7 +1201,7 @@
               <label>Left / right <input type="range" id="ccPanX" min="-100" max="100" value="0"></label>
               <label>Up / down <input type="range" id="ccPanY" min="-100" max="100" value="0"></label>
             </div>
-            <p class="hint">Tip: you can also drag an image onto the preview.</p>
+            <p class="hint">Tip: drag the picture on the preview to move it in any direction, and scroll over it to zoom. Zoom in first if the picture doesn't move in one direction, since it has to fill the frame. You can also drop an image file onto the preview.</p>
           </div>
 
           <div class="field"><label for="ccRules">Rules text</label>
@@ -3590,7 +3590,7 @@
       }
 
       let raf = 0;
-      const redraw = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); };
+      const redraw = () => { canvas.style.touchAction = art && art.naturalWidth ? "none" : ""; cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); };
       const saveDraft = () => { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(getFields())); } catch (e) {} };
       FIELDS.forEach(k => { F(k).addEventListener("input", () => { redraw(); saveDraft(); }); F(k).addEventListener("change", () => { redraw(); saveDraft(); }); });
 
@@ -3623,6 +3623,45 @@
       F("Art").addEventListener("change", ev => readFile(ev.target.files && ev.target.files[0]));
       F("ArtClear").addEventListener("click", () => { F("Art").value = ""; setArt(null); });
       const prev = $("#ccPreview");
+      /* ---------- drag the art to reposition it, scroll to zoom ---------- */
+      const ART = { x: 58, y: 122, w: 744 - 116, h: 456 };
+      const toCanvas = ev => { const r = canvas.getBoundingClientRect(); return { x: (ev.clientX - r.left) * canvas.width / r.width, y: (ev.clientY - r.top) * canvas.height / r.height, k: canvas.width / r.width }; };
+      const inArt = p => p.x >= ART.x && p.x <= ART.x + ART.w && p.y >= ART.y && p.y <= ART.y + ART.h;
+      const overflow = () => {
+        const zoom = Number(val("Zoom")) / 100;
+        const scale = Math.max(ART.w / art.naturalWidth, ART.h / art.naturalHeight) * zoom;
+        return { ox: (art.naturalWidth * scale - ART.w) / 2, oy: (art.naturalHeight * scale - ART.h) / 2 };
+      };
+      let dragArt = null;
+      canvas.addEventListener("pointerdown", ev => {
+        if (!art || !art.naturalWidth) return;
+        const p = toCanvas(ev);
+        if (!inArt(p)) return;
+        dragArt = { x: p.x, y: p.y, px: Number(val("PanX")), py: Number(val("PanY")), id: ev.pointerId };
+        try { canvas.setPointerCapture(ev.pointerId); } catch (e) {}
+        canvas.style.cursor = "grabbing";
+        ev.preventDefault();
+      });
+      canvas.addEventListener("pointermove", ev => {
+        const p = toCanvas(ev);
+        if (!dragArt) { canvas.style.cursor = art && art.naturalWidth && inArt(p) ? "grab" : ""; return; }
+        const { ox, oy } = overflow();
+        const cl = v => Math.max(-100, Math.min(100, v));
+        // Dragging right moves the picture right, which lowers the pan value.
+        if (ox > 0.5) F("PanX").value = cl(dragArt.px - (p.x - dragArt.x) * 100 / ox);
+        if (oy > 0.5) F("PanY").value = cl(dragArt.py - (p.y - dragArt.y) * 100 / oy);
+        redraw(); saveDraft();
+      });
+      const endDrag = () => { dragArt = null; canvas.style.cursor = ""; };
+      canvas.addEventListener("pointerup", endDrag);
+      canvas.addEventListener("pointercancel", endDrag);
+      canvas.addEventListener("wheel", ev => {
+        if (!art || !art.naturalWidth || !inArt(toCanvas(ev))) return;
+        ev.preventDefault();
+        F("Zoom").value = Math.max(100, Math.min(300, Number(val("Zoom")) - Math.sign(ev.deltaY) * 8));
+        redraw(); saveDraft();
+      }, { passive: false });
+
       prev.addEventListener("dragover", ev => { ev.preventDefault(); prev.classList.add("dragging"); });
       prev.addEventListener("dragleave", () => prev.classList.remove("dragging"));
       prev.addEventListener("drop", ev => {
