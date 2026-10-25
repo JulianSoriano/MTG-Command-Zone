@@ -367,6 +367,32 @@
   /* ---------------------------------------------------------------------
    * Commander game table
    * ------------------------------------------------------------------- */
+  /* Mana Guide */
+  .mg-pane { display: none; }
+  .mg-pane.active { display: block; }
+  .mg-pairs { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 12px; }
+  .mg-pairs button { display: inline-flex; align-items: center; gap: 2px; padding: 5px 10px; min-height: 0; }
+  .mg-pairs button .mana { width: 22px; height: 22px; }
+  .mg-pairs button:not(.active) { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .mg-pairs button.active { background: var(--accent); color: var(--on-accent, #fff); border-color: var(--accent); }
+  .mg-cycle { margin: 18px 0 8px; }
+  .mg-cycle h3 { margin: 0 0 2px; }
+  .mg-cycle p { margin: 2px 0 8px; color: var(--text-dim); font-size: 0.9rem; }
+  .mg-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .mg-tile { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 6px; background: var(--panel); }
+  .mg-tile:hover { border-color: var(--accent); }
+  .mg-tile .mg-img { aspect-ratio: 488 / 680; border-radius: 8px; background: var(--accent-dim); display: flex; align-items: center; justify-content: center; text-align: center; font-size: 0.8rem; color: var(--text-dim); overflow: hidden; }
+  .mg-tile .mg-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .mg-tile .mg-name { font-size: 0.85rem; font-weight: 600; line-height: 1.2; }
+  .mg-tile .mg-sym { display: flex; gap: 2px; }
+  .mg-tile .mg-sym .mana { width: 18px; height: 18px; }
+  .mg-list { padding-left: 20px; line-height: 1.5; }
+  .mg-table { border-collapse: collapse; margin: 6px 0 10px; }
+  .mg-table th, .mg-table td { border: 1px solid var(--border); padding: 6px 12px; text-align: left; }
+  .mg-triomes { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .mg-triomes span { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; background: var(--panel); }
+  .mg-triomes .mana { width: 18px; height: 18px; }
+
   .gt-table[hidden], .gt-modal[hidden], .gt-out[hidden], .gt-bubble[hidden], .gt-toast[hidden], .gt-resume[hidden] { display: none !important; }
   .gt-seg { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .gt-seg button { min-height: 0; padding: 9px 16px; font-size: 0.95rem; font-weight: 700; background: var(--panel); color: var(--text); border: 1px solid var(--border); }
@@ -932,6 +958,7 @@
     <button type="button" id="navLowSodium">Low Sodium</button>
     <button type="button" id="navGame">Game Tools</button>
     <button type="button" id="navAnalyzer">Deck Analyzer</button>
+    <button type="button" id="navMana">Mana Guide</button>
     <button type="button" id="navCedh">cEDH Guide</button>
     <button type="button" id="navRandom">Random Commander</button>
     <button type="button" id="navLore">MTG Lore</button>
@@ -1209,6 +1236,64 @@
       </div>
     </div>
   </div>
+
+  <div id="manaPage" class="page">
+    <div class="panel">
+      <h2>Mana Guide</h2>
+      <p class="hint">Dual lands by cycle and color pair, plus rules of thumb for building a Commander mana base. Land lists are modeled on the <a href="https://managathering.com/" target="_blank" rel="noopener">Mana Gathering</a> dual lands guide.</p>
+      <div class="ce-tabs" id="mgTabs" role="tablist">
+        <button type="button" class="active" data-mg="lands">Dual lands</button>
+        <button type="button" data-mg="basics">Mana base basics</button>
+      </div>
+
+      <div class="mg-pane active" id="mg-lands">
+        <div class="mg-pairs" id="mgPairs" role="group" aria-label="Color pair filter"></div>
+        <div class="lore-filters">
+          <select id="mgCycle" aria-label="Land cycle"><option value="">All cycles</option></select>
+        </div>
+        <div class="ce-status" id="mgStatus" aria-live="polite"></div>
+        <div id="mgCycles"></div>
+      </div>
+
+      <div class="mg-pane" id="mg-basics">
+        <h3>How many lands?</h3>
+        <ul class="mg-list">
+          <li><strong>36&ndash;38 lands</strong> is the usual range for a 99-card Commander deck, about 37% of the deck.</li>
+          <li>Run toward <strong>34&ndash;35</strong> with 10 or more ramp and mana rocks, a low curve, or a cheap commander. Run <strong>38&ndash;40</strong> with a high curve, big X spells, or little ramp.</li>
+          <li>Count mana rocks and ramp spells that find lands as part of your mana, not as extra lands.</li>
+        </ul>
+        <h3>How many sources of each color?</h3>
+        <p>Count the lands (and mana rocks) that make each color. These are rules of thumb, not exact odds:</p>
+        <table class="mg-table">
+          <tr><th>Role of the color</th><th>Sources to aim for</th></tr>
+          <tr><td>Main color, with many early spells</td><td>About 20 or more</td></tr>
+          <tr><td>Second color</td><td>About 15&ndash;18</td></tr>
+          <tr><td>Third color</td><td>About 12&ndash;14</td></tr>
+          <tr><td>Splash of a few cards</td><td>About 8&ndash;10, more if you need it early</td></tr>
+        </table>
+        <p class="hint">Colored costs like {W}{W} or {U}{U}{U} need more sources than a single pip, and cheap spells need them sooner. Run the Deck Analyzer tab to see your pip counts and sources by color.</p>
+        <h3>Count your pips</h3>
+        <p>Add up the colored mana symbols in every nonland card. The color with the most pips usually gets the most sources and the most basics. Do the count again after each swap.</p>
+        <h3>Kinds of fixing</h3>
+        <ul class="mg-list">
+          <li><strong>Untapped for free:</strong> original duals, and in some decks the Command Tower style lands. Best, usually expensive or restricted.</li>
+          <li><strong>Untapped with a condition:</strong> shock lands (2 life), fast lands (early game), check lands (need a matching basic type), pain lands (damage when tapped for color).</li>
+          <li><strong>Tapped with a perk:</strong> temples (scry), surveil lands, gain lands, bounce lands (they return a land, so they act like two).</li>
+          <li><strong>Slow but cheap:</strong> gates, gain lands, slow lands and filter lands. Fine in slower decks, but too many tapped lands will hurt in faster pods.</li>
+          <li><strong>Three colors at once:</strong> triomes enter tapped and have basic land types, so fetch lands and Nature's Lore effects can find them.</li>
+        </ul>
+        <h3>Triomes</h3>
+        <div class="mg-triomes" id="mgTriomes"></div>
+        <h3>Quick tips</h3>
+        <ul class="mg-list">
+          <li>Keep your basics. They matter for Farseek, Cultivate, check lands and slow lands.</li>
+          <li>Limit tapped lands, with a few more in decks that win slowly.</li>
+          <li>Add colorless-only utility lands only after your colors are stable, since each one costs you a colored source.</li>
+          <li>Check what your pod will bear: some groups ban or avoid the original duals and the most expensive lands.</li>
+        </ul>
+      </div>
+    </div>
+  </div><!-- /manaPage -->
 
   <div id="lorePage" class="page">
     <div class="panel">
@@ -2844,6 +2929,7 @@
       lowsodium: { nav: $("#navLowSodium"), page: $("#lowSodiumPage") },
       game: { nav: $("#navGame"), page: $("#gamePage") },
       analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
+      mana: { nav: $("#navMana"), page: $("#manaPage") },
       cedh: { nav: $("#navCedh"), page: $("#cedhPage") },
       random: { nav: $("#navRandom"), page: $("#randomPage") },
       creator: { nav: $("#navCreator"), page: $("#creatorPage") },
@@ -2857,6 +2943,7 @@
       }
     }
     pages.analyzer.nav.addEventListener("click", () => showPage("analyzer"));
+    pages.mana.nav.addEventListener("click", () => showPage("mana"));
     pages.print.nav.addEventListener("click", () => showPage("print"));
     pages.game.nav.addEventListener("click", () => showPage("game"));
     pages.lowsodium.nav.addEventListener("click", () => showPage("lowsodium"));
@@ -5517,6 +5604,73 @@
     } catch (err) {
       console.error("Game table failed to initialise", err);
     }
+  })();
+
+  /* ---------------------------------------------------------------------
+   * Mana Guide (dual lands by cycle and pair)
+   * ------------------------------------------------------------------- */
+  (function wireManaGuide() {
+    // Pair order for every list below: WU, UB, BR, RG, GW, WB, BG, GU, UR, RW
+    const PAIRS = [["W","U","Azorius"],["U","B","Dimir"],["B","R","Rakdos"],["R","G","Gruul"],["G","W","Selesnya"],["W","B","Orzhov"],["B","G","Golgari"],["G","U","Simic"],["U","R","Izzet"],["R","W","Boros"]];
+    const CYCLES = [
+      { id: "original", name: "Original duals", text: "Two basic land types, no drawback. The best fixing in the game and by far the priciest (Reserved List).", lands: ["Tundra","Underground Sea","Badlands","Taiga","Savannah","Scrubland","Bayou","Tropical Island","Volcanic Island","Plateau"] },
+      { id: "shock", name: "Shock lands", text: "Pay 2 life to enter untapped, otherwise tapped. Have both basic land types, so fetch lands find them.", lands: ["Hallowed Fountain","Watery Grave","Blood Crypt","Stomping Ground","Temple Garden","Godless Shrine","Overgrown Tomb","Breeding Pool","Steam Vents","Sacred Foundry"] },
+      { id: "fast", name: "Fast lands", text: "Enter untapped if you control two or fewer other lands. Great early, weaker late.", lands: ["Seachrome Coast","Darkslick Shores","Blackcleave Cliffs","Copperline Gorge","Razorverge Thicket","Concealed Courtyard","Blooming Marsh","Botanical Sanctum","Spirebluff Canal","Inspiring Vantage"] },
+      { id: "slow", name: "Slow lands", text: "Enter tapped unless you control two or more other lands. Good in decks that play lots of lands.", lands: ["Deserted Beach","Shipwreck Marsh","Haunted Ridge","Rockfall Vale","Overgrown Farmland","Shattered Sanctum","Deathcap Glade","Dreamroot Cascade","Stormcarved Coast","Sundown Pass"] },
+      { id: "check", name: "Check lands", text: "Enter untapped if you control a land of either basic type. Pairs well with basics and dual-typed lands.", lands: ["Glacial Fortress","Drowned Catacomb","Dragonskull Summit","Rootbound Crag","Sunpetal Grove","Isolated Chapel","Woodland Cemetery","Hinterland Harbor","Sulfur Falls","Clifftop Retreat"] },
+      { id: "pain", name: "Pain lands", text: "Always untapped. Tap for colorless for free, or for a color and take 1 damage.", lands: ["Adarkar Wastes","Underground River","Sulfurous Springs","Karplusan Forest","Brushland","Caves of Koilos","Llanowar Wastes","Yavimaya Coast","Shivan Reef","Battlefield Forge"] },
+      { id: "scry", name: "Temples (scry lands)", text: "Enter tapped and scry 1. Cheap, and they smooth draws in slower decks.", lands: ["Temple of Enlightenment","Temple of Deceit","Temple of Malice","Temple of Abandon","Temple of Plenty","Temple of Silence","Temple of Malady","Temple of Mystery","Temple of Epiphany","Temple of Triumph"] },
+      { id: "surveil", name: "Surveil lands", text: "Enter tapped and surveil 1. Good with graveyard strategies.", lands: ["Meticulous Archive","Undercity Sewers","Raucous Theater","Commercial District","Lush Portico","Shadowy Backstreet","Underground Mortuary","Hedge Maze","Thundering Falls","Elegant Parlor"] },
+      { id: "verge", name: "Verge lands", text: "Always make one color. The second color only comes if you control a land with the matching basic type.", lands: ["Floodfarm Verge","Gloomlake Verge","Blazemire Verge","Thornspire Verge","Hushwood Verge","Bleachbone Verge","Wastewood Verge","Willowrush Verge","Riverpyre Verge","Sunbillow Verge"] },
+      { id: "bounce", name: "Bounce lands (karoos)", text: "Enter tapped, return a land you control to your hand, and tap for two mana. Fast ramp, but risky against land destruction.", lands: ["Azorius Chancery","Dimir Aqueduct","Rakdos Carnarium","Gruul Turf","Selesnya Sanctuary","Orzhov Basilica","Golgari Rot Farm","Simic Growth Chamber","Izzet Boilerworks","Boros Garrison"] },
+      { id: "filter", name: "Filter lands", text: "Tap for colorless, or pay one mana of either color to make two mana in any mix of the pair. Smooths a hand with one color of fixing.", lands: ["Mystic Gate","Sunken Ruins","Graven Cairns","Fire-Lit Thicket","Wooded Bastion","Fetid Heath","Twilight Mire","Flooded Grove","Cascade Bluffs","Rugged Prairie"] },
+      { id: "gain", name: "Gain lands", text: "Enter tapped and gain 1 life. The cheapest fixing; fine in budget decks.", lands: ["Tranquil Cove","Dismal Backwater","Bloodfell Caves","Rugged Highlands","Blossoming Sands","Scoured Barrens","Jungle Hollow","Thornwood Falls","Swiftwater Cliffs","Wind-Scarred Crag"] },
+      { id: "gate", name: "Guildgates", text: "Enter tapped, tap for either color. Have the Gate type, which a few cards care about.", lands: ["Azorius Guildgate","Dimir Guildgate","Rakdos Guildgate","Gruul Guildgate","Selesnya Guildgate","Orzhov Guildgate","Golgari Guildgate","Simic Guildgate","Izzet Guildgate","Boros Guildgate"] }
+    ];
+    const TRIOMES = [["Indatha Triome", "WBG"], ["Ketria Triome", "GUR"], ["Raugrin Triome", "URW"], ["Savai Triome", "RWB"], ["Zagoth Triome", "BGU"]];
+
+    const cache = new Map(); // lowercase name -> card
+    let loading = null, failed = false, pair = -1, loaded = false;
+
+    $("#mgCycle").innerHTML += CYCLES.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+    $("#mgPairs").innerHTML = `<button type="button" class="active" data-p="-1">All pairs</button>` + PAIRS.map((p, i) =>
+      `<button type="button" data-p="${i}" aria-label="${p[2]} (${COLOR_NAMES[p[0]]} and ${COLOR_NAMES[p[1]]})" title="${p[2]}">${manaSym(p[0])}${manaSym(p[1])}</button>`).join("");
+    $("#mgTriomes").innerHTML = TRIOMES.map(t => `<span>${[...t[1]].map(c => manaSym(c)).join("")} ${esc(t[0])}</span>`).join("");
+
+    function tile(name, i) {
+      const card = cache.get(name.toLowerCase());
+      const url = card ? cardImageUrl(card, "normal") : null;
+      const href = card && card.scryfall_uri ? card.scryfall_uri : "https://scryfall.com/search?q=" + encodeURIComponent('!"' + name + '"');
+      return `<a class="mg-tile" href="${esc(href)}" target="_blank" rel="noopener"><div class="mg-img">${url ? `<img src="${esc(url)}" alt="${esc(name)}" loading="lazy">` : esc(name)}</div>
+        <div class="mg-name">${esc(name)}</div><div class="mg-sym">${manaSym(PAIRS[i][0])}${manaSym(PAIRS[i][1])}<span style="font-size:.8rem;color:var(--text-dim);margin-left:4px">${PAIRS[i][2]}</span></div></a>`;
+    }
+    function render() {
+      const which = $("#mgCycle").value;
+      const list = CYCLES.filter(c => !which || c.id === which);
+      const idx = pair < 0 ? PAIRS.map((_, i) => i) : [pair];
+      $("#mgCycles").innerHTML = list.map(c => `<section class="mg-cycle"><h3>${esc(c.name)}</h3><p>${esc(c.text)}</p>
+        <div class="mg-tiles">${idx.map(i => tile(c.lands[i], i)).join("")}</div></section>`).join("");
+      $("#mgStatus").textContent = failed ? "Couldn't load card images from Scryfall; names still link to Scryfall." : (loaded ? "" : "Loading card images\u2026");
+    }
+    async function load() {
+      if (loading) return loading;
+      const names = [...new Set(CYCLES.flatMap(c => c.lands))];
+      loading = fetchCollection(names).then(r => { r.found.forEach((c, k) => cache.set(k, c)); loaded = true; }).catch(() => { failed = true; });
+      await loading; render();
+    }
+    $("#mgPairs").addEventListener("click", ev => {
+      const b = ev.target.closest("button[data-p]"); if (!b) return;
+      pair = Number(b.dataset.p);
+      $("#mgPairs").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+      render();
+    });
+    $("#mgCycle").addEventListener("change", render);
+    $("#mgTabs").addEventListener("click", ev => {
+      const b = ev.target.closest("button[data-mg]"); if (!b) return;
+      $("#mgTabs").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+      document.querySelectorAll("#manaPage .mg-pane").forEach(p => p.classList.toggle("active", p.id === "mg-" + b.dataset.mg));
+    });
+    $("#navMana").addEventListener("click", () => { render(); load(); });
   })();
 
   /* ---------------------------------------------------------------------

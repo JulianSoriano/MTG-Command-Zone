@@ -32,6 +32,9 @@ A full-screen Commander table for phones, tablets and desktops, modeled on apps 
 - The dice, coin and mana pool also open from the setup screen without starting a game.
 
 
+### Mana Guide
+Dual lands by cycle (original duals, shock, fast, slow, check, pain, temples, surveil, verge, bounce, filter, gain, Guildgates) with card images from Scryfall, filterable by color pair and cycle, plus rules of thumb for land counts, sources per color, pip counting, kinds of fixing and the triomes. Modeled on the [Mana Gathering](https://managathering.com/) dual lands guide.
+
 ### Deck Analyzer
 Paste a commander and a decklist to get:
 - Legality, singleton, and color-identity checks (official Commander rules, or a stricter "Low Sodium 2.0" house ban list you can toggle on — results come with a compliant / not-compliant verdict, a per-rule tally, and the exact reason each card is banned)
