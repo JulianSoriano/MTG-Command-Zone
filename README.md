@@ -8,12 +8,18 @@ Open [`index.html`](./index.html) directly in a browser, or enable **GitHub Page
 
 The app has four tabs, in this order:
 
-### Print Proxy Sheets
+### Print & Card Creator (one page)
+Two sub-tabs share one printable sheet shown below them: print a decklist, or design a custom card (see Card Creator below) and add it to the same sheet.
+
+#### Print a decklist
 Paste a decklist and print it at **genuine card size** (2.5″ × 3.5″), 9 cards per US Letter page in a 3×3 grid with cut guides — ready to save as a PDF via your browser's print dialog (set scale to 100%, paper size to Letter) for playtesting/proxying. Includes options to skip basic lands and to include/exclude the commander.
 
 **Print style** — a dropdown that picks a matching printing for every card on the sheet: default, oldest (original), newest, borderless, extended art, showcase, full art, retro frame (1993/1997), promo, or textless. Cards with no printing in that style keep their default art, and the sheet tells you which ones. After generating, hover (or tap) any card to pick a specific printing of just that card from a list of every set it's been printed in. Art Series cards and other non-gameplay "memorabilia" printings are never offered. Changed cards get a purple outline on screen; the pickers and outlines never appear on the printed page.
 
-### Low Sodium
+### Low Sodium (inside the Deck Analyzer)
+Low Sodium is now part of the Deck Analyzer page: it uses the same commander and decklist boxes, with an "Instant Low Sodium check" button and the "Low Sodium check" and "Low Sodium rules & ban list" sub-tabs.
+
+#### Low Sodium details
 Everything about the Low Sodium 2.0 house format in one place (the list is built in, so it all works instantly with no card lookup):
 - **Instant check** — paste a commander and a list (Moxfield/Archidekt exports work as-is) and get a verdict, a per-rule tally, and the reason each banned card is banned. Commander-only bans are marked "OK in 99". One click hands the same list to the full analyzer, which also catches misspelled names.
 - **Rules breakdown** — the twelve headline rules (no tutors, no mass land denial, no extra turns, no discard, no fast mana, no free interaction, no stax or taxes, no mind control, no commander denial, no removal engines, no locks, no severe resource imbalances) with live card counts, plus how the 99 and command-zone lists differ.
@@ -36,6 +42,10 @@ A full-screen Commander table for phones, tablets and desktops, modeled on apps 
 Dual lands by cycle (original duals, shock, fast, slow, check, pain, temples, surveil, verge, bounce, filter, gain, Guildgates) with card images from Scryfall, filterable by color pair and cycle, plus rules of thumb for land counts, sources per color, pip counting, kinds of fixing and the triomes. Modeled on the [Mana Gathering](https://managathering.com/) dual lands guide.
 
 ### Deck Analyzer
+Sub-tabs: **Analysis**, **Mana base**, **Low Sodium check**, **Low Sodium rules & ban list**.
+
+**Mana base optimizer:** after you analyze a deck, the Mana base tab compares the colored symbols your spells need with your lands and mana rocks, gives a target number of sources per color (rules of thumb), suggests a land count, the best split of your basic lands, flags tapped and colorless lands, and lists dual lands, triomes and other fixing you could add.
+
 Paste a commander and a decklist to get:
 - Legality, singleton, and color-identity checks (official Commander rules, or a stricter "Low Sodium 2.0" house ban list you can toggle on — results come with a compliant / not-compliant verdict, a per-rule tally, and the exact reason each card is banned)
 - Card art for every card in the list, including the commander
@@ -51,7 +61,7 @@ A guide to competitive Commander, split into sub-tabs: a primer, a metagame tier
 ### Random Commander
 Rolls a random card that is legal as a commander right now (via Scryfall's random endpoint). Filter by color identity (exact, within, or at least), maximum price, partner commanders, and legendary creatures only. Each result shows the card, type, mana cost, colors and price, optional Oracle text, and an EDHREC link, with one-click hand-off to the Deck Analyzer and a history of recent rolls. Inspired by randomcommander.com.
 
-### Card Creator
+### Card Creator (a sub-tab of Print & Card Creator)
 Design your own card: name, mana cost (with symbols, including hybrid, {X}, {T} and {Q}), type line, rarity, frame color (automatic from the cost and type, or chosen), rules text (reminder text in parentheses is italicized), flavor text, power/toughness or loyalty, artist credit, and a footer note. Upload a JPG or PNG for the art (or drag it onto the preview), then zoom and reposition it. Type an existing card's name (with suggestions) to use it as a template, optionally with its art. Finished cards can be downloaded as a 744×1039 PNG (about 2.5×3.5 inches at 300 dpi), saved in the browser, or added to the Print Proxy sheet in any number of copies; they stay on the sheet when you rebuild it and each has a Remove button. The card frame is an original design, not Wizards of the Coast's.
 
 ### MTG Lore

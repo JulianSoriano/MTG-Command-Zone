@@ -865,15 +865,24 @@
   }
 
   /* ---------------------------------------------------------------------
+   * Merged-page panes (Print & Card Creator, Deck Analyzer)
+   * ------------------------------------------------------------------- */
+  .pc-pane, .an-pane { display: none; }
+  .pc-pane.active, .an-pane.active { display: block; }
+  .pc-tabs, .an-tabs { margin-top: 0; }
+
+  .mb-scroll { overflow-x: auto; }
+  .mb-table td, .mb-table th { white-space: nowrap; }
+  .mb-pair { margin: 8px 0; }
+  .mb-pairhead { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .mb-pairhead .mana, .mb-cands .mana { width: 20px; height: 20px; }
+  .mb-cands { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mb-cand { display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; background: var(--panel); font-size: 0.85rem; }
+  .mb-cand small { color: var(--text-dim); }
+
+  /* ---------------------------------------------------------------------
    * Card Creator
    * ------------------------------------------------------------------- */
-  .cc-sheet .proxy-print-pick, .cc-sheet .proxy-tip { display: none !important; }
-  .cc-sheetbtns { margin: 6px 0 0; }
-  @media print {
-    body.print-cc * { visibility: hidden; }
-    body.print-cc #ccSheetPreview, body.print-cc #ccSheetPreview * { visibility: visible; }
-    body.print-cc #ccSheetPreview { position: absolute; top: 0; left: 0; margin: 0; padding: 0; }
-  }
   .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .cc-inline input[type=text] { flex: 1 1 220px; }
@@ -960,11 +969,9 @@
   <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander, design your own cards, and read the story of Magic &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
 
   <div class="page-nav">
-    <button type="button" id="navPrint" class="active">Print Proxy Sheets</button>
-    <button type="button" id="navCreator">Card Creator</button>
-    <button type="button" id="navLowSodium">Low Sodium</button>
-    <button type="button" id="navGame">Game Tools</button>
+    <button type="button" id="navPrint" class="active">Print &amp; Card Creator</button>
     <button type="button" id="navAnalyzer">Deck Analyzer</button>
+    <button type="button" id="navGame">Game Tools</button>
     <button type="button" id="navMana">Mana Guide</button>
     <button type="button" id="navCedh">cEDH Guide</button>
     <button type="button" id="navRandom">Random Commander</button>
@@ -1157,103 +1164,6 @@
     </div>
   </div>
 
-  <div id="creatorPage" class="page">
-    <div class="panel">
-      <h2>Card Creator</h2>
-      <p class="hint">Design your own card. Fill in the fields, upload a JPG or PNG for the art, or start from a real card and change what you like. The preview updates as you type. You can download it as an image, save the design in this browser, or add it to your Print Proxy sheet.</p>
-
-      <div class="cc-template">
-        <label for="ccTemplate">Start from an existing card (optional)</label>
-        <div class="cc-inline">
-          <input type="text" id="ccTemplate" list="ccSuggest" placeholder="e.g. Llanowar Elves" autocomplete="off" spellcheck="false">
-          <datalist id="ccSuggest"></datalist>
-          <button type="button" id="ccLoadBtn">Use as template</button>
-        </div>
-        <label class="cc-check"><input type="checkbox" id="ccTemplateArt" checked> Also use that card's art</label>
-        <div class="ce-status" id="ccStatus" aria-live="polite"></div>
-      </div>
-
-      <div class="cc-layout">
-        <div class="cc-form">
-          <div class="cc-grid2">
-            <div class="field"><label for="ccName">Card name</label><input type="text" id="ccName" placeholder="Name"></div>
-            <div class="field"><label for="ccCost">Mana cost</label><input type="text" id="ccCost" placeholder="{2}{G}{G} or 2GG" spellcheck="false"></div>
-          </div>
-          <div class="cc-grid2">
-            <div class="field"><label for="ccType">Type line</label><input type="text" id="ccType" placeholder="Creature — Elf Druid"></div>
-            <div class="field"><label for="ccRarity">Rarity</label>
-              <select id="ccRarity"><option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare" selected>Rare</option><option value="mythic">Mythic</option></select></div>
-          </div>
-          <div class="field"><label for="ccFrame">Frame color</label>
-            <select id="ccFrame">
-              <option value="auto">Automatic (from mana cost and type)</option>
-              <option value="W">White</option><option value="U">Blue</option><option value="B">Black</option>
-              <option value="R">Red</option><option value="G">Green</option><option value="gold">Gold (multicolor)</option>
-              <option value="artifact">Artifact</option><option value="colorless">Colorless</option><option value="land">Land</option>
-            </select></div>
-
-          <div class="field cc-artfield">
-            <label for="ccArt">Card art (JPG or PNG)</label>
-            <input type="file" id="ccArt" accept="image/png,image/jpeg">
-            <div class="cc-inline cc-artbtns"><button type="button" class="secondary" id="ccArtClear">Remove art</button></div>
-            <div class="cc-sliders">
-              <label>Zoom <input type="range" id="ccZoom" min="100" max="300" value="100"></label>
-              <label>Left / right <input type="range" id="ccPanX" min="-100" max="100" value="0"></label>
-              <label>Up / down <input type="range" id="ccPanY" min="-100" max="100" value="0"></label>
-            </div>
-            <p class="hint">Tip: drag the picture on the preview to move it in any direction, and scroll over it to zoom. Zoom in first if the picture doesn't move in one direction, since it has to fill the frame. You can also drop an image file onto the preview.</p>
-          </div>
-
-          <div class="field"><label for="ccRules">Rules text</label>
-            <textarea id="ccRules" rows="5" placeholder="Flying&#10;{T}: Add {G}.&#10;(Reminder text in parentheses is shown in italics.)"></textarea>
-            <p class="hint">Symbols: type them in braces, like {W} {U} {B} {R} {G} {C} {2} {X} {T} (tap) {Q} (untap), or hybrid {W/U}. Start a new line for a new paragraph.</p></div>
-          <div class="field"><label for="ccFlavor">Flavor text</label><textarea id="ccFlavor" rows="2" placeholder="Optional italic flavor text"></textarea></div>
-          <div class="cc-grid3">
-            <div class="field"><label for="ccPow">Power</label><input type="text" id="ccPow" placeholder="—"></div>
-            <div class="field"><label for="ccTou">Toughness</label><input type="text" id="ccTou" placeholder="—"></div>
-            <div class="field"><label for="ccLoy">Loyalty</label><input type="text" id="ccLoy" placeholder="—"></div>
-          </div>
-          <div class="cc-grid2">
-            <div class="field"><label for="ccArtist">Artist credit</label><input type="text" id="ccArtist" placeholder="Your name"></div>
-            <div class="field"><label for="ccFooter">Footer note</label><input type="text" id="ccFooter"></div>
-          </div>
-        </div>
-
-        <div class="cc-preview" id="ccPreview">
-          <canvas id="ccCanvas" width="744" height="1039" aria-label="Card preview" role="img"></canvas>
-          <div class="cc-actions">
-            <button type="button" id="ccDownload">Download image</button>
-            <div class="cc-inline">
-              <label class="cc-copies" for="ccCopies">Copies</label>
-              <input type="number" id="ccCopies" min="1" max="99" value="1">
-              <button type="button" class="secondary" id="ccToPrint">Add to print sheet</button>
-            </div>
-            <div class="cc-inline">
-              <button type="button" class="secondary" id="ccSave">Save design</button>
-              <button type="button" class="secondary" id="ccReset">Start over</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="ccSheetWrap" hidden>
-        <h3>Print sheet preview</h3>
-        <p class="hint" id="ccSheetNote"></p>
-        <div class="cc-inline cc-sheetbtns">
-          <button type="button" id="ccSheetPrint">Print / Save as PDF&hellip;</button>
-          <button type="button" class="secondary" id="ccSheetOpen">Open the Print Proxy Sheets tab</button>
-        </div>
-        <div class="proxy-preview-wrap cc-sheet" id="ccSheetPreview"></div>
-      </div>
-
-      <div id="ccSavedWrap" hidden>
-        <h3>Saved designs</h3>
-        <p class="hint">Stored in this browser only. Very large images are shrunk to save space.</p>
-        <div class="cc-saved" id="ccSaved"></div>
-      </div>
-    </div>
-  </div>
-
   <div id="manaPage" class="page">
     <div class="panel">
       <h2>Mana Guide</h2>
@@ -1379,18 +1289,74 @@
         <option value="official">Official Commander rules</option>
         <option value="lowsodium">Low Sodium 2.0 (house rules)</option>
       </select>
-      <div class="hint">Low Sodium 2.0 layers a stricter, playgroup house ruleset on top of the official banlist &mdash; separate rules (and a much longer ban list) for the command zone and the 99. Switching this re-checks an already-analyzed deck instantly, no need to re-run. The <strong>Low Sodium</strong> tab has the full rules, a searchable ban list, and an instant paste-and-check.</div>
+      <div class="hint">Low Sodium 2.0 layers a stricter, playgroup house ruleset on top of the official banlist &mdash; separate rules (and a much longer ban list) for the command zone and the 99. Switching this re-checks an already-analyzed deck instantly, no need to re-run. The <strong>Low Sodium rules &amp; ban list</strong> tab below has the full rules, a searchable ban list, and an instant paste-and-check.</div>
     </div>
     <div class="btn-row">
       <button id="analyzeBtn">Analyze deck</button>
+      <button id="lsCheckBtn" class="secondary" type="button">Instant Low Sodium check</button>
       <button id="primerBtn" class="secondary" type="button" disabled>Generate primer</button>
       <button id="clearBtn" class="secondary" type="button">Clear</button>
     </div>
     <div class="status" id="statusLine"></div>
   </div>
 
-  <div id="results"></div>
-  <div id="primerPanel"></div>
+  <div class="ce-tabs an-tabs" id="anTabs" role="tablist">
+    <button type="button" class="active" data-an="analysis">Analysis</button>
+    <button type="button" data-an="mana">Mana base</button>
+    <button type="button" data-an="lowsodium">Low Sodium check</button>
+    <button type="button" data-an="rules">Low Sodium rules &amp; ban list</button>
+  </div>
+
+  <div class="an-pane active" id="an-analysis">
+    <div id="results"></div>
+    <div id="primerPanel"></div>
+  </div>
+
+  <div class="an-pane" id="an-mana">
+    <div id="manaBase"><div class="panel"><h2>Mana base optimizer</h2><p class="hint">Run <strong>Analyze deck</strong> above first. This tab then checks your lands and mana sources against what your spells need and suggests fixes.</p></div></div>
+  </div>
+
+  <div class="an-pane" id="an-lowsodium">
+    <div class="panel">
+      <h2>Low Sodium 2.0 &mdash; instant check</h2>
+      <p class="hint ls-lede">Uses the commander and decklist you entered above. This runs instantly in your browser against the built-in ban list, with no card lookup needed. The command zone is checked against a stricter list than the 99. Use <strong>Analyze deck</strong> with the ban list set to Low Sodium 2.0 for the full analysis.</p>
+      <label class="ls-inline"><input type="checkbox" id="lsHideClean" checked> Hide cards that aren't on the ban list</label>
+      <div id="lsResults" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="an-pane" id="an-rules">
+    <div class="panel" id="lsRulesPanel">
+      <h2>The Low Sodium rules</h2>
+      <p class="ls-lede">Low Sodium is a Commander house format built to keep multiplayer games free of the play patterns that tend to sour a table. Rather than capping power level, it bans specific <em>kinds of effects</em> &mdash; and every card that does them &mdash; so whatever is left can be played freely. Decks can still range from slow and silly to fast and focused.</p>
+      <h3>What's banned</h3>
+      <p class="hint">Tap a rule to jump to the cards it bans. Counts are cards on the list.</p>
+      <ul class="ls-tiles" id="lsTiles"></ul>
+      <h3>How the two lists work</h3>
+      <ul>
+        <li><strong>The 99.</strong> A card on the deck ban list can't be played anywhere &mdash; not in the 99 and not as your commander.</li>
+        <li><strong>The command zone.</strong> Commanders face a longer, stricter list, because you always have access to them. A card banned <em>only</em> as a commander is still legal in the 99.</li>
+        <li><strong>Game Changers.</strong> Every Wizards-designated Game Changer is banned, whichever rule catches it.</li>
+      </ul>
+      <div class="ls-note">The &ldquo;locks&rdquo; and &ldquo;severe resource imbalances&rdquo; rules involve judgment calls &mdash; they exist to catch the most one-sided engines (think Rhystic Study or Smothering Tithe) and game-ending locks (think Avacyn, Angel of Hope or Constant Mists), so expect the exact wording to be broader than it looks.</div>
+      <p class="hint" id="lsSnapshot"></p>
+    </div>
+
+    <div class="panel" id="lsBrowsePanel">
+      <h2>The ban list, by rule</h2>
+      <p class="hint">Every banned card, grouped under the exact rule that bans it. Search by card name or by words in a rule. Card art loads from Scryfall as you scroll.</p>
+      <div class="ls-filters">
+        <input type="text" id="lsSearch" placeholder="Search cards or rule text&hellip;" aria-label="Search the ban list">
+        <select id="lsScope" aria-label="Which list">
+          <option value="all">Both lists</option>
+          <option value="deck">Banned everywhere</option>
+          <option value="commander">Banned as commander only</option>
+        </select>
+        <select id="lsCatFilter" aria-label="Rule category"><option value="all">All categories</option></select>
+      </div>
+      <div id="lsBrowse"></div>
+    </div>
+  </div>
 
   <footer>
     Card data &amp; pricing from <a href="https://scryfall.com" target="_blank" rel="noopener">Scryfall</a>, fetched live from your browser each time you analyze. Nothing is uploaded anywhere else &mdash; your decklist stays local to this page.
@@ -1398,6 +1364,12 @@
   </div><!-- /analyzerPage -->
 
   <div id="printPage" class="page active">
+    <div class="ce-tabs pc-tabs" id="pcTabs" role="tablist">
+      <button type="button" class="active" data-pc="print">Print a decklist</button>
+      <button type="button" data-pc="creator">Card Creator</button>
+    </div>
+
+    <div class="pc-pane active" id="pc-print">
     <div class="panel">
       <div class="field">
         <label for="printCommanderInput">Commander (or Commander + Partner/Background) &mdash; one per line</label>
@@ -1437,64 +1409,100 @@
       <div class="status" id="printStatusLine"></div>
       <div class="hint">Each card prints at genuine Magic card size (2.5&Prime; &times; 3.5&Prime;), 9 per US Letter page (3&times;3) with light dashed cut-guides. <strong>In the print dialog, set Scale to 100% (turn off "Fit to page") and Paper size to Letter</strong> &mdash; then choose "Save as PDF" as the destination, or print directly. These are for playtesting/proxying only, not tournament-legal cards.</div>
     </div>
+    </div>
+
+    <div class="pc-pane" id="pc-creator">
+    <div class="panel">
+      <h2>Card Creator</h2>
+      <p class="hint">Design your own card. Fill in the fields, upload a JPG or PNG for the art, or start from a real card and change what you like. The preview updates as you type. You can download it as an image, save the design in this browser, or add it to your Print Proxy sheet.</p>
+
+      <div class="cc-template">
+        <label for="ccTemplate">Start from an existing card (optional)</label>
+        <div class="cc-inline">
+          <input type="text" id="ccTemplate" list="ccSuggest" placeholder="e.g. Llanowar Elves" autocomplete="off" spellcheck="false">
+          <datalist id="ccSuggest"></datalist>
+          <button type="button" id="ccLoadBtn">Use as template</button>
+        </div>
+        <label class="cc-check"><input type="checkbox" id="ccTemplateArt" checked> Also use that card's art</label>
+        <div class="ce-status" id="ccStatus" aria-live="polite"></div>
+      </div>
+
+      <div class="cc-layout">
+        <div class="cc-form">
+          <div class="cc-grid2">
+            <div class="field"><label for="ccName">Card name</label><input type="text" id="ccName" placeholder="Name"></div>
+            <div class="field"><label for="ccCost">Mana cost</label><input type="text" id="ccCost" placeholder="{2}{G}{G} or 2GG" spellcheck="false"></div>
+          </div>
+          <div class="cc-grid2">
+            <div class="field"><label for="ccType">Type line</label><input type="text" id="ccType" placeholder="Creature — Elf Druid"></div>
+            <div class="field"><label for="ccRarity">Rarity</label>
+              <select id="ccRarity"><option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare" selected>Rare</option><option value="mythic">Mythic</option></select></div>
+          </div>
+          <div class="field"><label for="ccFrame">Frame color</label>
+            <select id="ccFrame">
+              <option value="auto">Automatic (from mana cost and type)</option>
+              <option value="W">White</option><option value="U">Blue</option><option value="B">Black</option>
+              <option value="R">Red</option><option value="G">Green</option><option value="gold">Gold (multicolor)</option>
+              <option value="artifact">Artifact</option><option value="colorless">Colorless</option><option value="land">Land</option>
+            </select></div>
+
+          <div class="field cc-artfield">
+            <label for="ccArt">Card art (JPG or PNG)</label>
+            <input type="file" id="ccArt" accept="image/png,image/jpeg">
+            <div class="cc-inline cc-artbtns"><button type="button" class="secondary" id="ccArtClear">Remove art</button></div>
+            <div class="cc-sliders">
+              <label>Zoom <input type="range" id="ccZoom" min="100" max="300" value="100"></label>
+              <label>Left / right <input type="range" id="ccPanX" min="-100" max="100" value="0"></label>
+              <label>Up / down <input type="range" id="ccPanY" min="-100" max="100" value="0"></label>
+            </div>
+            <p class="hint">Tip: drag the picture on the preview to move it in any direction, and scroll over it to zoom. Zoom in first if the picture doesn't move in one direction, since it has to fill the frame. You can also drop an image file onto the preview.</p>
+          </div>
+
+          <div class="field"><label for="ccRules">Rules text</label>
+            <textarea id="ccRules" rows="5" placeholder="Flying&#10;{T}: Add {G}.&#10;(Reminder text in parentheses is shown in italics.)"></textarea>
+            <p class="hint">Symbols: type them in braces, like {W} {U} {B} {R} {G} {C} {2} {X} {T} (tap) {Q} (untap), or hybrid {W/U}. Start a new line for a new paragraph.</p></div>
+          <div class="field"><label for="ccFlavor">Flavor text</label><textarea id="ccFlavor" rows="2" placeholder="Optional italic flavor text"></textarea></div>
+          <div class="cc-grid3">
+            <div class="field"><label for="ccPow">Power</label><input type="text" id="ccPow" placeholder="—"></div>
+            <div class="field"><label for="ccTou">Toughness</label><input type="text" id="ccTou" placeholder="—"></div>
+            <div class="field"><label for="ccLoy">Loyalty</label><input type="text" id="ccLoy" placeholder="—"></div>
+          </div>
+          <div class="cc-grid2">
+            <div class="field"><label for="ccArtist">Artist credit</label><input type="text" id="ccArtist" placeholder="Your name"></div>
+            <div class="field"><label for="ccFooter">Footer note</label><input type="text" id="ccFooter"></div>
+          </div>
+        </div>
+
+        <div class="cc-preview" id="ccPreview">
+          <canvas id="ccCanvas" width="744" height="1039" aria-label="Card preview" role="img"></canvas>
+          <div class="cc-actions">
+            <button type="button" id="ccDownload">Download image</button>
+            <div class="cc-inline">
+              <label class="cc-copies" for="ccCopies">Copies</label>
+              <input type="number" id="ccCopies" min="1" max="99" value="1">
+              <button type="button" class="secondary" id="ccToPrint">Add to print sheet</button>
+              <button type="button" class="secondary" id="ccPrintNow">Print sheet&hellip;</button>
+            </div>
+            <div class="cc-inline">
+              <button type="button" class="secondary" id="ccSave">Save design</button>
+              <button type="button" class="secondary" id="ccReset">Start over</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="ccSavedWrap" hidden>
+        <h3>Saved designs</h3>
+        <p class="hint">Stored in this browser only. Very large images are shrunk to save space.</p>
+        <div class="cc-saved" id="ccSaved"></div>
+      </div>
+    </div>
+    </div>
 
     <div id="printMissing"></div>
 
     <div class="proxy-preview-wrap" id="printPreviewWrap"></div>
   </div><!-- /printPage -->
-
-  <div id="lowSodiumPage" class="page">
-    <div class="panel">
-      <h2>Low Sodium 2.0 &mdash; instant check</h2>
-      <p class="hint ls-lede">Paste a commander and a list to see which cards break the Low Sodium rules. This runs instantly in your browser against the built-in ban list &mdash; no card lookup needed. The command zone is checked against a stricter list than the 99.</p>
-      <div class="field">
-        <label for="lsCmd">Commander(s) &mdash; one per line (partner or Background: two lines). Leave blank to check only cards.</label>
-        <textarea id="lsCmd" rows="2" spellcheck="false" placeholder="e.g. Atraxa, Praetors' Voice"></textarea>
-      </div>
-      <div class="field">
-        <label for="lsDeck">The 99 &mdash; one per line, quantity optional. Moxfield / Archidekt exports work as-is.</label>
-        <textarea id="lsDeck" spellcheck="false" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;Cultivate&#10;10 Forest"></textarea>
-      </div>
-      <div class="btn-row">
-        <button id="lsCheckBtn" type="button">Check my deck</button>
-        <button id="lsFullBtn" type="button" class="secondary">Run full analysis instead</button>
-        <button id="lsClearBtn" type="button" class="secondary">Clear</button>
-      </div>
-      <label class="ls-inline"><input type="checkbox" id="lsHideClean" checked> Hide cards that aren't on the ban list</label>
-      <div id="lsResults" aria-live="polite"></div>
-    </div>
-
-    <div class="panel" id="lsRulesPanel">
-      <h2>The Low Sodium rules</h2>
-      <p class="ls-lede">Low Sodium is a Commander house format built to keep multiplayer games free of the play patterns that tend to sour a table. Rather than capping power level, it bans specific <em>kinds of effects</em> &mdash; and every card that does them &mdash; so whatever is left can be played freely. Decks can still range from slow and silly to fast and focused.</p>
-      <h3>What's banned</h3>
-      <p class="hint">Tap a rule to jump to the cards it bans. Counts are cards on the list.</p>
-      <ul class="ls-tiles" id="lsTiles"></ul>
-      <h3>How the two lists work</h3>
-      <ul>
-        <li><strong>The 99.</strong> A card on the deck ban list can't be played anywhere &mdash; not in the 99 and not as your commander.</li>
-        <li><strong>The command zone.</strong> Commanders face a longer, stricter list, because you always have access to them. A card banned <em>only</em> as a commander is still legal in the 99.</li>
-        <li><strong>Game Changers.</strong> Every Wizards-designated Game Changer is banned, whichever rule catches it.</li>
-      </ul>
-      <div class="ls-note">The &ldquo;locks&rdquo; and &ldquo;severe resource imbalances&rdquo; rules involve judgment calls &mdash; they exist to catch the most one-sided engines (think Rhystic Study or Smothering Tithe) and game-ending locks (think Avacyn, Angel of Hope or Constant Mists), so expect the exact wording to be broader than it looks.</div>
-      <p class="hint" id="lsSnapshot"></p>
-    </div>
-
-    <div class="panel" id="lsBrowsePanel">
-      <h2>The ban list, by rule</h2>
-      <p class="hint">Every banned card, grouped under the exact rule that bans it. Search by card name or by words in a rule. Card art loads from Scryfall as you scroll.</p>
-      <div class="ls-filters">
-        <input type="text" id="lsSearch" placeholder="Search cards or rule text&hellip;" aria-label="Search the ban list">
-        <select id="lsScope" aria-label="Which list">
-          <option value="all">Both lists</option>
-          <option value="deck">Banned everywhere</option>
-          <option value="commander">Banned as commander only</option>
-        </select>
-        <select id="lsCatFilter" aria-label="Rule category"><option value="all">All categories</option></select>
-      </div>
-      <div id="lsBrowse"></div>
-    </div>
-  </div>
 
   <div id="gamePage" class="page">
     <div class="panel" id="gtSetup">
@@ -2820,6 +2828,187 @@
   // without hitting Scryfall again.
   let lastRawInputs = null;
 
+  /* ---------------------------------------------------------------------
+   * Mana base optimizer (a tab inside the Deck Analyzer)
+   * ------------------------------------------------------------------- */
+  let manaGuideData = null; // cycles and color pairs, filled in by the Mana Guide tab
+  const MANA_BASE_EMPTY = `<div class="panel"><h2>Mana base optimizer</h2><p class="hint">Run <strong>Analyze deck</strong> above first. This tab then checks your lands and mana sources against what your spells need and suggests fixes.</p></div>`;
+  const BASIC_FOR = { W: "Plains", U: "Island", B: "Swamp", R: "Mountain", G: "Forest" };
+  const LAND_TIER = { original: "untapped", shock: "untapped", fast: "untapped", check: "untapped", pain: "untapped", verge: "untapped", filter: "untapped", slow: "mostly untapped", surveil: "tapped", scry: "tapped", bounce: "tapped", gain: "tapped", gate: "tapped" };
+  const PREMIUM_ORDER = ["original", "shock", "fast", "check", "pain", "verge", "slow", "filter", "surveil", "scry"];
+  const UTILITY_FIXERS = ["Command Tower", "Exotic Orchard", "Path of Ancestry", "Fabled Passage", "Evolving Wilds", "Terramorphic Expanse", "Mana Confluence", "City of Brass"];
+
+  function mbProduced(card, identity, isLandCard) {
+    const set = new Set();
+    if (isLandCard && Array.isArray(card.produced_mana)) card.produced_mana.forEach(c => set.add(c));
+    else {
+      const text = (card.oracle_text || "") + " " + (card.card_faces ? card.card_faces.map(f => f.oracle_text || "").join(" ") : "");
+      for (const clause of text.match(/add[^.]*\./gi) || []) {
+        (clause.match(/\{([WUBRG])\}/g) || []).forEach(x => set.add(x[1]));
+        if (/any (one )?color/i.test(clause)) COLORS.forEach(c => set.add(c));
+      }
+    }
+    return [...set].filter(c => identity.includes(c));
+  }
+  function mbTapped(card) {
+    const text = (card.oracle_text || "") + " " + (card.card_faces ? card.card_faces.map(f => f.oracle_text || "").join(" ") : "");
+    if (!/enters( the battlefield)? tapped/i.test(text)) return "no";
+    return /unless|if you control|you may pay|reveal|if a player has|if you have/i.test(text) ? "sometimes" : "always";
+  }
+
+  function analyzeManaBase(a) {
+    const id = a.identityArr.filter(c => COLORS.includes(c));
+    const landTotal = a.landCards.reduce((s, l) => s + l.qty, 0);
+    const spells = a.nonlandCards.concat((a.commanderCards || []).map(card => ({ name: card.name, qty: 1, card })));
+    const dem = {};
+    id.forEach(c => { dem[c] = { pips: 0, cards: 0, maxPips: 0, early: null }; });
+    for (const e of spells) {
+      const card = e.card, q = e.qty || 1;
+      const pips = pipCounts(card.mana_cost || (card.card_faces && card.card_faces[0] && card.card_faces[0].mana_cost) || "");
+      const cmc = Math.round(card.cmc || 0);
+      for (const c of id) {
+        const n = pips[c];
+        if (!n) continue;
+        dem[c].pips += n * q; dem[c].cards += q; dem[c].maxPips = Math.max(dem[c].maxPips, n);
+        if (dem[c].early === null || cmc < dem[c].early) dem[c].early = cmc;
+      }
+    }
+    const totalPips = id.reduce((s, c) => s + dem[c].pips, 0);
+
+    const landSrc = {}, basicSrc = {}, rockSrc = {};
+    id.forEach(c => { landSrc[c] = 0; basicSrc[c] = 0; rockSrc[c] = 0; });
+    let basicTotal = 0, colorlessLands = 0;
+    const tappedAlways = [], tappedSometimes = [], nonbasics = [], colorlessNames = [];
+    for (const l of a.landCards) {
+      const card = l.card, q = l.qty || 1;
+      const cols = mbProduced(card, id, true);
+      const isBasic = /\bbasic\b/i.test(card.type_line || "");
+      cols.forEach(c => { landSrc[c] += q; if (isBasic) basicSrc[c] += q; });
+      if (isBasic) basicTotal += q;
+      else nonbasics.push({ name: l.name, colors: cols });
+      if (!cols.length && !isBasic) { colorlessLands += q; colorlessNames.push(l.name); }
+      const t = mbTapped(card);
+      if (t === "always") tappedAlways.push(l.name); else if (t === "sometimes") tappedSometimes.push(l.name);
+    }
+    for (const e of a.nonlandCards) {
+      const card = e.card;
+      if (/instant|sorcery/i.test(card.type_line || "")) continue;
+      for (const c of mbProduced(card, id, false)) rockSrc[c] += (e.qty || 1);
+    }
+
+    const rampCount = a.categoryMembers && a.categoryMembers.ramp ? a.categoryMembers.ramp.length : 0;
+    const suggestedLands = recommendedLandCount(a.avgCmc, rampCount, a.nonlandCards.length);
+
+    // Rule-of-thumb source targets, by how much of the deck leans on each color.
+    const targets = {};
+    for (const c of id) {
+      const d = dem[c];
+      const share = totalPips ? d.pips / totalPips : 0;
+      let t;
+      if (id.length === 1) t = Math.max(1, suggestedLands - Math.min(4, colorlessLands));
+      else {
+        t = share >= 0.45 ? 20 : share >= 0.3 ? 17 : share >= 0.18 ? 14 : share >= 0.08 ? 11 : 9;
+        if (d.cards <= 3) t = Math.min(t, 8);
+        if (d.maxPips >= 3) t += 2; else if (d.maxPips === 2) t += 1;
+        if (d.early !== null && d.early <= 2 && d.cards >= 5) t += 1;
+        t = Math.min(t, Math.max(8, suggestedLands - 4));
+      }
+      targets[c] = t;
+      d.share = share;
+    }
+    const eff = {};
+    id.forEach(c => { eff[c] = landSrc[c] + 0.5 * rockSrc[c]; });
+
+    // Best split of the basic lands: give each one to the color furthest below its target.
+    const basicPlanTotal = Math.max(0, basicTotal + (suggestedLands - landTotal));
+    const alloc = {}; id.forEach(c => { alloc[c] = 0; });
+    const cur = {}; id.forEach(c => { cur[c] = eff[c] - basicSrc[c]; });
+    if (id.length) {
+      for (let i = 0; i < basicPlanTotal; i++) {
+        let best = id[0], bestScore = -Infinity;
+        for (const c of id) {
+          const score = (targets[c] - (cur[c] + alloc[c])) + dem[c].share * 0.5;
+          if (score > bestScore) { bestScore = score; best = c; }
+        }
+        alloc[best]++;
+      }
+    }
+
+    // Land upgrades from the Mana Guide's cycle lists.
+    const have = new Set(a.landCards.map(l => l.name.toLowerCase()));
+    const triomes = [], adds = [];
+    if (manaGuideData && id.length >= 2) {
+      const { PAIRS, CYCLES } = manaGuideData;
+      PAIRS.forEach((p, pi) => {
+        if (!id.includes(p[0]) || !id.includes(p[1])) return;
+        const cands = PREMIUM_ORDER.map(cid => CYCLES.find(c => c.id === cid)).filter(Boolean)
+          .map(c => ({ name: c.lands[pi], cycle: c.name })).filter(x => !have.has(x.name.toLowerCase()));
+        const weak = a.landCards.filter(l => CYCLES.some(c => ["gate", "gain", "scry", "bounce"].includes(c.id) && c.lands[pi].toLowerCase() === l.name.toLowerCase()));
+        if (cands.length) adds.push({ pair: p, cands: cands.slice(0, 5), weak: weak.map(w => w.name) });
+      });
+      triomes.push(...(id.length >= 3 ? manaGuideData.TRIOMES.filter(t => [...t[1]].every(c => id.includes(c)) && !have.has(t[0].toLowerCase())) : []));
+      adds.utility = UTILITY_FIXERS.filter(n => !have.has(n.toLowerCase()) && (id.length >= 3 || !/Confluence|City of Brass/.test(n))).slice(0, 6);
+    }
+    return { id, dem, totalPips, landTotal, suggestedLands, rampCount, targets, landSrc, rockSrc, eff, basicSrc, basicTotal, basicPlanTotal, alloc,
+      colorlessLands, colorlessNames, tappedAlways, tappedSometimes, adds, triomes, avgCmc: a.avgCmc };
+  }
+
+  function renderManaBase(a) {
+    const m = analyzeManaBase(a);
+    const link = n => `<a href="https://scryfall.com/search?q=${encodeURIComponent('!"' + n + '"')}" target="_blank" rel="noopener">${esc(n)}</a>`;
+    if (!m.id.length) {
+      return `<div class="panel"><h2>Mana base optimizer</h2><p class="hint">This deck's commander is colorless, so there are no colors to balance. The land count below is still a useful check.</p>
+        <p>You have <strong>${m.landTotal}</strong> lands; the suggested count for this curve is about <strong>${m.suggestedLands}</strong>.</p></div>`;
+    }
+    const actions = [];
+    const diff = m.suggestedLands - m.landTotal;
+    if (diff >= 2) actions.push(`Add about <strong>${diff}</strong> more land${diff === 1 ? "" : "s"} (you have ${m.landTotal}; about ${m.suggestedLands} fits this curve and ${m.rampCount} ramp card${m.rampCount === 1 ? "" : "s"}).`);
+    else if (diff <= -3) actions.push(`You run <strong>${-diff}</strong> more land${diff === -1 ? "" : "s"} than the suggested ${m.suggestedLands}. If you keep drawing too many, cut basics first.`);
+    else actions.push(`Your land count (${m.landTotal}) is in a good range for this deck (suggested ${m.suggestedLands}).`);
+    const short = m.id.filter(c => m.eff[c] < m.targets[c] - 1.5);
+    const over = m.id.filter(c => m.eff[c] > m.targets[c] + 4);
+    short.forEach(c => actions.push(`Add more <strong>${COLOR_NAMES[c]}</strong> sources: you have about ${Math.round(m.eff[c])}, aim for about ${m.targets[c]}.`));
+    if (over.length && short.length) actions.push(`You have more than you need of ${over.map(c => COLOR_NAMES[c]).join(", ")}. Trade a few of those basics for lands that make ${short.map(c => COLOR_NAMES[c]).join(" or ")}.`);
+    if (m.tappedAlways.length > 8) actions.push(`<strong>${m.tappedAlways.length}</strong> of your lands always enter tapped. Many groups aim for 6 to 8 or fewer, so swap a few for untapped duals.`);
+    if (m.id.length >= 3 && m.colorlessLands > 4) actions.push(`<strong>${m.colorlessLands}</strong> lands make no colored mana. In a ${m.id.length}-color deck, each one costs you a colored source.`);
+
+    const rows = m.id.map(c => {
+      const d = m.dem[c], t = m.targets[c], e = m.eff[c];
+      const status = e < t - 1.5 ? `<span class="badge bad">Short by ${Math.ceil(t - e)}</span>` : e > t + 4 ? `<span class="badge warn">More than needed</span>` : `<span class="badge good">Good</span>`;
+      return `<tr><td>${manaSym(c)} ${COLOR_NAMES[c]}</td><td>${d.pips} (${Math.round((d.share || 0) * 100)}%)</td><td>${d.cards}</td><td>${d.early === null ? "&ndash;" : d.early}</td>
+        <td>${m.landSrc[c]}${m.rockSrc[c] ? ` + ${m.rockSrc[c]} from rocks and creatures` : ""}</td><td>${t}</td><td>${status}</td></tr>`;
+    }).join("");
+
+    const basicRows = m.id.map(c => {
+      const now = m.basicSrc[c], next = m.alloc[c], dlt = next - now;
+      return `<tr><td>${manaSym(c)} ${BASIC_FOR[c]}</td><td>${now}</td><td><strong>${next}</strong></td><td>${dlt === 0 ? "&ndash;" : (dlt > 0 ? "+" : "&minus;") + Math.abs(dlt)}</td></tr>`;
+    }).join("");
+
+    let upgrades = "";
+    if (m.adds.length) {
+      upgrades += `<h3>Dual land upgrades</h3><p class="hint">Lands that make two of your colors and that your list doesn't have yet, best first. The original duals (Underground Sea and the like) are excellent but extremely expensive. Names link to Scryfall.</p>`;
+      upgrades += m.adds.map(x => `<div class="mb-pair"><div class="mb-pairhead">${manaSym(x.pair[0])}${manaSym(x.pair[1])} <strong>${x.pair[2]}</strong>${x.weak.length ? ` <span class="hint">You run ${x.weak.map(esc).join(", ")}; these enter tapped, so they're the first to swap out.</span>` : ""}</div>
+        <div class="mb-cands">${x.cands.map(c => `<span class="mb-cand">${link(c.name)} <small>${esc(c.cycle)}</small></span>`).join("")}</div></div>`).join("");
+    }
+    if (m.triomes.length) upgrades += `<h3>Three-color lands</h3><p class="hint">Triomes make three colors, enter tapped, and count as basic land types.</p><div class="mb-cands">${m.triomes.map(t => `<span class="mb-cand">${[...t[1]].map(c => manaSym(c)).join("")} ${link(t[0])}</span>`).join("")}</div>`;
+    if (m.adds.utility && m.adds.utility.length) upgrades += `<h3>Other fixing lands</h3><p class="hint">Not already in your list. Command Tower and Exotic Orchard are strongest; Mana Confluence and City of Brass cost life.</p><div class="mb-cands">${m.adds.utility.map(n => `<span class="mb-cand">${link(n)}</span>`).join("")}</div>`;
+
+    const tappedNote = `<p>Lands that always enter tapped: <strong>${m.tappedAlways.length}</strong>${m.tappedAlways.length ? ` (${m.tappedAlways.map(esc).join(", ")})` : ""}. Sometimes tapped: <strong>${m.tappedSometimes.length}</strong>. Lands that make no colored mana: <strong>${m.colorlessLands}</strong>${m.colorlessNames.length ? ` (${m.colorlessNames.map(esc).join(", ")})` : ""}.</p>`;
+
+    return `<div class="panel"><h2>Mana base optimizer</h2>
+      <p class="hint">Compares the colors your spells need with the lands and mana rocks that make them. Targets are rules of thumb, not exact odds. Colored costs in hybrid or Phyrexian symbols and activated abilities aren't counted.</p>
+      <h3>What to do</h3><ul class="mg-list">${actions.map(x => `<li>${x}</li>`).join("")}</ul>
+      <h3>Color by color</h3>
+      <div class="mb-scroll"><table class="mg-table mb-table"><tr><th>Color</th><th>Colored symbols</th><th>Cards</th><th>Earliest cost</th><th>Sources now</th><th>Aim for</th><th></th></tr>${rows}</table></div>
+      <p class="hint">"Earliest cost" is the cheapest card that needs the color. Rocks and creatures that make mana count as half a source.</p>
+      <h3>Best split of your basic lands</h3>
+      <p class="hint">Keeping your ${m.basicTotal} basic${m.basicTotal === 1 ? "" : "s"}${m.basicPlanTotal !== m.basicTotal ? ` and changing to ${m.basicPlanTotal} so the deck has ${m.suggestedLands} lands` : ""}, this is the split that gets each color closest to its target given the nonbasic lands you already run.</p>
+      <div class="mb-scroll"><table class="mg-table mb-table"><tr><th>Basic</th><th>Now</th><th>Suggested</th><th>Change</th></tr>${basicRows}</table></div>
+      <h3>Tapped and colorless lands</h3>${tappedNote}
+      ${upgrades}
+    </div>`;
+  }
+
   function renderAll(a, commanders, notFound, staples, deckSize, commanderRecovered) {
     resultsEl.innerHTML =
       renderCommanderNotice(a, commanderRecovered) +
@@ -2835,6 +3024,7 @@
       renderSecondLook(a) +
       renderSuggestions(a, staples);
 
+    $("#manaBase").innerHTML = renderManaBase(a);
     wireGalleryToggle();
     wireCommanderTilt();
 
@@ -2853,6 +3043,7 @@
   });
 
   async function runAnalysis() {
+    if (!$("#an-mana").classList.contains("active")) $("#anTabs [data-an=\"analysis\"]").click();
     const decklistText = $("#decklistInput").value;
     const commanderText = $("#commanderInput").value;
     if (!decklistText.trim()) {
@@ -2924,6 +3115,11 @@
     analyzeBtn.disabled = false;
   }
 
+  $("#anTabs").addEventListener("click", ev => {
+    const b = ev.target.closest("button[data-an]"); if (!b) return;
+    $("#anTabs").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+    document.querySelectorAll("#analyzerPage .an-pane").forEach(p => p.classList.toggle("active", p.id === "an-" + b.dataset.an));
+  });
   $("#analyzeBtn").addEventListener("click", runAnalysis);
   $("#clearBtn").addEventListener("click", () => {
     $("#decklistInput").value = "";
@@ -2931,6 +3127,8 @@
     resultsEl.innerHTML = "";
     statusEl.textContent = "";
     primerPanelEl.innerHTML = "";
+    $("#lsResults").innerHTML = "";
+    $("#manaBase").innerHTML = MANA_BASE_EMPTY;
     primerBtn.disabled = true;
     lastAnalysis = null;
     lastRawInputs = null;
@@ -2943,13 +3141,11 @@
   (function wirePageNav() {
     const pages = {
       print: { nav: $("#navPrint"), page: $("#printPage") },
-      lowsodium: { nav: $("#navLowSodium"), page: $("#lowSodiumPage") },
       game: { nav: $("#navGame"), page: $("#gamePage") },
       analyzer: { nav: $("#navAnalyzer"), page: $("#analyzerPage") },
       mana: { nav: $("#navMana"), page: $("#manaPage") },
       cedh: { nav: $("#navCedh"), page: $("#cedhPage") },
       random: { nav: $("#navRandom"), page: $("#randomPage") },
-      creator: { nav: $("#navCreator"), page: $("#creatorPage") },
       lore: { nav: $("#navLore"), page: $("#lorePage") }
     };
     function showPage(which) {
@@ -2963,10 +3159,8 @@
     pages.mana.nav.addEventListener("click", () => showPage("mana"));
     pages.print.nav.addEventListener("click", () => showPage("print"));
     pages.game.nav.addEventListener("click", () => showPage("game"));
-    pages.lowsodium.nav.addEventListener("click", () => showPage("lowsodium"));
     pages.cedh.nav.addEventListener("click", () => showPage("cedh"));
     pages.random.nav.addEventListener("click", () => showPage("random"));
-    pages.creator.nav.addEventListener("click", () => showPage("creator"));
     pages.lore.nav.addEventListener("click", () => showPage("lore"));
   })();
 
@@ -3743,8 +3937,8 @@
         if (!url) return;
         const n = Math.max(1, Math.min(99, parseInt(val("Copies"), 10) || 1));
         const total = printBridge.addCustom ? printBridge.addCustom(val("Name").trim() || "Custom card", url, n) : 0;
-        status(`Added ${n} cop${n === 1 ? "y" : "ies"} to the Print Proxy sheet (${total} custom card${total === 1 ? "" : "s"} there now). The sheet preview is below.`);
-        const sw = $("#ccSheetWrap"); if (sw && !sw.hidden) sw.scrollIntoView({ behavior: "smooth", block: "start" });
+        status(`Added ${n} cop${n === 1 ? "y" : "ies"} to the Print Proxy sheet (${total} custom card${total === 1 ? "" : "s"} there now). The sheet is shown below.`);
+        $("#printPreviewWrap").scrollIntoView({ behavior: "smooth", block: "start" });
       });
 
       /* ---------- saved designs ---------- */
@@ -3787,7 +3981,7 @@
           setArt(d.art || null, { remote: /^https?:/.test(d.art || "") });
           saveDraft(); redraw();
           status(`Loaded “${d.fields.Name || "Untitled"}”.`);
-          window.scrollTo({ top: $("#creatorPage").offsetTop, behavior: "smooth" });
+          $("#pcTabs").scrollIntoView({ behavior: "smooth", block: "start" });
         } else if (del) {
           const d = list.find(x => x.id === del.dataset.ccDel);
           if (!d || !confirm(`Delete the saved design “${d.fields.Name || "Untitled"}”?`)) return;
@@ -3804,7 +3998,7 @@
       try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); setFields(d || DEFAULTS); } catch (e) { setFields(DEFAULTS); }
       renderSaved();
       draw();
-      $("#navCreator").addEventListener("click", redraw);
+      $("#pcTabs").addEventListener("click", redraw);
     } catch (err) {
       console.error("Card Creator failed to initialise", err);
     }
@@ -4438,10 +4632,10 @@
 
       /* ---------------- instant check ---------------- */
       function runCheck() {
-        const cmdText = $("#lsCmd").value, deckText = $("#lsDeck").value;
+        const cmdText = $("#commanderInput").value, deckText = $("#decklistInput").value;
         const out = $("#lsResults");
         if (!cmdText.trim() && !deckText.trim()) {
-          out.innerHTML = `<div class="ls-empty">Nothing to check yet &mdash; add a commander, some card names, or a decklist above.</div>`;
+          out.innerHTML = `<div class="ls-empty">Nothing to check yet &mdash; add a commander, some card names, or a decklist in the boxes at the top of this page.</div>`;
           return;
         }
         const parsed = parseDecklist(deckText, cmdText);
@@ -4505,29 +4699,18 @@
         out.innerHTML = html;
       }
 
-      $("#lsCheckBtn").addEventListener("click", runCheck);
+      $("#lsCheckBtn").addEventListener("click", () => {
+        $("#anTabs [data-an=\"lowsodium\"]").click();
+        runCheck();
+      });
       $("#lsHideClean").addEventListener("change", () => { if ($("#lsResults").innerHTML) runCheck(); });
-      $("#lsClearBtn").addEventListener("click", () => {
-        $("#lsCmd").value = ""; $("#lsDeck").value = ""; $("#lsResults").innerHTML = "";
-        $("#lsCmd").focus();
-      });
-      $("#lsFullBtn").addEventListener("click", () => {
-        const cmd = $("#lsCmd").value, deck = $("#lsDeck").value;
-        if (!cmd.trim() && !deck.trim()) { runCheck(); return; }
-        $("#commanderInput").value = cmd;
-        $("#decklistInput").value = deck;
-        const sel = $("#banListMode");
-        sel.value = "lowsodium";
-        sel.dispatchEvent(new Event("change", { bubbles: true }));
-        $("#navAnalyzer").click();
-        $("#analyzeBtn").click();
-      });
 
       // "See the Low Sodium rules" buttons rendered inside analyzer results.
       document.addEventListener("click", ev => {
         const go = ev.target.closest && ev.target.closest("[data-ls-goto]");
         if (!go) return;
-        $("#navLowSodium").click();
+        $("#navAnalyzer").click();
+        $("#anTabs [data-an=\"rules\"]").click();
         const target = go.dataset.lsGoto === "browse" ? $("#lsBrowsePanel") : $("#lsRulesPanel");
         target.scrollIntoView({ behavior: "smooth", block: "start" });
       });
@@ -4710,27 +4893,14 @@
       const tiles = printTiles;
       const pages = [];
       for (let i = 0; i < tiles.length; i += 9) pages.push(tiles.slice(i, i + 9).map((t, j) => ({ t, idx: i + j })));
-      if (!pages.length) { printPreviewWrapEl.innerHTML = ""; mirrorSheet(); return; }
+      if (!pages.length) { printPreviewWrapEl.innerHTML = ""; return; }
       printPreviewWrapEl.innerHTML = `<div class="proxy-tip"><strong>Want a different print?</strong> Use the <em>Change print…</em> dropdown at the bottom of any card to pick a specific printing of it. (The dropdowns don't appear on the printed page.)</div>` + pages.map((page, i) => `
         <div class="proxy-page-label">Page ${i + 1} of ${pages.length}</div>
         <div class="proxy-preview-scroll">
           <div class="proxy-page">${page.map(({ t, idx }) => proxyCardTileHtml(t, idx)).join("")}</div>
         </div>
       `).join("");
-      mirrorSheet();
     }
-
-    // The Card Creator tab shows the same sheet below its form, so a new card can be checked without switching tabs.
-    function mirrorSheet() {
-      const wrap = $("#ccSheetWrap");
-      if (!wrap) return;
-      const n = printTiles.length;
-      wrap.hidden = !n;
-      $("#ccSheetPreview").innerHTML = n ? printPreviewWrapEl.innerHTML : "";
-      const pg = Math.ceil(n / 9);
-      $("#ccSheetNote").textContent = n ? `${n} card${n === 1 ? "" : "s"} on the sheet, ${pg} page${pg === 1 ? "" : "s"} at 9 per page. This is the same sheet as the Print Proxy Sheets tab. Use Remove on a custom card to take it off.` : "";
-    }
-    printBridge.mirror = mirrorSheet;
 
     function rerenderTile(idx) {
       const el = printPreviewWrapEl.querySelector(`.proxy-card[data-idx="${idx}"]`);
@@ -4738,7 +4908,6 @@
       const tmp = document.createElement("div");
       tmp.innerHTML = proxyCardTileHtml(printTiles[idx], idx);
       el.replaceWith(tmp.firstElementChild);
-      mirrorSheet();
     }
 
     // Fill the existing dropdown in place (replacing the element could close it
@@ -4921,15 +5090,17 @@
       printStatusEl.textContent = `Removed ${tile.name}. ${printTiles.length} card${printTiles.length === 1 ? "" : "s"} on the sheet.`;
     };
     printPreviewWrapEl.addEventListener("click", removeCustomClick);
-    $("#ccSheetPreview").addEventListener("click", removeCustomClick);
     $("#printBtn").addEventListener("click", () => window.print());
-    $("#ccSheetPrint").addEventListener("click", () => {
-      document.body.classList.add("print-cc");
-      const done = () => { document.body.classList.remove("print-cc"); window.removeEventListener("afterprint", done); };
-      window.addEventListener("afterprint", done);
+    $("#ccPrintNow").addEventListener("click", () => {
+      if (!printTiles.length) { $("#ccStatus").textContent = "The sheet is empty. Use Add to print sheet first."; return; }
       window.print();
     });
-    $("#ccSheetOpen").addEventListener("click", () => { $("#navPrint").click(); window.scrollTo(0, 0); });
+    // Sub-tabs: print a decklist / Card Creator. The sheet preview below is shared by both.
+    $("#pcTabs").addEventListener("click", ev => {
+      const b = ev.target.closest("button[data-pc]"); if (!b) return;
+      $("#pcTabs").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
+      document.querySelectorAll("#printPage .pc-pane").forEach(p => p.classList.toggle("active", p.id === "pc-" + b.dataset.pc));
+    });
     $("#useAnalyzerListBtn").addEventListener("click", () => {
       $("#printCommanderInput").value = $("#commanderInput").value;
       $("#printDecklistInput").value = $("#decklistInput").value;
@@ -5709,6 +5880,7 @@
     ];
     const TRIOMES = [["Indatha Triome", "WBG"], ["Ketria Triome", "GUR"], ["Raugrin Triome", "URW"], ["Savai Triome", "RWB"], ["Zagoth Triome", "BGU"]];
 
+    manaGuideData = { PAIRS, CYCLES, TRIOMES };
     const cache = new Map(); // lowercase name -> card
     let loading = null, failed = false, pair = -1, loaded = false;
 
