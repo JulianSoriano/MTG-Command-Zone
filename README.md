@@ -42,8 +42,6 @@ A full-screen Commander table for phones, tablets and desktops, modeled on apps 
 Dual lands by cycle (original duals, shock, fast, slow, check, pain, temples, surveil, verge, bounce, filter, gain, Guildgates) with card images from Scryfall, filterable by color pair and cycle, plus rules of thumb for land counts, sources per color, pip counting, kinds of fixing and the triomes. Modeled on the [Mana Gathering](https://managathering.com/) dual lands guide.
 
 ### Deck Analyzer
-**Import from a link:** paste an Archidekt or Moxfield deck link (or paste it straight into the decklist box) and the commander and decklist fill in. The deck must be public. The app first asks the site directly; if the browser blocks that, it retries through a public relay (only the deck link is sent, and the status line says so). If both fail, it tells you to paste the exported list instead. The same link box is on the Print page.
-
 Sub-tabs: **Analysis**, **Mana base**, **Low Sodium check**, **Low Sodium rules & ban list**.
 
 **Mana base optimizer:** after you analyze a deck, the Mana base tab compares the colored symbols your spells need with your lands and mana rocks, gives a target number of sources per color (rules of thumb), suggests a land count, the best split of your basic lands, flags tapped and colorless lands, and lists dual lands, triomes and other fixing you could add.
