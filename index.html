@@ -1274,9 +1274,17 @@
 
   <div id="analyzerPage" class="page">
   <div class="panel">
+    <div class="field deck-import">
+      <label for="deckLinkInput">Import from a link (Archidekt or Moxfield)</label>
+      <div class="cc-inline">
+        <input type="text" id="deckLinkInput" placeholder="https://archidekt.com/decks/... or https://moxfield.com/decks/..." spellcheck="false" autocomplete="off">
+        <button type="button" class="secondary" id="deckLinkBtn">Load deck</button>
+      </div>
+      <div class="hint" id="deckLinkStatus" aria-live="polite">Paste the deck's link and the commander and decklist boxes fill in for you. The deck needs to be public.</div>
+    </div>
     <div class="field">
       <label for="commanderInput">Commander (or Commander + Partner/Background) &mdash; one per line</label>
-      <input type="text" id="commanderInput" placeholder="e.g. Atraxa, Praetors' Voice">
+      <textarea id="commanderInput" rows="2" spellcheck="false" style="min-height:0" placeholder="e.g. Atraxa, Praetors' Voice"></textarea>
       <div class="hint">If your pasted list below already has a "Commander" section (Archidekt/TappedOut/Moxfield style export), I'll also try to detect it automatically.</div>
     </div>
     <div class="field">
@@ -1371,9 +1379,17 @@
 
     <div class="pc-pane active" id="pc-print">
     <div class="panel">
+      <div class="field deck-import">
+        <label for="printLinkInput">Import from a link (Archidekt or Moxfield)</label>
+        <div class="cc-inline">
+          <input type="text" id="printLinkInput" placeholder="https://archidekt.com/decks/... or https://moxfield.com/decks/..." spellcheck="false" autocomplete="off">
+          <button type="button" class="secondary" id="printLinkBtn">Load deck</button>
+        </div>
+        <div class="hint" id="printLinkStatus" aria-live="polite">Paste the deck's link and the commander and decklist boxes fill in for you. The deck needs to be public.</div>
+      </div>
       <div class="field">
         <label for="printCommanderInput">Commander (or Commander + Partner/Background) &mdash; one per line</label>
-        <input type="text" id="printCommanderInput" placeholder="e.g. Atraxa, Praetors' Voice">
+        <textarea id="printCommanderInput" rows="2" spellcheck="false" style="min-height:0" placeholder="e.g. Atraxa, Praetors' Voice"></textarea>
       </div>
       <div class="field">
         <label for="printDecklistInput">Decklist (99 cards, one per line &mdash; qty is optional, e.g. "1 Sol Ring" or just "Sol Ring")</label>
@@ -3041,6 +3057,86 @@
     const a = analyzeDeck(commanders, found, requested, mode);
     renderAll(a, commanders, notFound, staples, deckSize, commanderRecovered);
   });
+
+  /* ---------------------------------------------------------------------
+   * Import a deck from an Archidekt or Moxfield link
+   * ------------------------------------------------------------------- */
+  function parseDeckLink(text) {
+    const t = (text || "").trim();
+    let m = t.match(/archidekt\.com\/(?:[a-z]{2}\/)?decks\/(\d+)/i);
+    if (m) return { site: "archidekt", id: m[1] };
+    m = t.match(/moxfield\.com\/decks\/([A-Za-z0-9_-]+)/i);
+    if (m) return { site: "moxfield", id: m[1] };
+    return null;
+  }
+  const isDeckLink = t => /^https?:\/\/\S+$/i.test((t || "").trim()) && !!parseDeckLink(t);
+
+  async function fetchDeckFromLink(link) {
+    const ref = parseDeckLink(link);
+    if (!ref) throw new Error("That doesn't look like an Archidekt or Moxfield deck link.");
+    const commanders = [], cards = [];
+    let title = "";
+    if (ref.site === "archidekt") {
+      const res = await fetch(`https://archidekt.com/api/decks/${ref.id}/`).catch(() => null);
+      if (!res) throw new Error("Couldn't reach Archidekt from this page. Use Archidekt's Export button, copy the list, and paste it below instead.");
+      if (res.status === 404 || res.status === 403) throw new Error("Archidekt couldn't find that deck, or it's private. Make it public and try again.");
+      if (!res.ok) throw new Error("Archidekt answered with an error (" + res.status + "). Try again in a moment.");
+      const d = await res.json();
+      title = d.name || "";
+      const skipCats = new Set((d.categories || []).filter(c => c.includedInDeck === false).map(c => c.name));
+      for (const e of d.cards || []) {
+        const name = e.card && e.card.oracleCard && e.card.oracleCard.name || e.card && e.card.name;
+        if (!name) continue;
+        const cats = e.categories || [];
+        if (cats.includes("Commander")) { commanders.push(name); continue; }
+        if (cats.some(c => skipCats.has(c) || /^(sideboard|maybeboard)$/i.test(c))) continue;
+        cards.push({ qty: e.quantity || 1, name });
+      }
+    } else {
+      const res = await fetch(`https://api2.moxfield.com/v3/decks/all/${ref.id}`).catch(() => null);
+      if (!res || res.status === 403 || res.status === 0) throw new Error("Moxfield doesn't let this page read decks directly. On Moxfield click Export, then Copy for Moxfield / Copy to clipboard, and paste the list below instead.");
+      if (res.status === 404) throw new Error("Moxfield couldn't find that deck, or it's private. Make it public and try again.");
+      if (!res.ok) throw new Error("Moxfield answered with an error (" + res.status + "). Try again in a moment.");
+      const d = await res.json();
+      title = d.name || "";
+      const boards = d.boards || {};
+      const listOf = name => { const b = boards[name] || d[name]; return Object.values((b && b.cards) || b || {}); };
+      for (const e of listOf("commanders")) { const n = e && e.card && e.card.name; if (n) commanders.push(n); }
+      for (const e of listOf("mainboard")) { const n = e && e.card && e.card.name; if (n) cards.push({ qty: e.quantity || 1, name: n }); }
+    }
+    if (!cards.length && !commanders.length) throw new Error("That deck came back empty.");
+    return { title, commanders, cards, site: ref.site };
+  }
+
+  function wireDeckImport(pfx, cmdEl, deckEl, onLoaded) {
+    const input = $("#" + pfx + "LinkInput"), btn = $("#" + pfx + "LinkBtn"), status = $("#" + pfx + "LinkStatus");
+    async function go(link) {
+      const l = (link || input.value).trim();
+      if (!l) { status.textContent = "Paste a link first."; return; }
+      btn.disabled = true; status.textContent = "Loading the deck\u2026";
+      try {
+        const d = await fetchDeckFromLink(l);
+        cmdEl.value = d.commanders.join("\n");
+        deckEl.value = d.cards.map(c => `${c.qty} ${c.name}`).join("\n");
+        const total = d.cards.reduce((s, c) => s + c.qty, 0);
+        status.textContent = `Loaded${d.title ? " \u201c" + d.title + "\u201d" : ""}: ${d.commanders.length ? d.commanders.join(" + ") + " and " : ""}${total} other card${total === 1 ? "" : "s"}.${d.commanders.length ? "" : " No commander was marked, so enter one above."}`;
+        if (onLoaded) onLoaded(d);
+      } catch (err) {
+        status.textContent = err.message || "Couldn't load that deck.";
+      }
+      btn.disabled = false;
+    }
+    btn.addEventListener("click", () => go());
+    input.addEventListener("keydown", ev => { if (ev.key === "Enter") { ev.preventDefault(); go(); } });
+    // Pasting just a link straight into the decklist box works too.
+    deckEl.addEventListener("paste", ev => {
+      const t = (ev.clipboardData && ev.clipboardData.getData("text")) || "";
+      if (isDeckLink(t)) { ev.preventDefault(); input.value = t.trim(); go(t); }
+    });
+    input.addEventListener("paste", () => setTimeout(() => { if (isDeckLink(input.value)) go(); }, 0));
+  }
+  wireDeckImport("deck", $("#commanderInput"), $("#decklistInput"));
+  wireDeckImport("print", $("#printCommanderInput"), $("#printDecklistInput"));
 
   async function runAnalysis() {
     if (!$("#an-mana").classList.contains("active")) $("#anTabs [data-an=\"analysis\"]").click();
