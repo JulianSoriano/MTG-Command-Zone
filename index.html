@@ -1104,6 +1104,15 @@
           </div>
         </div>
 
+        <div class="ce-combo sc-deck">
+          <h4>My Shang-Chi deck</h4>
+          <p><a class="button secondary" href="https://moxfield.com/decks/CCmfARjzLnSd2i-qV7Y4QQ" target="_blank" rel="noopener">Open on Moxfield</a></p>
+          <p class="hint">Moxfield can&rsquo;t be read directly from this page. To check the Moxfield deck against the list saved in this guide, use Moxfield&rsquo;s Export button, copy the list, and paste it here.</p>
+          <textarea id="scDeckIn" rows="4" placeholder="Paste your Moxfield export here"></textarea>
+          <div class="btn-row"><button type="button" id="scDeckCheck">Compare with my saved list</button><button type="button" id="scDeckClear" class="secondary">Clear</button></div>
+          <div id="scDeckOut" aria-live="polite"></div>
+        </div>
+
         <h3>The game plan</h3>
         <div class="sc-flow">
           <div class="sc-step"><i>1</i><b>Set up</b><span>Land, a mox or Sol Ring, then mana elves. Dorks tap the turn they land.</span></div>
@@ -4423,6 +4432,45 @@
           ["Invasion of Ikoria // Zilortha, Apex of Ikoria", "A battle that searches for a creature. Check the card.", "The missing piece."]
         ] }
       ];
+
+      const SC_DECK = [[1, "Allosaurus Shepherd"], [1, "Ancient Tomb"], [1, "Arbor Elf"], [1, "Archdruid's Charm"], [1, "Ashaya, Soul of the Wild"], [1, "Badgermole Cub"], [1, "Birds of Paradise"], [1, "Boreal Druid"], [1, "Boseiju, Who Endures"], [1, "Celestial Reunion"], [1, "Chancellor of the Tangle"], [1, "Chomping Changeling"], [1, "Chord of Calling"], [1, "Chrome Mox"], [1, "Circle of Dreams Druid"], [1, "City of Traitors"], [1, "Collector Ouphe"], [1, "Crop Rotation"], [1, "Delighted Halfling"], [1, "Disciple of Freyalise // Garden of Freyalise"], [1, "Dosan the Falling Leaf"], [1, "Dryad Arbor"], [1, "Duskwatch Recruiter // Krallenhorde Howler"], [1, "Ecological Appreciation"], [1, "Eladamri, Korvecdal"], [1, "Eldritch Evolution"], [1, "Elvish Archdruid"], [1, "Elvish Harbinger"], [1, "Elvish Mystic"], [1, "Elvish Reclaimer"], [1, "Elvish Spirit Guide"], [1, "Emergence Zone"], [1, "Eternal Witness"], [1, "Fanatic of Rhonas"], [1, "Fauna Shaman"], [1, "Finale of Devastation"], [8, "Forest"], [1, "Formidable Speaker"], [1, "Fyndhorn Elves"], [1, "Gaea's Cradle"], [1, "Gemstone Caverns"], [1, "Generous Patron"], [1, "Green Sun's Zenith"], [1, "Hickory Woodlot"], [1, "Invasion of Ikoria // Zilortha, Apex of Ikoria"], [1, "Joraga Treespeaker"], [1, "Karametra's Acolyte"], [1, "Legolas's Quick Reflexes"], [1, "Leyline of Abundance"], [1, "Llanowar Elves"], [1, "Llanowar Mentor"], [1, "Lotus Petal"], [1, "Magus of the Candelabra"], [1, "Magus of the Order"], [1, "Mana Vault"], [1, "Marvin, Murderous Mimic"], [1, "Misty Rainforest"], [1, "Mox Amber"], [1, "Natural Order"], [1, "Nature's Rhythm"], [1, "Once Upon a Time"], [1, "Orochi Leafcaller"], [1, "Priest of Titania"], [1, "Prismatic Vista"], [1, "Quirion Ranger"], [1, "Regal Force"], [1, "Scryb Ranger"], [1, "Seeker of Skybreak"], [1, "Shaman of Forgotten Ways"], [1, "Shang-Chi, Master of Kung Fu"], [1, "Shared Summons"], [1, "Skyshroud Poacher"], [1, "Sol Ring"], [1, "Sowing Mycospawn"], [1, "Summoner's Pact"], [1, "Survival of the Fittest"], [1, "Sylvan Library"], [1, "Sylvan Scrying"], [1, "Sylvan Tutor"], [1, "Talon Gates of Madara"], [1, "Temur Sabertooth"], [1, "Turntimber Symbiosis // Turntimber, Serpentine Wood"], [1, "Ulvenwald Tracker"], [1, "Verdant Catacombs"], [1, "Voice of Many"], [1, "Windswept Heath"], [1, "Wirewood Symbiote"], [1, "Wooded Foothills"], [1, "Woodland Bellower"], [1, "Worldly Tutor"], [1, "Yavimaya, Cradle of Growth"], [1, "Yeva, Nature's Herald"], [1, "Yisan, the Wanderer Bard"]];
+      const scNorm = n => n.toLowerCase().replace(/\u2019/g, "'").split(/\s*\/\/\s*/)[0].trim();
+      function scParse(text) {
+        const m = new Map();
+        text.split(/\r?\n/).forEach(line => {
+          let t = line.trim();
+          if (!t || /^(sideboard|maybeboard|commander|deck|companion)\b:?$/i.test(t)) return;
+          const q = t.match(/^(\d+)\s*x?\s+/i);
+          const qty = q ? parseInt(q[1], 10) : 1;
+          if (q) t = t.slice(q[0].length);
+          t = t.replace(/\s*\[[^\]]*\]\s*/g, " ").replace(/\s*\*[A-Za-z]+\*\s*$/, "").replace(/\s+\([A-Za-z0-9]{2,6}\)(\s+\S+)?\s*$/, "").trim();
+          if (!t) return;
+          const k = scNorm(t);
+          const e = m.get(k) || { name: t, qty: 0 };
+          e.qty += qty; m.set(k, e);
+        });
+        return m;
+      }
+      function scCompare() {
+        const out = $("#scDeckOut");
+        const theirs = scParse($("#scDeckIn").value);
+        if (!theirs.size) { out.innerHTML = `<p class="hint">Paste a list first.</p>`; return; }
+        const mine = new Map(SC_DECK.map(([q, n]) => [scNorm(n), { name: n, qty: q }]));
+        const onlyMox = [], onlySaved = [], qtyDiff = [];
+        theirs.forEach((v, k) => { const o = mine.get(k); if (!o) onlyMox.push(v); else if (o.qty !== v.qty) qtyDiff.push(`${v.name}: Moxfield ${v.qty}, saved ${o.qty}`); });
+        mine.forEach((v, k) => { if (!theirs.has(k)) onlySaved.push(v); });
+        const list = (title, items, fmtf) => items.length ? `<h4>${title} (${items.length})</h4><div class="ce-pills">${items.map(fmtf).join("")}</div>` : "";
+        const tcount = [...theirs.values()].reduce((a, v) => a + v.qty, 0);
+        if (!onlyMox.length && !onlySaved.length && !qtyDiff.length) {
+          out.innerHTML = `<p><strong>They match.</strong> ${tcount} cards, same as the saved list.</p>`; return;
+        }
+        out.innerHTML = `<p><strong>They differ.</strong> Moxfield has ${tcount} cards, the saved list has ${SC_DECK.reduce((a, [q]) => a + q, 0)}.</p>`
+          + list("In Moxfield but not in the saved list", onlyMox, v => pill(v.name))
+          + list("In the saved list but not in Moxfield", onlySaved, v => pill(v.name))
+          + (qtyDiff.length ? `<h4>Different quantities (${qtyDiff.length})</h4><ul>${qtyDiff.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : "");
+      }
+      $("#scDeckCheck").addEventListener("click", scCompare);
+      $("#scDeckClear").addEventListener("click", () => { $("#scDeckIn").value = ""; $("#scDeckOut").innerHTML = ""; });
 
       function scTile(n) {
         const b = isBanned(n);
