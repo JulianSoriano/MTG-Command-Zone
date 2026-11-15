@@ -688,6 +688,40 @@
   .ce-pill.banned { background: var(--bad-bg); color: var(--bad); text-decoration: line-through; }
   .ce-combo p { margin: 0 0 4px; font-size: 0.88rem; }
   .ce-combo .need { color: var(--text-dim); }
+  .sc-hero { display: grid; grid-template-columns: 1fr; gap: 16px; margin: 6px 0 14px; }
+  .sc-hero-art { width: 190px; max-width: 60%; margin: 0 auto; }
+  .sc-hero-text h3 { margin-top: 0; }
+  .sc-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+  .sc-badges span { border: 1px solid var(--border); border-radius: 99px; padding: 2px 10px; font-size: 0.78rem; background: var(--panel); }
+  .sc-abil { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; margin: 8px 0; display: flex; flex-direction: column; gap: 2px; font-size: 0.9rem; }
+  .sc-abil span { color: var(--text-dim); }
+  .sc-flow { display: grid; grid-template-columns: 1fr; gap: 8px; margin: 8px 0 14px; }
+  .sc-step { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--panel); display: grid; grid-template-columns: 28px 1fr; column-gap: 10px; align-items: start; font-size: 0.86rem; }
+  .sc-step i { grid-row: span 2; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: var(--on-accent, #fff); display: flex; align-items: center; justify-content: center; font-style: normal; font-weight: 700; font-size: 0.82rem; }
+  .sc-step span { color: var(--text-dim); }
+  .sc-arrow { display: none; align-self: center; color: var(--accent); font-size: 1.3rem; }
+  .sc-recipe { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 10px; }
+  .sc-tile { display: flex; flex-direction: column; gap: 4px; width: 84px; text-decoration: none; color: var(--text); font-size: 0.7rem; line-height: 1.2; text-align: center; }
+  .sc-tile:hover .ls-art { border-color: var(--accent); transform: translateY(-2px); }
+  .sc-tile .ls-art { display: block; }
+  .sc-tile.banned { opacity: 0.6; }
+  .sc-hero-tile { width: 100%; }
+  .sc-op { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+  .sc-result { flex: 1 1 130px; min-width: 120px; border: 1px dashed var(--accent); border-radius: 10px; padding: 10px 12px; font-weight: 600; font-size: 0.88rem; text-align: center; }
+  .sc-steps { margin: 0 0 8px; padding-left: 20px; font-size: 0.88rem; }
+  .sc-steps li { margin: 2px 0; }
+  .sc-alt { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 6px; font-size: 0.8rem; color: var(--text-dim); }
+  .sc-tag { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; border-radius: 99px; padding: 1px 8px; border: 1px solid var(--accent); color: var(--accent); }
+  .sc-win { background: var(--accent); color: var(--on-accent, #fff); }
+  .sc-role h4 { margin: 14px 0 6px; font-size: 0.95rem; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .sc-role h4 small { color: var(--text-dim); font-weight: 400; font-size: 0.78rem; }
+  @media (min-width: 720px) {
+    .sc-hero { grid-template-columns: 210px 1fr; }
+    .sc-hero-art { width: 100%; max-width: none; margin: 0; }
+    .sc-flow { grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr; }
+    .sc-arrow { display: block; }
+    .sc-tile { width: 104px; font-size: 0.74rem; }
+  }
   .ce-staples { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px 10px; margin: 10px 0 18px; }
   .ce-staple { display: flex; flex-direction: column; gap: 4px; text-decoration: none; color: var(--text); font-size: 0.76rem; line-height: 1.25; font-weight: 500; }
   .ce-staple:hover .ls-art { border-color: var(--accent); transform: translateY(-2px); }
@@ -1052,34 +1086,47 @@
       </div>
 
       <div class="ce-panel" id="ce-shang">
-        <h3>Shang-Chi, Master of Kung Fu &mdash; combos and win lines</h3>
-        <p>A mono-green creature-ability deck. Shang-Chi is a 2-mana legend (2/2) with two jobs: it lets every creature use {T} abilities the turn it arrives, and it taps for two mana of one colour that can <em>only</em> pay for abilities of creatures. It can&rsquo;t cast spells, so the plan is to turn that restricted mana into real mana, or into untaps and tutors.</p>
-        <p class="hint">These lines are my reading of the card text as I understand it, not tested play. Goldfish them, and read each card on Scryfall before relying on a line in a real game. Shang-Chi&rsquo;s text comes from its Marvel Super Heroes listing.</p>
-        <h3>Game plan</h3>
-        <ul>
-          <li><strong>Turns 1&ndash;2:</strong> land, a mox or Sol Ring, then a mana elf or a tutor that finds one. Any dork cast after Shang-Chi taps right away.</li>
-          <li><strong>Turn 2&ndash;3:</strong> land Shang-Chi, then untap or reuse it. The untappers are the heart of the deck.</li>
-          <li><strong>Win:</strong> build a huge pile of creature-only mana, turn it into real mana, then finish with an Elf army or a library-draw chain.</li>
-        </ul>
-        <div id="ceShang"></div>
-        <h3>Tutor map</h3>
-        <div class="ce-grid2">
-          <div class="ce-combo"><h4>Find a creature</h4><p>Green Sun&rsquo;s Zenith, Chord of Calling, Eldritch Evolution, Natural Order, Survival of the Fittest, Fauna Shaman, Summoner&rsquo;s Pact, Sylvan Tutor, Worldly Tutor, Finale of Devastation, Nature&rsquo;s Rhythm, Shared Summons, Woodland Bellower and Yisan.</p></div>
-          <div class="ce-combo"><h4>Find a land</h4><p>Crop Rotation (Gaea&rsquo;s Cradle is the top target), Elvish Reclaimer, Sylvan Scrying and the fetchlands.</p></div>
-          <div class="ce-combo"><h4>Best first targets</h4><p>Seeker of Skybreak or Wirewood Symbiote when Shang-Chi is in play; Shang-Chi itself when you have mana but no engine; Dosan the Falling Leaf when you need to resolve a combo through counterspells.</p></div>
+        <div class="sc-hero">
+          <div id="scHeroArt" class="sc-hero-art"></div>
+          <div class="sc-hero-text">
+            <h3>Shang-Chi, Master of Kung Fu</h3>
+            <div class="sc-badges"><span>Mono green</span><span>Mana value 2</span><span>2/2 Human Warrior Hero</span></div>
+            <div class="sc-abil"><b>Haste for abilities</b><span>Creatures you control can use their {T} abilities the turn they arrive.</span></div>
+            <div class="sc-abil"><b>{T}: two mana</b><span>Two mana of one colour, but only to pay for abilities of creatures. It can&rsquo;t cast spells.</span></div>
+            <p class="hint">Combo lines are my own untested reading of the cards. Goldfish them and read each card before relying on a line.</p>
+          </div>
         </div>
-        <h3>Protection</h3>
-        <ul>
-          <li><strong>Dosan the Falling Leaf</strong> stops opponents casting spells on your turn, including free ones. It is your best shield for the final turn.</li>
-          <li><strong>Allosaurus Shepherd</strong> makes your green spells uncounterable, but it also taxes your own mana, so cast it before the key spell.</li>
-          <li><strong>Yeva, Nature&rsquo;s Herald, Legolas&rsquo;s Quick Reflexes, Temur Sabertooth</strong> give flash and instant-speed answers to removal. Collector Ouphe shuts down opposing artifact rocks but also turns off your own, so hold it unless it matters.</li>
-        </ul>
+
+        <h3>The game plan</h3>
+        <div class="sc-flow">
+          <div class="sc-step"><i>1</i><b>Set up</b><span>Land, a mox or Sol Ring, then mana elves. Dorks tap the turn they land.</span></div>
+          <div class="sc-arrow" aria-hidden="true">&rarr;</div>
+          <div class="sc-step"><i>2</i><b>Engine</b><span>Land Shang-Chi, then untap it. Untappers are the heart of the deck.</span></div>
+          <div class="sc-arrow" aria-hidden="true">&rarr;</div>
+          <div class="sc-step"><i>3</i><b>Convert</b><span>Turn creature-only mana into real mana with Magus of the Candelabra.</span></div>
+          <div class="sc-arrow" aria-hidden="true">&rarr;</div>
+          <div class="sc-step"><i>4</i><b>Win</b><span>Elf army with Finale of Devastation, or draw the deck with Regal Force.</span></div>
+        </div>
+
+        <h3>Combos and win lines</h3>
+        <div id="ceShang"></div>
+
+        <h3>Key cards by job</h3>
+        <div id="scRoles"></div>
+
+        <h3>Protect the win</h3>
+        <div class="ce-grid2">
+          <div class="ce-combo"><h4>Dosan the Falling Leaf</h4><p>Stops opponents casting spells on your turn, free ones included. Your best shield for the final turn.</p></div>
+          <div class="ce-combo"><h4>Allosaurus Shepherd</h4><p>Makes your green spells uncounterable. Cast it before the key spell.</p></div>
+          <div class="ce-combo"><h4>Flash answers</h4><p>Yeva, Legolas&rsquo;s Quick Reflexes and Temur Sabertooth help against removal. Collector Ouphe also shuts off your own artifact mana, so hold it unless it matters.</p></div>
+        </div>
+
         <h3>Weak spots</h3>
         <ul>
-          <li>Shang-Chi is a 2/2 with no protection of its own. Hold your untappers until you can use them in the same turn.</li>
+          <li>Shang-Chi is a 2/2 with no protection. Hold your untappers until you can use them in the same turn.</li>
           <li>Its mana can&rsquo;t cast spells, so a hand of only spells and no land or dork stalls.</li>
           <li>Board wipes and cheap creature removal hurt more than counterspells.</li>
-          <li>The list has no single-card finisher such as Craterhoof Behemoth. Wins depend on the Elf army or the draw chain, so consider adding one.</li>
+          <li>The list has no single-card finisher such as Craterhoof Behemoth, so wins depend on the Elf army or the draw chain.</li>
         </ul>
       </div>
       <div class="ce-panel" id="ce-staples">
@@ -4233,6 +4280,9 @@
         META.rows.forEach(r => r.names.forEach(n => s.add(n)));
         COMBOS.forEach(c => c.cards.forEach(n => s.add(n)));
         STAPLES.forEach(g => g.cards.forEach(c => s.add(c[0])));
+        SHANG.forEach(c => { c.cards.forEach(n => s.add(n)); c.alt.forEach(n => s.add(n)); });
+        SC_ROLES.forEach(g => g.cards.forEach(c => s.add(c[0])));
+        s.add("Shang-Chi, Master of Kung Fu");
         return [...s];
       };
 
@@ -4293,30 +4343,60 @@
       }
 
       const SHANG = [
-        { title: "Shang-Chi + any untapper: double the mana", cards: ["Shang-Chi, Master of Kung Fu", "Seeker of Skybreak", "Quirion Ranger", "Scryb Ranger", "Wirewood Symbiote"],
-          how: "Tap Shang-Chi for two creature-only mana, untap it with an untapper, and tap it again. Seeker of Skybreak untaps for free by tapping itself. Quirion Ranger and Scryb Ranger need a Forest returned to hand, and Wirewood Symbiote needs an Elf returned to hand.",
-          need: "Needs: Shang-Chi plus one untapper. Each untapper has a cost, so count how many repeats you can afford." },
-        { title: "Turn creature mana into real mana", cards: ["Shang-Chi, Master of Kung Fu", "Magus of the Candelabra", "Gaea's Cradle", "Ancient Tomb"], 
-          how: "Tap your lands for mana first, then pay Magus of the Candelabra&rsquo;s {X} with Shang-Chi&rsquo;s creature-only mana to untap X lands, and tap them again. Magus is a creature ability, so Shang-Chi can pay for it. Gaea&rsquo;s Cradle is the best land to untap with a wide board.",
-          need: "Needs: Shang-Chi, Magus, and lands that were tapped this turn. Net gain grows with the number of creatures when Cradle is involved." },
-        { title: "Elf mana loop", cards: ["Shang-Chi, Master of Kung Fu", "Wirewood Symbiote", "Llanowar Elves", "Elvish Archdruid", "Priest of Titania"],
-          how: "With Shang-Chi, an Elf can tap the turn it is cast. Tap the Elf for mana, use Wirewood Symbiote to return that Elf and untap Shang-Chi, then recast the Elf with the mana it just made. Shang-Chi nets two creature-only mana each loop. Archdruid and Priest of Titania make the Elf pay off even more.",
-          need: "Needs: Shang-Chi, Wirewood Symbiote, and a one-mana Elf that taps for at least the mana it costs. Check that every step leaves you at least even on mana." },
-        { title: "Infinite real mana", cards: ["Shang-Chi, Master of Kung Fu", "Wirewood Symbiote", "Magus of the Candelabra", "Gaea's Cradle"],
-          how: "Run the Elf mana loop to get as much creature-only mana as you like. Pay Magus of the Candelabra with it to untap all your lands, tap them for real mana, and use Symbiote to untap Magus so it can do it again. This leaves you with as much real green mana as you like.",
-          need: "Needs: the Elf mana loop above, Magus, and a Symbiote activation to spare for Magus each time. Test it step by step; it uses a lot of parts." },
-        { title: "Elf army finish", cards: ["Allosaurus Shepherd", "Elvish Archdruid", "Finale of Devastation", "Regal Force", "Natural Order"],
-          how: "With lots of mana, activate Allosaurus Shepherd to make every Elf 5/5, add Elvish Archdruid&rsquo;s bonus, and cast Finale of Devastation with X of 10 or more so your creatures get +2/+2 and haste. Natural Order into Regal Force draws cards equal to your green creatures if you need to refill.",
-          need: "Needs: a wide board of Elves and the mana from the lines above. Shang-Chi&rsquo;s haste only covers abilities, so Finale is what lets your creatures attack." },
-        { title: "Level up Joraga Treespeaker", cards: ["Joraga Treespeaker", "Shang-Chi, Master of Kung Fu", "Elvish Mystic", "Fyndhorn Elves"],
-          how: "Level up is an activated ability of the creature, so Shang-Chi&rsquo;s mana can pay for it. One level makes your Elves tap for GG each.",
-          need: "Needs: Treespeaker plus three or more Elves. Best on turn 2 or 3 as a way to jump to a big turn." }
+        { title: "Double the mana", tag: "Engine", cards: ["Shang-Chi, Master of Kung Fu", "Seeker of Skybreak"], result: "Two creature-only mana, again",
+          steps: ["Tap Shang-Chi for two creature-only mana.", "Tap Seeker of Skybreak to untap Shang-Chi.", "Tap Shang-Chi again."],
+          alt: ["Quirion Ranger", "Scryb Ranger", "Wirewood Symbiote"],
+          note: "Seeker untaps for free. The alternates cost a Forest or an Elf returned to hand, so count how many repeats you can afford." },
+        { title: "Turn creature mana into real mana", tag: "Engine", cards: ["Shang-Chi, Master of Kung Fu", "Magus of the Candelabra", "Gaea's Cradle"], result: "Real mana for spells",
+          steps: ["Tap your lands for mana first.", "Pay Magus of the Candelabra's {X} with Shang-Chi's mana. It is a creature ability, so it counts.", "Untap X lands and tap them again."],
+          alt: ["Ancient Tomb"],
+          note: "Gaea's Cradle is the best land to untap with a wide board." },
+        { title: "Elf mana loop", tag: "Combo", cards: ["Shang-Chi, Master of Kung Fu", "Wirewood Symbiote", "Llanowar Elves"], result: "Creature-only mana, as much as you like",
+          steps: ["Tap Llanowar Elves for G. It can tap at once thanks to Shang-Chi.", "Wirewood Symbiote: return the Elf to hand and untap Shang-Chi.", "Recast the Elf with that G, tap Shang-Chi for two, and repeat."],
+          alt: ["Elvish Archdruid", "Priest of Titania"],
+          note: "Check that each loop leaves you at least even on mana. Archdruid and Priest of Titania make the Elf pay off more." },
+        { title: "Infinite real mana", tag: "Combo", cards: ["Shang-Chi, Master of Kung Fu", "Wirewood Symbiote", "Magus of the Candelabra", "Gaea's Cradle"], result: "As much green mana as you like",
+          steps: ["Run the Elf mana loop to build a huge pool of creature-only mana.", "Pay Magus's {X} with it to untap every land, then tap them for real mana.", "Use Symbiote to untap Magus and repeat."],
+          alt: [],
+          note: "Test this one step by step. It uses a lot of parts." },
+        { title: "Elf army finish", tag: "Win", cards: ["Allosaurus Shepherd", "Elvish Archdruid", "Finale of Devastation"], result: "A lethal swing",
+          steps: ["Activate Allosaurus Shepherd so every Elf is 5/5.", "Elvish Archdruid adds its bonus.", "Cast Finale of Devastation with X of 10 or more: creatures get +2/+2 and haste."],
+          alt: ["Regal Force", "Natural Order"],
+          note: "Shang-Chi's haste only covers abilities, so Finale is what lets your creatures attack. Natural Order into Regal Force refills your hand." },
+        { title: "Level up Joraga Treespeaker", tag: "Burst", cards: ["Joraga Treespeaker", "Shang-Chi, Master of Kung Fu", "Elvish Mystic"], result: "Every Elf taps for GG",
+          steps: ["Level up is a creature ability, so Shang-Chi's mana pays for it.", "At level 1, your Elves tap for GG each."],
+          alt: ["Fyndhorn Elves"],
+          note: "Best on turn 2 or 3 as a way to jump to a big turn." }
       ];
+
+      const SC_ROLES = [
+        { group: "Untappers", note: "Reuse Shang-Chi or a mana engine", cards: [["Seeker of Skybreak", "Free untap"], ["Quirion Ranger", "Return a Forest"], ["Scryb Ranger", "Return a Forest"], ["Wirewood Symbiote", "Return an Elf"]] },
+        { group: "Mana engines", note: "Where the mana comes from", cards: [["Gaea's Cradle", "Green per creature"], ["Magus of the Candelabra", "Untap X lands"], ["Circle of Dreams Druid", "Green per creature"], ["Elvish Archdruid", "Green per Elf"], ["Priest of Titania", "Green per Elf"], ["Joraga Treespeaker", "Level up for GG"]] },
+        { group: "Creature tutors", note: "Find the missing piece", cards: [["Green Sun's Zenith", "Green creature"], ["Natural Order", "Green creature, free"], ["Chord of Calling", "Instant speed"], ["Eldritch Evolution", "Sacrifice, upgrade"], ["Survival of the Fittest", "Discard, search"], ["Fauna Shaman", "Discard, search"], ["Summoner's Pact", "Free, pay later"], ["Sylvan Tutor", "Top of library"], ["Worldly Tutor", "Top of library"]] },
+        { group: "Land finders", note: "Gaea's Cradle is the top target", cards: [["Crop Rotation", "Sacrifice a land"], ["Elvish Reclaimer", "Sacrifice a land"], ["Sylvan Scrying", "Any land"]] },
+        { group: "Protection", note: "Land the final turn", cards: [["Dosan the Falling Leaf", "No spells on your turn"], ["Allosaurus Shepherd", "Uncounterable"], ["Yeva, Nature's Herald", "Flash creatures"], ["Legolas's Quick Reflexes", "Cheap trick"], ["Temur Sabertooth", "Protect a creature"]] },
+        { group: "Finishers and draw", note: "How the game ends", cards: [["Finale of Devastation", "Haste and +2/+2"], ["Regal Force", "Draw per green creature"], ["Eladamri, Korvecdal", "Cast from the top"], ["Allosaurus Shepherd", "Elves become 5/5"]] }
+      ];
+
+      function scTile(n) {
+        const b = isBanned(n);
+        return `<a class="sc-tile${b ? " banned" : ""}" href="${scryUrl(n)}" target="_blank" rel="noopener" title="${esc(n)}">${artHtml(n)}<span>${esc(n)}</span></a>`;
+      }
+
       function renderShang() {
         const el = $("#ceShang"); if (!el) return;
-        el.innerHTML = SHANG.map(c => `<div class="ce-combo"><h4>${esc(c.title)}</h4>
-            <div class="ce-pills">${c.cards.map(pill).join("")}</div>
-            <p>${c.how}</p><p class="need">${c.need}</p></div>`).join("");
+        el.innerHTML = SHANG.map(c => {
+          const tiles = c.cards.map(scTile).join('<span class="sc-op" aria-hidden="true">+</span>');
+          const alt = c.alt.length ? `<div class="sc-alt"><span>Also works with</span>${c.alt.map(pill).join("")}</div>` : "";
+          return `<div class="ce-combo sc-combo"><h4>${esc(c.title)} <span class="sc-tag sc-${c.tag.toLowerCase()}">${esc(c.tag)}</span></h4>
+            <div class="sc-recipe">${tiles}<span class="sc-op" aria-hidden="true">=</span><span class="sc-result">${esc(c.result)}</span></div>
+            <ol class="sc-steps">${c.steps.map(t => `<li>${esc(t)}</li>`).join("")}</ol>
+            ${alt}<p class="need">${esc(c.note)}</p></div>`;
+        }).join("");
+        const hero = $("#scHeroArt");
+        if (hero) hero.innerHTML = `<a class="sc-tile sc-hero-tile" href="${scryUrl("Shang-Chi, Master of Kung Fu")}" target="_blank" rel="noopener">${artHtml("Shang-Chi, Master of Kung Fu")}</a>`;
+        const roles = $("#scRoles");
+        if (roles) roles.innerHTML = SC_ROLES.map(g => `<div class="sc-role"><h4>${esc(g.group)} <small>${esc(g.note)}</small></h4><div class="ce-staples">${g.cards.map(([n, r]) => `<a class="ce-staple" href="${scryUrl(n)}" target="_blank" rel="noopener">${artHtml(n)}<span>${esc(n)}</span><span class="role">${esc(r)}</span></a>`).join("")}</div></div>`).join("");
       }
 
       function renderAll() { renderTiers(); renderCombos(); renderShang(); renderStaples(); }
