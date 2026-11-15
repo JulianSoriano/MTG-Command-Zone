@@ -1105,11 +1105,11 @@
         </div>
 
         <div class="ce-combo sc-deck">
-          <h4>My Shang-Chi deck</h4>
-          <p><a class="button secondary" href="https://moxfield.com/decks/CCmfARjzLnSd2i-qV7Y4QQ" target="_blank" rel="noopener">Open on Moxfield</a></p>
-          <p class="hint">Moxfield can&rsquo;t be read directly from this page. To check the Moxfield deck against the list saved in this guide, use Moxfield&rsquo;s Export button, copy the list, and paste it here.</p>
-          <textarea id="scDeckIn" rows="4" placeholder="Paste your Moxfield export here"></textarea>
-          <div class="btn-row"><button type="button" id="scDeckCheck">Compare with my saved list</button><button type="button" id="scDeckClear" class="secondary">Clear</button></div>
+          <h4>Reference deck: Pigeonize&rsquo;s Shang-Chi list</h4>
+          <p><a class="button secondary" href="https://moxfield.com/decks/CCmfARjzLnSd2i-qV7Y4QQ" target="_blank" rel="noopener">Open Pigeonize&rsquo;s deck on Moxfield</a></p>
+          <p class="hint">This is the example deck to measure yours against. Moxfield can&rsquo;t be read directly from this page, so use its Export button, copy the list, and paste it here to see how it differs from your list.</p>
+          <textarea id="scDeckIn" rows="4" placeholder="Paste Pigeonize's Moxfield export here"></textarea>
+          <div class="btn-row"><button type="button" id="scDeckCheck">Compare with my list</button><button type="button" id="scDeckClear" class="secondary">Clear</button></div>
           <div id="scDeckOut" aria-live="polite"></div>
         </div>
 
@@ -4457,16 +4457,16 @@
         if (!theirs.size) { out.innerHTML = `<p class="hint">Paste a list first.</p>`; return; }
         const mine = new Map(SC_DECK.map(([q, n]) => [scNorm(n), { name: n, qty: q }]));
         const onlyMox = [], onlySaved = [], qtyDiff = [];
-        theirs.forEach((v, k) => { const o = mine.get(k); if (!o) onlyMox.push(v); else if (o.qty !== v.qty) qtyDiff.push(`${v.name}: Moxfield ${v.qty}, saved ${o.qty}`); });
+        theirs.forEach((v, k) => { const o = mine.get(k); if (!o) onlyMox.push(v); else if (o.qty !== v.qty) qtyDiff.push(`${v.name}: Pigeonize ${v.qty}, you ${o.qty}`); });
         mine.forEach((v, k) => { if (!theirs.has(k)) onlySaved.push(v); });
         const list = (title, items, fmtf) => items.length ? `<h4>${title} (${items.length})</h4><div class="ce-pills">${items.map(fmtf).join("")}</div>` : "";
         const tcount = [...theirs.values()].reduce((a, v) => a + v.qty, 0);
         if (!onlyMox.length && !onlySaved.length && !qtyDiff.length) {
-          out.innerHTML = `<p><strong>They match.</strong> ${tcount} cards, same as the saved list.</p>`; return;
+          out.innerHTML = `<p><strong>Your list matches Pigeonize's.</strong> ${tcount} cards, all the same.</p>`; return;
         }
-        out.innerHTML = `<p><strong>They differ.</strong> Moxfield has ${tcount} cards, the saved list has ${SC_DECK.reduce((a, [q]) => a + q, 0)}.</p>`
-          + list("In Moxfield but not in the saved list", onlyMox, v => pill(v.name))
-          + list("In the saved list but not in Moxfield", onlySaved, v => pill(v.name))
+        out.innerHTML = `<p><strong>Your list differs.</strong> Pigeonize's list has ${tcount} cards, yours has ${SC_DECK.reduce((a, [q]) => a + q, 0)}.</p>`
+          + list("Pigeonize plays, you don't (cards to consider adding)", onlyMox, v => pill(v.name))
+          + list("You play, Pigeonize doesn't (cards to consider cutting)", onlySaved, v => pill(v.name))
           + (qtyDiff.length ? `<h4>Different quantities (${qtyDiff.length})</h4><ul>${qtyDiff.map(t => `<li>${esc(t)}</li>`).join("")}</ul>` : "");
       }
       $("#scDeckCheck").addEventListener("click", scCompare);
