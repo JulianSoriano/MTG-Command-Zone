@@ -715,6 +715,13 @@
   .sc-win { background: var(--accent); color: var(--on-accent, #fff); }
   .sc-role h4 { margin: 14px 0 6px; font-size: 0.95rem; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
   .sc-role h4 small { color: var(--text-dim); font-weight: 400; font-size: 0.78rem; }
+  .sc-tutors { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .sc-tutor { display: grid; grid-template-columns: 84px 1fr; gap: 12px; border: 1px solid var(--border); border-radius: 10px; padding: 10px; background: var(--panel); align-items: start; }
+  .sc-tutor .sc-tile span:not(.ls-art):not(.ls-ph) { display: none; }
+  .sc-tutor-text b { display: block; margin-bottom: 4px; font-size: 0.92rem; }
+  .sc-tutor-text p { margin: 0 0 4px; font-size: 0.84rem; }
+  .sc-tutor-text p span { display: inline-block; min-width: 40px; margin-right: 6px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); }
+  @media (min-width: 900px) { .sc-tutors { grid-template-columns: 1fr 1fr; } }
   @media (min-width: 720px) {
     .sc-hero { grid-template-columns: 210px 1fr; }
     .sc-hero-art { width: 100%; max-width: none; margin: 0; }
@@ -1110,6 +1117,10 @@
 
         <h3>Combos and win lines</h3>
         <div id="ceShang"></div>
+
+        <h3>What each tutor finds</h3>
+        <p class="hint">Which card to fetch depends on what you already have. Rule of thumb: no Shang-Chi, fetch Shang-Chi. Shang-Chi but no untapper, fetch Seeker of Skybreak or Wirewood Symbiote. Loop running, fetch Magus of the Candelabra and Gaea&rsquo;s Cradle. Everything in place, fetch the finisher. Effects are as I understand them, so check any card you aren&rsquo;t sure of.</p>
+        <div id="scTutors"></div>
 
         <h3>Key cards by job</h3>
         <div id="scRoles"></div>
@@ -4282,6 +4293,7 @@
         STAPLES.forEach(g => g.cards.forEach(c => s.add(c[0])));
         SHANG.forEach(c => { c.cards.forEach(n => s.add(n)); c.alt.forEach(n => s.add(n)); });
         SC_ROLES.forEach(g => g.cards.forEach(c => s.add(c[0])));
+        SC_TUTORS.forEach(g => g.items.forEach(i => s.add(i[0])));
         s.add("Shang-Chi, Master of Kung Fu");
         return [...s];
       };
@@ -4372,10 +4384,44 @@
       const SC_ROLES = [
         { group: "Untappers", note: "Reuse Shang-Chi or a mana engine", cards: [["Seeker of Skybreak", "Free untap"], ["Quirion Ranger", "Return a Forest"], ["Scryb Ranger", "Return a Forest"], ["Wirewood Symbiote", "Return an Elf"]] },
         { group: "Mana engines", note: "Where the mana comes from", cards: [["Gaea's Cradle", "Green per creature"], ["Magus of the Candelabra", "Untap X lands"], ["Circle of Dreams Druid", "Green per creature"], ["Elvish Archdruid", "Green per Elf"], ["Priest of Titania", "Green per Elf"], ["Joraga Treespeaker", "Level up for GG"]] },
-        { group: "Creature tutors", note: "Find the missing piece", cards: [["Green Sun's Zenith", "Green creature"], ["Natural Order", "Green creature, free"], ["Chord of Calling", "Instant speed"], ["Eldritch Evolution", "Sacrifice, upgrade"], ["Survival of the Fittest", "Discard, search"], ["Fauna Shaman", "Discard, search"], ["Summoner's Pact", "Free, pay later"], ["Sylvan Tutor", "Top of library"], ["Worldly Tutor", "Top of library"]] },
-        { group: "Land finders", note: "Gaea's Cradle is the top target", cards: [["Crop Rotation", "Sacrifice a land"], ["Elvish Reclaimer", "Sacrifice a land"], ["Sylvan Scrying", "Any land"]] },
         { group: "Protection", note: "Land the final turn", cards: [["Dosan the Falling Leaf", "No spells on your turn"], ["Allosaurus Shepherd", "Uncounterable"], ["Yeva, Nature's Herald", "Flash creatures"], ["Legolas's Quick Reflexes", "Cheap trick"], ["Temur Sabertooth", "Protect a creature"]] },
         { group: "Finishers and draw", note: "How the game ends", cards: [["Finale of Devastation", "Haste and +2/+2"], ["Regal Force", "Draw per green creature"], ["Eladamri, Korvecdal", "Cast from the top"], ["Allosaurus Shepherd", "Elves become 5/5"]] }
+      ];
+
+      const SC_TUTORS = [
+        { group: "Put a creature straight onto the battlefield", items: [
+          ["Green Sun's Zenith", "A green creature with mana value X or less, put onto the battlefield. It shuffles back into your library.", "Dryad Arbor for just G: it is a land that taps for mana right away with Shang-Chi. Later, Shang-Chi, Seeker of Skybreak, Wirewood Symbiote or Magus of the Candelabra."],
+          ["Natural Order", "Any green creature, put onto the battlefield. You sacrifice a green creature to cast it.", "Regal Force to draw cards, or Ashaya, Soul of the Wild to turn your creatures into mana. Allosaurus Shepherd if you need protection."],
+          ["Eldritch Evolution", "A creature with mana value up to 2 higher than the one you sacrifice, put onto the battlefield.", "Sacrifice a one-mana elf to fetch a three-or-less: Shang-Chi, Seeker of Skybreak, Wirewood Symbiote or Dosan the Falling Leaf."],
+          ["Chord of Calling", "A creature with mana value exactly X, put onto the battlefield at instant speed. Tapping creatures can pay for it.", "Whichever combo piece is missing, ideally at the end of an opponent's turn so it can untap with you."],
+          ["Finale of Devastation", "A creature with mana value X or less from your library or graveyard, put onto the battlefield. At X of 10 or more your creatures get +2/+2 and haste.", "Mid-game, the missing engine piece. With a huge pile of mana, X of 10 or more turns it into the finisher."],
+          ["Nature's Rhythm", "A creature with mana value X or less, put onto the battlefield.", "Same job as Finale of Devastation. Check the card for its extra options."],
+          ["Woodland Bellower", "When it enters, a nonlegendary green creature with mana value 3 or less goes onto the battlefield.", "Seeker of Skybreak, Wirewood Symbiote or Magus of the Candelabra. It can't find Shang-Chi, who is legendary."]
+        ] },
+        { group: "Put a creature in your hand", items: [
+          ["Fauna Shaman", "Discard a creature card, then search for a creature card. Costs G and a tap.", "The next missing piece. Shang-Chi's mana can pay for it, and an untapper lets you use it twice."],
+          ["Survival of the Fittest", "Discard a card, then search for a creature card. Costs G.", "The next missing piece, discarding a spare land or a card you can't cast. It isn't a creature, so Shang-Chi's mana can't pay for it."],
+          ["Summoner's Pact", "A green creature, free now, but you must pay {2}{G}{G} next upkeep or lose the game.", "Use it on the turn you win, or when you know you can pay. Fetch the last missing piece."],
+          ["Yisan, the Wanderer Bard", "Add a counter each activation, then search for a creature with mana value equal to its counters.", "Slow, but Shang-Chi pays for it. Fetch what the counter count allows."],
+          ["Shared Summons", "Several creature cards at once. Check the card for the exact number.", "Two engine pieces in one card, such as Seeker of Skybreak and Wirewood Symbiote."],
+          ["Ecological Appreciation", "Up to four creatures with different names and mana value X or less. Opponents choose which two you keep.", "Cheap engine pieces, accepting that you may lose two of the four."]
+        ] },
+        { group: "Put a creature on top of your library", items: [
+          ["Sylvan Tutor", "Any creature on top of your library for G.", "Shang-Chi or an untapper, then draw it with Sylvan Library, Once Upon a Time or Eladamri."],
+          ["Worldly Tutor", "Any creature on top of your library for G.", "Same as Sylvan Tutor. Cast it late in the turn so the card you draw is the one you want."],
+          ["Elvish Harbinger", "When it enters, search for an Elf and put it on top of your library.", "Wirewood Symbiote, Priest of Titania or Elvish Archdruid."]
+        ] },
+        { group: "Find a land", items: [
+          ["Crop Rotation", "Sacrifice a land, then put any land onto the battlefield. Instant speed.", "Gaea's Cradle, ideally in response to a land-destruction spell."],
+          ["Elvish Reclaimer", "Pay {2}, tap, and sacrifice a land to put a land onto the battlefield.", "Gaea's Cradle. Shang-Chi's mana can pay for it."],
+          ["Sylvan Scrying", "A land card into your hand.", "Gaea's Cradle or a utility land."]
+        ] },
+        { group: "Other creature finders", items: [
+          ["Celestial Reunion", "A creature tutor from Lorwyn Eclipsed. Check the card.", "The missing piece, by mana value."],
+          ["Formidable Speaker", "A creature tutor attached to a body. Check the card.", "The missing piece."],
+          ["Magus of the Order", "A creature tutor attached to a body. Check the card.", "The missing piece."],
+          ["Invasion of Ikoria // Zilortha, Apex of Ikoria", "A battle that searches for a creature. Check the card.", "The missing piece."]
+        ] }
       ];
 
       function scTile(n) {
@@ -4395,6 +4441,8 @@
         }).join("");
         const hero = $("#scHeroArt");
         if (hero) hero.innerHTML = `<a class="sc-tile sc-hero-tile" href="${scryUrl("Shang-Chi, Master of Kung Fu")}" target="_blank" rel="noopener">${artHtml("Shang-Chi, Master of Kung Fu")}</a>`;
+        const tut = $("#scTutors");
+        if (tut) tut.innerHTML = SC_TUTORS.map(g => `<div class="sc-role"><h4>${esc(g.group)}</h4><div class="sc-tutors">${g.items.map(([n, finds, grab]) => `<div class="sc-tutor">${scTile(n)}<div class="sc-tutor-text"><b>${esc(n)}</b><p><span>Finds</span> ${esc(finds)}</p><p><span>Grab</span> ${esc(grab)}</p></div></div>`).join("")}</div></div>`).join("");
         const roles = $("#scRoles");
         if (roles) roles.innerHTML = SC_ROLES.map(g => `<div class="sc-role"><h4>${esc(g.group)} <small>${esc(g.note)}</small></h4><div class="ce-staples">${g.cards.map(([n, r]) => `<a class="ce-staple" href="${scryUrl(n)}" target="_blank" rel="noopener">${artHtml(n)}<span>${esc(n)}</span><span class="role">${esc(r)}</span></a>`).join("")}</div></div>`).join("");
       }
