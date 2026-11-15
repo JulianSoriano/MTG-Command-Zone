@@ -1000,6 +1000,32 @@
   .lore-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .lore-chip { min-height: 0; padding: 3px 10px; font-size: 0.78rem; font-weight: 600; border-radius: 999px; background: var(--accent-dim); color: var(--accent); border: 1px solid transparent; cursor: pointer; }
   .lore-chip:hover { border-color: var(--accent); }
+
+  /* UI polish: compact scrolling navigation, themed controls, focus, touch targets */
+  .sub { margin-bottom: 14px; }
+  .page-nav {
+    flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    position: sticky; top: 0; z-index: 20; margin: 0 -12px 16px; padding: 8px 12px;
+    background: color-mix(in srgb, var(--bg) 92%, transparent); backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border);
+  }
+  .page-nav::-webkit-scrollbar, .ce-tabs::-webkit-scrollbar { display: none; }
+  .page-nav button { flex: 0 0 auto; white-space: nowrap; padding: 8px 12px; font-size: 0.82rem; }
+  .ce-tabs { scrollbar-width: none; }
+  @media (max-width: 720px) {
+    .ce-tabs { flex-wrap: nowrap; overflow-x: auto; margin-left: -4px; margin-right: -4px; padding: 2px 4px 6px;
+      -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent); }
+    .ce-tabs button { flex: 0 0 auto; white-space: nowrap; }
+  }
+  @media (min-width: 721px) { .page-nav { margin: 0 0 18px; padding: 8px 0; justify-content: space-between; } .page-nav button { flex: 1 1 auto; } }
+  @media (pointer: coarse) { .page-nav button, .ce-tabs button { min-height: 44px; } }
+  input[type="checkbox"], input[type="radio"], input[type="range"] { accent-color: var(--accent); }
+  ::placeholder { color: var(--text-dim); opacity: 0.75; }
+  button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--gold, var(--accent)); outline-offset: 2px;
+  }
+  .sc-deck { margin-top: 22px; }
+  .sc-deck textarea { margin: 6px 0 10px; }
 </style>
 </head>
 <body>
@@ -1007,7 +1033,7 @@
   <div class="top-row">
     <h1>MTG Command Zone <span class="mana-row hdr-mana" id="hdrMana" aria-hidden="true"></span></h1>
   </div>
-  <p class="sub">Print actual-size proxy sheets, check a deck against the Low Sodium rules, roll dice &amp; track life, mana, and counters during the game, analyze a Commander decklist, read a cEDH guide, and roll a random commander, design your own cards, and read the story of Magic &mdash; all in one self-contained page using live card data pulled from Scryfall.</p>
+  <p class="sub">Proxy printing, deck analysis, game tools and guides for Commander, in one page.</p>
 
   <div class="page-nav">
     <button type="button" id="navPrint" class="active">Print &amp; Card Creator</button>
@@ -1104,15 +1130,6 @@
           </div>
         </div>
 
-        <div class="ce-combo sc-deck">
-          <h4>Reference deck: Pigeonize&rsquo;s Shang-Chi list</h4>
-          <p><a class="button secondary" href="https://moxfield.com/decks/CCmfARjzLnSd2i-qV7Y4QQ" target="_blank" rel="noopener">Open Pigeonize&rsquo;s deck on Moxfield</a></p>
-          <p class="hint">This is the example deck to measure yours against. Moxfield can&rsquo;t be read directly from this page, so use its Export button, copy the list, and paste it here to see how it differs from your list.</p>
-          <textarea id="scDeckIn" rows="4" placeholder="Paste Pigeonize's Moxfield export here"></textarea>
-          <div class="btn-row"><button type="button" id="scDeckCheck">Compare with my list</button><button type="button" id="scDeckClear" class="secondary">Clear</button></div>
-          <div id="scDeckOut" aria-live="polite"></div>
-        </div>
-
         <h3>The game plan</h3>
         <div class="sc-flow">
           <div class="sc-step"><i>1</i><b>Set up</b><span>Land, a mox or Sol Ring, then mana elves. Dorks tap the turn they land.</span></div>
@@ -1148,6 +1165,15 @@
           <li>Board wipes and cheap creature removal hurt more than counterspells.</li>
           <li>The list has no single-card finisher such as Craterhoof Behemoth, so wins depend on the Elf army or the draw chain.</li>
         </ul>
+
+        <div class="ce-combo sc-deck">
+          <h4>Reference deck: Pigeonize&rsquo;s Shang-Chi list</h4>
+          <p><a class="button secondary" href="https://moxfield.com/decks/CCmfARjzLnSd2i-qV7Y4QQ" target="_blank" rel="noopener">Open Pigeonize&rsquo;s deck on Moxfield</a></p>
+          <p class="hint">This is the example deck to measure yours against. Moxfield can&rsquo;t be read directly from this page, so use its Export button, copy the list, and paste it here to see how it differs from your list.</p>
+          <textarea id="scDeckIn" rows="4" placeholder="Paste Pigeonize's Moxfield export here"></textarea>
+          <div class="btn-row"><button type="button" id="scDeckCheck">Compare with my list</button><button type="button" id="scDeckClear" class="secondary">Clear</button></div>
+          <div id="scDeckOut" aria-live="polite"></div>
+        </div>
       </div>
       <div class="ce-panel" id="ce-staples">
         <h3>Cards you will see everywhere</h3>
@@ -6521,6 +6547,12 @@
   });
 
 })();
+</script>
+<script>
+document.addEventListener("click", function (ev) {
+  var b = ev.target.closest && ev.target.closest(".page-nav button, .ce-tabs button");
+  if (b && b.scrollIntoView) { try { b.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" }); } catch (e) {} }
+});
 </script>
 </body>
 </html>
