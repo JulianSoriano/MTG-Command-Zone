@@ -79,6 +79,19 @@
     resize: vertical;
   }
   textarea { min-height: 220px; }
+  /* Print tab: line-number gutter showing the running card count */
+  .ln-wrap { position: relative; }
+  .ln-wrap textarea { display: block; line-height: 24px; white-space: pre; overflow-x: auto; padding-left: 58px; }
+  .ln-gutter {
+    position: absolute; left: 1px; top: 1px; bottom: 1px; width: 46px;
+    padding: 10px 8px 10px 0; overflow: hidden; pointer-events: none;
+    border-right: 1px solid var(--border); border-radius: 7px 0 0 7px;
+    background: var(--panel); color: var(--text-dim);
+    font-family: var(--mono); font-size: 14px; line-height: 24px; text-align: right; white-space: pre;
+  }
+  .ln-count { font-size: 0.85rem; margin-top: 6px; color: var(--text-dim); }
+  .ln-count.ok { color: var(--good); }
+  .ln-count.over { color: var(--warn); }
   select {
     width: 100%;
     background: var(--bg);
@@ -1494,7 +1507,8 @@
       </div>
       <div class="field">
         <label for="printDecklistInput">Decklist (99 cards, one per line &mdash; qty is optional, e.g. "1 Sol Ring" or just "Sol Ring")</label>
-        <textarea id="printDecklistInput" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;1 Cultivate&#10;..."></textarea>
+        <div class="ln-wrap"><div class="ln-gutter" id="printLineNums" aria-hidden="true"></div><textarea spellcheck="false" id="printDecklistInput" placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;1 Cultivate&#10;..."></textarea></div>
+        <div class="ln-count" id="printCardCount" aria-live="polite"></div>
         <div class="hint">Paste the same list you'd use in the analyzer &mdash; set/collector-number decorations and Archidekt-style tags are stripped automatically.</div>
       </div>
       <div class="field proxy-style-field">
@@ -5354,12 +5368,35 @@
       $("#pcTabs").querySelectorAll("button").forEach(x => x.classList.toggle("active", x === b));
       document.querySelectorAll("#printPage .pc-pane").forEach(p => p.classList.toggle("active", p.id === "pc-" + b.dataset.pc));
     });
+    // Line numbers = running card total (a "2 Sol Ring" line counts as 2), so the last number is the deck size.
+    const printTa = $("#printDecklistInput"), printNums = $("#printLineNums"), printCount = $("#printCardCount");
+    function refreshPrintLines() {
+      let total = 0, stop = false;
+      const nums = printTa.value.split("\n").map(line => {
+        const t = line.trim();
+        if (!t) return "";
+        if (/^(sideboard|maybeboard)\b:?$/i.test(t)) { stop = true; return ""; }
+        if (stop || /^(commander|deck|companion)\b:?$/i.test(t)) return "";
+        const q = t.match(/^(\d+)\s*x?\s+/i);
+        total += q ? parseInt(q[1], 10) : 1;
+        return String(total);
+      });
+      printNums.textContent = nums.join("\n");
+      printNums.scrollTop = printTa.scrollTop;
+      printCount.textContent = total + " of 99 cards in the list";
+      printCount.className = "ln-count" + (total === 99 ? " ok" : total > 99 ? " over" : "");
+    }
+    printTa.addEventListener("input", refreshPrintLines);
+    printTa.addEventListener("scroll", () => { printNums.scrollTop = printTa.scrollTop; });
+    refreshPrintLines();
     $("#useAnalyzerListBtn").addEventListener("click", () => {
       $("#printCommanderInput").value = $("#commanderInput").value;
       $("#printDecklistInput").value = $("#decklistInput").value;
+      refreshPrintLines();
     });
     $("#printClearBtn").addEventListener("click", () => {
       $("#printDecklistInput").value = "";
+      refreshPrintLines();
       $("#printCommanderInput").value = "";
       printPreviewWrapEl.innerHTML = "";
       printMissingEl.innerHTML = "";
@@ -5403,7 +5440,7 @@
       const savedIncludeCommander = localStorage.getItem("mtgAnalyzer.printIncludeCommander");
       const savedStyle = localStorage.getItem("mtgAnalyzer.printStyle");
       if (savedStyle && PRINT_STYLES[savedStyle]) $("#printStyle").value = savedStyle;
-      if (savedPrintList) $("#printDecklistInput").value = savedPrintList;
+      if (savedPrintList) { $("#printDecklistInput").value = savedPrintList; refreshPrintLines(); }
       if (savedPrintCmd) $("#printCommanderInput").value = savedPrintCmd;
       if (savedSkipBasics === "0") $("#printSkipBasics").checked = false;
       if (savedIncludeCommander === "0") $("#printIncludeCommander").checked = false;
