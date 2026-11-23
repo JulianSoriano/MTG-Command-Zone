@@ -934,6 +934,11 @@
   .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .cc-inline input[type=text] { flex: 1 1 220px; }
+  /* Saved deck library */
+  .deck-lib { padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+  .dl-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
+  .dl-row select, .dl-row input[type=text] { flex: 1 1 220px; width: auto; }
+  .dl-row button { min-height: 0; }
   /* Sample hand / goldfish */
   .sh-zone { margin-top: 18px; }
   .sh-zone h3 { margin: 0 0 8px; }
@@ -1429,6 +1434,20 @@
 
   <div id="analyzerPage" class="page">
   <div class="panel">
+    <div class="field deck-lib">
+      <label for="dlSelect">Saved decks</label>
+      <div class="dl-row">
+        <select id="dlSelect" aria-label="Saved decks"></select>
+        <button type="button" id="dlLoad" disabled>Load</button>
+        <button type="button" class="secondary" id="dlDelete" disabled>Delete</button>
+      </div>
+      <div class="dl-row" style="margin-top:8px">
+        <input type="text" id="dlName" maxlength="60" placeholder="Deck name (defaults to your commander)" aria-label="Deck name" autocomplete="off">
+        <button type="button" id="dlSave">Save</button>
+        <button type="button" class="secondary" id="dlSaveAs">Save as new</button>
+      </div>
+      <div class="hint" id="dlStatus" role="status" aria-live="polite">Decks are kept in this browser only. Save puts your current commander and list under the name above; Save as new keeps the old one.</div>
+    </div>
     <div class="field">
       <label for="commanderInput">Commander (or Commander + Partner/Background) &mdash; one per line</label>
       <textarea id="commanderInput" rows="2" spellcheck="false" style="min-height:0" placeholder="e.g. Atraxa, Praetors' Voice"></textarea>
@@ -3317,6 +3336,91 @@
     lastRawInputs = null;
     try { localStorage.removeItem("mtgAnalyzer.decklist"); localStorage.removeItem("mtgAnalyzer.commander"); } catch (e) {}
   });
+
+  /* ---------------------------------------------------------------------
+   * Saved deck library (Deck Analyzer): named decks kept in this browser
+   * ------------------------------------------------------------------- */
+  (function deckLibrary() {
+    const KEY = "mtgAnalyzer.deckLibrary";
+    const sel = $("#dlSelect"), nameEl = $("#dlName"), statusEl3 = $("#dlStatus");
+    const cmdEl = $("#commanderInput"), listEl = $("#decklistInput");
+    let decks = [], pendingLoad = 0, pendingDelete = 0, flashTimer = 0;
+    try { const d = JSON.parse(localStorage.getItem(KEY) || "[]"); if (Array.isArray(d)) decks = d.filter(x => x && x.id && typeof x.name === "string"); } catch (e) { decks = []; }
+    const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(decks)); return true; } catch (e) { say("Couldn't save in this browser (storage is blocked or full).", true); return false; } };
+    const say = (msg, bad) => { statusEl3.textContent = msg; statusEl3.style.color = bad ? "var(--bad)" : ""; };
+    const cardCount = text => (text || "").split(/\r?\n/).reduce((n, l) => {
+      const t = l.trim(); if (!t || /^(\/\/|#)/.test(t) || /^(commander|deck|sideboard|maybeboard|companion)\b:?$/i.test(t)) return n;
+      const m = t.match(/^(\d+)\s*x?\s*\S/i); return n + (m ? parseInt(m[1], 10) : 1);
+    }, 0);
+    const current = () => decks.find(d => d.id === sel.value) || null;
+    const dirty = () => {
+      const d = current(), c = cmdEl.value.trim(), l = listEl.value.trim();
+      if (!d) return !!(c || l);
+      return d.commander.trim() !== c || d.list.trim() !== l;
+    };
+    function refresh(selectId) {
+      decks.sort((a, b) => a.name.localeCompare(b.name));
+      const keepId = selectId !== undefined ? selectId : sel.value;
+      sel.innerHTML = "";
+      const none = document.createElement("option"); none.value = ""; none.textContent = decks.length ? "Unsaved list" : "No saved decks yet"; sel.appendChild(none);
+      decks.forEach(d => { const o = document.createElement("option"); o.value = d.id; o.textContent = `${d.name} (${cardCount(d.list) + (d.commander.trim() ? d.commander.trim().split(/\r?\n/).filter(Boolean).length : 0)} cards)`; sel.appendChild(o); });
+      sel.value = decks.some(d => d.id === keepId) ? keepId : "";
+      $("#dlLoad").disabled = $("#dlDelete").disabled = !sel.value;
+    }
+    const newId = () => "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    function suggestName() {
+      const first = cmdEl.value.split(/\r?\n/).map(s => s.trim()).filter(Boolean)[0];
+      return first ? first.split(/\s*\/\/\s*/)[0].split(",")[0] : "My deck";
+    }
+    function snapshot(name, id) {
+      return { id: id || newId(), name, commander: cmdEl.value, list: listEl.value, updated: Date.now() };
+    }
+    function save(asNew) {
+      if (!cmdEl.value.trim() && !listEl.value.trim()) { say("Nothing to save yet. Paste a decklist first.", true); return; }
+      let name = nameEl.value.trim() || suggestName();
+      const cur = current();
+      let target = null;
+      if (!asNew) target = cur || decks.find(d => d.name.toLowerCase() === name.toLowerCase()) || null;
+      if (asNew && decks.some(d => d.name.toLowerCase() === name.toLowerCase())) {
+        let n = 2; while (decks.some(d => d.name.toLowerCase() === `${name} ${n}`.toLowerCase())) n++; name = `${name} ${n}`;
+      }
+      if (target) { Object.assign(target, snapshot(name, target.id)); }
+      else { target = snapshot(name); decks.push(target); }
+      if (!persist()) return;
+      nameEl.value = name; refresh(target.id);
+      say(`Saved "${name}".`);
+    }
+    function load() {
+      const d = current(); if (!d) return;
+      if (dirty() && !pendingLoad) {
+        pendingLoad = 1; $("#dlLoad").textContent = "Replace current list?";
+        say("Your current list has changes that aren't saved. Click again to replace it, or save first.", true);
+        clearTimeout(flashTimer); flashTimer = setTimeout(resetButtons, 5000); return;
+      }
+      cmdEl.value = d.commander; listEl.value = d.list; nameEl.value = d.name;
+      try { localStorage.setItem("mtgAnalyzer.decklist", d.list); localStorage.setItem("mtgAnalyzer.commander", d.commander); } catch (e) {}
+      resetButtons(); say(`Loaded "${d.name}". Press Analyze deck to run it.`);
+    }
+    function del() {
+      const d = current(); if (!d) return;
+      if (!pendingDelete) {
+        pendingDelete = 1; $("#dlDelete").textContent = "Click to confirm delete";
+        say(`This permanently deletes "${d.name}" from this browser.`, true);
+        clearTimeout(flashTimer); flashTimer = setTimeout(resetButtons, 5000); return;
+      }
+      decks = decks.filter(x => x.id !== d.id); persist(); resetButtons(); refresh(""); nameEl.value = "";
+      say(`Deleted "${d.name}".`);
+    }
+    function resetButtons() {
+      pendingLoad = pendingDelete = 0; $("#dlLoad").textContent = "Load"; $("#dlDelete").textContent = "Delete";
+    }
+    sel.addEventListener("change", () => { resetButtons(); const d = current(); nameEl.value = d ? d.name : ""; $("#dlLoad").disabled = $("#dlDelete").disabled = !d; say(d ? `Selected "${d.name}". Click Load to open it.` : ""); });
+    $("#dlLoad").addEventListener("click", load);
+    $("#dlSave").addEventListener("click", () => save(false));
+    $("#dlSaveAs").addEventListener("click", () => save(true));
+    $("#dlDelete").addEventListener("click", del);
+    refresh("");
+  })();
 
   /* ---------------------------------------------------------------------
    * Sample hand & goldfish
