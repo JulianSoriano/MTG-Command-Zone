@@ -35,6 +35,7 @@ A full-screen Commander table for phones, tablets and desktops, modeled on apps 
 - **Commander art** - type a commander name to use its Scryfall art as the card background.
 - **Defeat and winner detection** - life, poison, commander damage or concede; the last player standing is announced. Defeated players can be kept in the game.
 - **Center hub menu** - dice (d4-d100, custom), coin flip, roll-for-first-player, random player picker, turn tracker with rounds (skips defeated players), mana pool, action log with undo, day/night, game clock, wake lock and full screen.
+- **Turn timer** - in the Turn tab, pick Off/1/2/3/5 minutes. The center button counts down for the active player, flashes red and buzzes at zero, and the Turn tab lists how much time each player has used.
 - The dice, coin and mana pool also open from the setup screen without starting a game.
 
 

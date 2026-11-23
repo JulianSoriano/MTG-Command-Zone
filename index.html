@@ -473,6 +473,11 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0; line-height: 1.15;
     background: radial-gradient(circle at 35% 30%, #3b2f1c, #120d07); color: #f5d76e; border: 2px solid #c39a3f; box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.55), 0 4px 14px rgba(0, 0, 0, 0.7);
   }
+  .gt-hub.late { border-color: var(--bad); color: var(--bad); animation: gt-late 1s steps(2) infinite; }
+  @keyframes gt-late { 50% { background: var(--bad-bg); } }
+  @media (prefers-reduced-motion: reduce) { .gt-hub.late { animation: none; background: var(--bad-bg); } }
+  .gt-used { font-size: 0.8rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .gt-turn-limit { margin: 0 0 12px; }
   .gt-hub-top { font-size: 0.74rem; font-weight: 700; } .gt-hub-sub { font-size: 0.62rem; opacity: 0.8; letter-spacing: 0.06em; text-transform: uppercase; }
   .gt-toast { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); z-index: 30; background: rgba(0, 0, 0, 0.85); color: #fff; padding: 8px 16px; border-radius: 999px; font-size: 0.9rem; max-width: 90vw; text-align: center; }
   .gt-toast[hidden] { display: none; }
@@ -1715,6 +1720,12 @@
         <button type="button" class="secondary" id="clearDiceHistoryBtn" style="margin-top:8px;min-height:0;padding:6px 12px;font-size:.8rem;">Clear history</button>
       </div>
       <div class="gt-tabpane" id="gtTab-turn">
+        <div class="field gt-turn-limit"><label>Turn timer</label>
+          <div class="gt-seg" id="gtLimit" role="group" aria-label="Turn timer length">
+            <button type="button" data-v="0" class="active">Off</button><button type="button" data-v="60">1 min</button><button type="button" data-v="120">2 min</button><button type="button" data-v="180">3 min</button><button type="button" data-v="300">5 min</button>
+          </div>
+          <div class="hint">Counts down for each turn and buzzes when time is up. The center button shows the time left.</div>
+        </div>
         <div class="gt-turn-now" id="gtTurnNow"></div>
         <div class="btn-row"><button type="button" id="gtPrevTurn" class="secondary">Back</button><button type="button" id="gtNextTurn">Next turn</button><button type="button" id="gtRandomPlayer" class="secondary">Random player</button></div>
         <div id="gtTurnList" class="gt-turn-list"></div>
@@ -5527,6 +5538,8 @@
         s.clock = s.clock || { acc: 0, since: null };
         if (s.clock.since) s.clock.since = Date.now();
         s.turn = s.turn || { n: 1, active: 0, start: Date.now() };
+        s.turnLimit = Number(s.turnLimit) || 0;
+        s.used = s.used && typeof s.used === "object" ? s.used : {};
         return s;
       }
       state = loadState();
@@ -5554,6 +5567,7 @@
         state.players.forEach(p => { p.life = state.start; p.dmg = {}; p.tax = [0, 0]; p.cnt = { poison: 0, energy: 0, experience: 0, rad: 0 }; p.custom.forEach(c => c.v = 0); p.citys = false; p.conceded = false; p.dismissed = null; });
         state.monarch = null; state.initiative = null; state.day = ""; state.winner = null;
         state.turn = { n: 1, active: 0, start: Date.now() };
+        state.used = {};
         state.clock = { acc: 0, since: Date.now() };
         addLog(`New game with the same players, ${state.start} life.`);
         saveState(); renderTable(); renderMenuPanes();
@@ -5601,6 +5615,16 @@
       const isOut = p => !!defeatedReason(p);
       const maxCmdDmg = p => Math.max(0, ...Object.values(p.dmg).flat());
 
+      /* ----- turn timer: per-turn countdown and time used per player ----- */
+      const turnElapsed = () => Math.min(Date.now() - state.turn.start, 3600000);
+      const turnLeft = () => (state && state.turnLimit) ? Math.ceil(state.turnLimit - (Date.now() - state.turn.start) / 1000) : null;
+      const usedMap = () => state.used || (state.used = {});
+      const usedMs = i => (usedMap()[P(i).id] || 0) + (i === state.turn.active ? turnElapsed() : 0);
+      function recordTurnTime() {
+        const id = P(state.turn.active).id, u = usedMap();
+        u[id] = (u[id] || 0) + turnElapsed();
+      }
+      let alertedStart = 0;
       let toastTimer = 0;
       function toast(msg) {
         const t = $("#gtToast");
@@ -5680,8 +5704,10 @@
       }
       function refreshHub() {
         if (!state) return;
-        $("#gtHubTop").textContent = `Round ${state.turn.n}`;
-        $("#gtHubSub").textContent = state.day ? (state.day === "day" ? "Day" : "Night") : P(state.turn.active).name.slice(0, 10);
+        const left = turnLeft();
+        $("#gtHubTop").textContent = left === null ? `Round ${state.turn.n}` : fmtTime(Math.max(0, left) * 1000);
+        $("#gtHubSub").textContent = state.day ? (state.day === "day" ? "Day" : "Night") : (left === null ? P(state.turn.active).name.slice(0, 10) : `R${state.turn.n} ${P(state.turn.active).name.slice(0, 6)}`);
+        $("#gtHub").classList.toggle("late", left !== null && left <= 0);
       }
 
       /* ================= life ================= */
@@ -5989,17 +6015,30 @@
       setInterval(() => {
         if (!state || menu.hidden) return;
         if (menuTab === "game") { $("#gtClock").textContent = fmtTime(clockElapsed()); }
-        if (menuTab === "turn") { const el = $("#gtTurnTime"); if (el) el.textContent = fmtTime(Date.now() - state.turn.start); }
+        if (menuTab === "turn") { const el = $("#gtTurnTime"); if (el) el.textContent = fmtTime(Date.now() - state.turn.start); const l = $("#gtTurnLeft"); if (l) l.innerHTML = turnLeft() === null ? "" : " &middot; " + fmtTime(Math.max(0, turnLeft()) * 1000) + " left"; }
+      }, 1000);
+      // Table tick: update the center button and sound the alarm once per turn when time is up.
+      setInterval(() => {
+        if (!state || $("#gtTable").hidden) return;
+        refreshHub();
+        const left = turnLeft();
+        if (left !== null && left <= 0 && alertedStart !== state.turn.start) {
+          alertedStart = state.turn.start;
+          toast(`Time's up, ${P(state.turn.active).name}!`);
+          try { if (navigator.vibrate) navigator.vibrate([300, 150, 300]); } catch (e) {}
+        }
       }, 1000);
 
       /* ----- turn tab ----- */
       function renderTurn() {
         const a = P(state.turn.active);
-        $("#gtTurnNow").innerHTML = `<strong>${esc(a.name)}</strong>'s turn<small>Round ${state.turn.n} &middot; this turn <span id="gtTurnTime">${fmtTime(Date.now() - state.turn.start)}</span></small>`;
-        $("#gtTurnList").innerHTML = orderNow().map(i => { const p = P(i); return `<button type="button" data-i="${i}" class="${i === state.turn.active ? "active" : ""}"><i style="background:${hexOf(p.color)}"></i><span style="flex:1">${esc(p.name)}</span><span>${isOut(p) ? "Defeated" : p.life + " life"}</span></button>`; }).join("");
+        $("#gtTurnNow").innerHTML = `<strong>${esc(a.name)}</strong>'s turn<small>Round ${state.turn.n} &middot; this turn <span id="gtTurnTime">${fmtTime(Date.now() - state.turn.start)}</span><span id="gtTurnLeft">${turnLeft() === null ? "" : " &middot; " + fmtTime(Math.max(0, turnLeft()) * 1000) + " left"}</span></small>`;
+        document.querySelectorAll("#gtLimit button").forEach(b => b.classList.toggle("active", Number(b.dataset.v) === (state.turnLimit || 0)));
+        $("#gtTurnList").innerHTML = orderNow().map(i => { const p = P(i); return `<button type="button" data-i="${i}" class="${i === state.turn.active ? "active" : ""}"><i style="background:${hexOf(p.color)}"></i><span style="flex:1">${esc(p.name)}</span><span>${isOut(p) ? "Defeated" : p.life + " life"}</span><span class="gt-used">${fmtTime(usedMs(i))}</span></button>`; }).join("");
       }
       function setActive(i, logIt) {
         snapshot();
+        recordTurnTime();
         state.turn.active = i; state.turn.start = Date.now();
         if (logIt) addLog(`${P(i).name}'s turn (round ${state.turn.n}).`);
         saveState(); renderTable(); renderMenuPanes();
@@ -6016,10 +6055,17 @@
           if (!isOut(P(order[pos]))) break;
         }
         snapshot();
+        recordTurnTime();
         state.turn = { n: rounds, active: order[pos], start: Date.now() };
         addLog(`${P(order[pos]).name}'s turn (round ${rounds}).`);
         saveState(); renderTable(); renderMenuPanes();
       }
+      $("#gtLimit").addEventListener("click", ev => {
+        const b = ev.target.closest("button[data-v]"); if (!b || !state) return;
+        state.turnLimit = Number(b.dataset.v) || 0;
+        state.turn.start = Date.now(); alertedStart = 0;
+        saveState(); refreshHub(); renderTurn();
+      });
       $("#gtNextTurn").addEventListener("click", () => advance(1));
       $("#gtPrevTurn").addEventListener("click", () => advance(-1));
       $("#gtTurnList").addEventListener("click", ev => { const b = ev.target.closest("button[data-i]"); if (b) setActive(Number(b.dataset.i), true); });
