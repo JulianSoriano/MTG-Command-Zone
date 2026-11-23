@@ -934,6 +934,26 @@
   .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .cc-inline input[type=text] { flex: 1 1 220px; }
+  /* Sample hand / goldfish */
+  .sh-zone { margin-top: 18px; }
+  .sh-zone h3 { margin: 0 0 8px; }
+  .sh-cards { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sh-item { display: flex; flex-direction: column; gap: 4px; width: 118px; }
+  .sh-card {
+    width: 118px; aspect-ratio: 5 / 7; padding: 0; border: 2px solid var(--border); border-radius: 8px; overflow: hidden;
+    background: var(--panel); color: var(--text); cursor: default; display: flex; align-items: center; justify-content: center;
+    text-align: center; font-size: 0.78rem; line-height: 1.25; min-height: 0; box-shadow: none; font-weight: 600;
+  }
+  .sh-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .sh-card span { padding: 6px; }
+  .sh-card.picked { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-dim); }
+  .sh-card.land { border-style: dotted; }
+  button.sh-card { cursor: pointer; }
+  .sh-acts { display: flex; gap: 4px; }
+  .sh-acts button { flex: 1; min-height: 0; padding: 4px 2px; font-size: 0.72rem; border-radius: 6px; white-space: nowrap; }
+  .sh-stats { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 0 0; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+  .sh-stats b { color: var(--accent); }
+  .sh-empty { color: var(--text-dim); font-size: 0.85rem; }
   .cc-check { display: flex; gap: 8px; align-items: center; font-weight: 400; margin: 10px 0 0; }
   .cc-check input { width: auto; margin: 0; }
   .cc-layout { display: grid; grid-template-columns: 1fr; gap: 22px; }
@@ -1438,6 +1458,7 @@
   <div class="ce-tabs an-tabs" id="anTabs" role="tablist">
     <button type="button" class="active" data-an="analysis">Analysis</button>
     <button type="button" data-an="mana">Mana base</button>
+    <button type="button" data-an="hand">Sample hand</button>
     <button type="button" data-an="lowsodium">Low Sodium check</button>
     <button type="button" data-an="rules">Low Sodium rules &amp; ban list</button>
   </div>
@@ -1449,6 +1470,26 @@
 
   <div class="an-pane" id="an-mana">
     <div id="manaBase"><div class="panel"><h2>Mana base optimizer</h2><p class="hint">Run <strong>Analyze deck</strong> above first. This tab then checks your lands and mana sources against what your spells need and suggests fixes.</p></div></div>
+  </div>
+
+  <div class="an-pane" id="an-hand">
+    <div class="panel">
+      <h2>Sample hand &amp; goldfish</h2>
+      <p class="hint">Uses the decklist and commander from the Analysis tab. Draw an opening hand, mulligan if you want, then play out turns to see how the deck runs. Nothing here is saved or counted against your list.</p>
+      <div class="btn-row" id="shButtons">
+        <button type="button" id="shLoad">Load deck &amp; draw 7</button>
+        <button type="button" id="shKeep" hidden>Keep hand</button>
+        <button type="button" class="secondary" id="shMull" hidden>Mulligan</button>
+        <button type="button" id="shConfirm" hidden>Put selected on the bottom</button>
+        <button type="button" id="shNext" hidden>Next turn</button>
+        <button type="button" class="secondary" id="shDraw" hidden>Draw 1</button>
+        <button type="button" class="secondary" id="shRestart" hidden>Start over</button>
+      </div>
+      <label class="cc-check"><input type="checkbox" id="shPlay"> On the play (no draw on turn 1)</label>
+      <label class="cc-check"><input type="checkbox" id="shFree" checked> Free first mulligan (Commander rule)</label>
+      <div class="hint" id="shStatus" role="status" aria-live="polite"></div>
+      <div id="shBoard"></div>
+    </div>
   </div>
 
   <div class="an-pane" id="an-lowsodium">
@@ -3276,6 +3317,137 @@
     lastRawInputs = null;
     try { localStorage.removeItem("mtgAnalyzer.decklist"); localStorage.removeItem("mtgAnalyzer.commander"); } catch (e) {}
   });
+
+  /* ---------------------------------------------------------------------
+   * Sample hand & goldfish
+   * ------------------------------------------------------------------- */
+  (function sampleHand() {
+    const board = $("#shBoard"), statusEl2 = $("#shStatus");
+    const BASIC_RE = /^(snow-covered )?(plains|island|swamp|mountain|forest|wastes)$/i;
+    let sh = null; // { lib, hand, bf, gy, cmd, turn, mulls, phase, picked }
+    const btn = id => $("#" + id);
+    const show = (id, on) => { btn(id).hidden = !on; };
+
+    function shuffle(a) {
+      for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+      return a;
+    }
+    const landOf = c => c.card ? isLand(c.card) : BASIC_RE.test(c.name);
+    const bottomsNeeded = () => Math.max(0, sh.mulls - ($("#shFree").checked ? 1 : 0));
+
+    async function load() {
+      const parsed = parseDecklist($("#decklistInput").value, $("#commanderInput").value);
+      const total = parsed.cards.reduce((n, c) => n + c.qty, 0);
+      if (!total) { statusEl2.textContent = "Paste a decklist in the Analysis tab first."; return; }
+      btn("shLoad").disabled = true;
+      statusEl2.textContent = "Loading card data...";
+      let found = new Map();
+      try {
+        const names = [...new Set([...parsed.cards.map(c => c.name), ...parsed.commanders])];
+        found = (await fetchCollection(names)).found;
+        statusEl2.textContent = "";
+      } catch (e) {
+        statusEl2.textContent = "Couldn't load card art and types (offline or blocked), so this runs with card names only. Land counts will only recognize basic lands.";
+      }
+      btn("shLoad").disabled = false;
+      const dataFor = n => found.get(n.toLowerCase()) || found.get(primaryLookupName(n).toLowerCase()) || null;
+      const lib = [];
+      parsed.cards.forEach(c => { for (let i = 0; i < c.qty; i++) lib.push({ name: c.name, card: dataFor(c.name) }); });
+      sh = { lib: shuffle(lib), hand: [], bf: [], gy: [], cmd: parsed.commanders.map(n => ({ name: n, card: dataFor(n) })), turn: 0, mulls: 0, phase: "opening", picked: new Set() };
+      deal();
+    }
+    function deal() {
+      sh.lib = shuffle([...sh.lib, ...sh.hand]);
+      sh.picked = new Set();
+      sh.hand = sh.lib.splice(0, 7);
+      sh.phase = "opening"; render();
+    }
+    function keep() {
+      if (bottomsNeeded() > 0) { sh.phase = "bottom"; sh.picked = new Set(); }
+      else startPlay();
+      render();
+    }
+    function bottomPicked() {
+      if (sh.picked.size !== bottomsNeeded()) return;
+      const out = sh.hand.filter((_, i) => sh.picked.has(i));
+      sh.hand = sh.hand.filter((_, i) => !sh.picked.has(i));
+      sh.lib.push(...out); sh.picked = new Set();
+      startPlay(); render();
+    }
+    function startPlay() {
+      sh.phase = "play"; sh.turn = 1;
+      if (!$("#shPlay").checked) drawCards(1);
+    }
+    function drawCards(n) {
+      for (let i = 0; i < n; i++) {
+        if (!sh.lib.length) { statusEl2.textContent = "The library is empty."; return; }
+        sh.hand.push(sh.lib.shift());
+      }
+    }
+    function move(from, idx, to) { const [c] = sh[from].splice(idx, 1); sh[to].push(c); render(); }
+
+    function tile(c, opts) {
+      const item = document.createElement("div"); item.className = "sh-item";
+      const el = document.createElement(opts.pick ? "button" : "div");
+      el.className = "sh-card" + (landOf(c) ? " land" : "") + (opts.picked ? " picked" : "");
+      if (opts.pick) { el.type = "button"; el.setAttribute("aria-pressed", opts.picked ? "true" : "false"); el.addEventListener("click", opts.pick); }
+      const url = c.card ? cardImageUrl(c.card, "small") : null;
+      const fallback = () => { el.innerHTML = ""; const sp = document.createElement("span"); sp.textContent = c.name; el.appendChild(sp); };
+      if (url) { const img = document.createElement("img"); img.alt = c.name; img.title = c.name; img.loading = "lazy"; img.addEventListener("error", fallback); img.src = url; el.appendChild(img); }
+      else fallback();
+      item.appendChild(el);
+      if (opts.acts && opts.acts.length) {
+        const row = document.createElement("div"); row.className = "sh-acts";
+        opts.acts.forEach(([label, fn]) => { const b = document.createElement("button"); b.type = "button"; b.className = "secondary"; b.textContent = label; b.addEventListener("click", fn); row.appendChild(b); });
+        item.appendChild(row);
+      }
+      return item;
+    }
+    function zone(title, cards, mk) {
+      const z = document.createElement("div"); z.className = "sh-zone";
+      const h = document.createElement("h3"); h.textContent = `${title} (${cards.length})`; z.appendChild(h);
+      const wrap = document.createElement("div"); wrap.className = "sh-cards";
+      if (!cards.length) { const e = document.createElement("div"); e.className = "sh-empty"; e.textContent = "Empty"; wrap.appendChild(e); }
+      cards.forEach((c, i) => wrap.appendChild(tile(c, mk(c, i))));
+      z.appendChild(wrap); return z;
+    }
+    function render() {
+      board.innerHTML = "";
+      const playing = sh.phase === "play";
+      show("shLoad", false); show("shKeep", sh.phase === "opening"); show("shMull", sh.phase === "opening");
+      show("shConfirm", sh.phase === "bottom"); show("shNext", playing); show("shDraw", playing); show("shRestart", true);
+      btn("shConfirm").disabled = sh.picked.size !== bottomsNeeded();
+      btn("shConfirm").textContent = `Put ${bottomsNeeded()} on the bottom`;
+      if (sh.phase === "opening") statusEl2.textContent = sh.mulls ? `Mulligan ${sh.mulls}. Keep this hand or mulligan again.` : "Opening hand. Keep it or mulligan.";
+      else if (sh.phase === "bottom") statusEl2.textContent = `Pick ${bottomsNeeded()} card${bottomsNeeded() === 1 ? "" : "s"} to put on the bottom of your library, then confirm.`;
+      else if (!statusEl2.textContent.startsWith("The library")) statusEl2.textContent = "";
+      const landsIn = a => a.filter(landOf).length;
+      const stats = document.createElement("div"); stats.className = "sh-stats";
+      const odds = sh.lib.length ? Math.round(landsIn(sh.lib) / sh.lib.length * 100) + "%" : "-";
+      stats.innerHTML = `<span>Turn <b>${sh.turn || "-"}</b></span><span>Library <b>${sh.lib.length}</b></span><span>Lands in hand <b>${landsIn(sh.hand)}</b></span><span>Lands in play <b>${landsIn(sh.bf)}</b></span><span>Next draw is a land <b>${odds}</b></span>`;
+      board.appendChild(stats);
+      if (sh.cmd.length) board.appendChild(zone("Command zone", sh.cmd, () => ({})));
+      board.appendChild(zone("Hand", sh.hand, (c, i) => sh.phase === "bottom"
+        ? { pick: () => { if (sh.picked.has(i)) sh.picked.delete(i); else if (sh.picked.size < bottomsNeeded()) sh.picked.add(i); render(); }, picked: sh.picked.has(i) }
+        : { acts: playing ? [["Play", () => move("hand", i, "bf")], ["Discard", () => move("hand", i, "gy")]] : [] }));
+      if (playing || sh.bf.length || sh.gy.length) {
+        board.appendChild(zone("Battlefield", sh.bf, (c, i) => ({ acts: [["Hand", () => move("bf", i, "hand")], ["Grave", () => move("bf", i, "gy")]] })));
+        board.appendChild(zone("Graveyard", sh.gy, (c, i) => ({ acts: [["Hand", () => move("gy", i, "hand")], ["Play", () => move("gy", i, "bf")]] })));
+      }
+    }
+
+    btn("shLoad").addEventListener("click", load);
+    btn("shKeep").addEventListener("click", keep);
+    btn("shMull").addEventListener("click", () => { sh.mulls++; deal(); });
+    btn("shConfirm").addEventListener("click", bottomPicked);
+    btn("shNext").addEventListener("click", () => { sh.turn++; drawCards(1); render(); });
+    btn("shDraw").addEventListener("click", () => { drawCards(1); render(); });
+    btn("shRestart").addEventListener("click", () => {
+      if (!sh) return;
+      sh.lib = [...sh.lib, ...sh.hand, ...sh.bf, ...sh.gy]; sh.hand = []; sh.bf = []; sh.gy = []; sh.mulls = 0; sh.turn = 0; statusEl2.textContent = "";
+      deal();
+    });
+  })();
 
   /* ---------------------------------------------------------------------
    * Page nav (Deck Analyzer / Print Proxy Sheets)

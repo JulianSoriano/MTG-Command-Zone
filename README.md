@@ -43,9 +43,11 @@ A full-screen Commander table for phones, tablets and desktops, modeled on apps 
 Dual lands by cycle (original duals, shock, fast, slow, check, pain, temples, surveil, verge, bounce, filter, gain, Guildgates) with card images from Scryfall, filterable by color pair and cycle, plus rules of thumb for land counts, sources per color, pip counting, kinds of fixing and the triomes. Modeled on the [Mana Gathering](https://managathering.com/) dual lands guide.
 
 ### Deck Analyzer
-Sub-tabs: **Analysis**, **Mana base**, **Low Sodium check**, **Low Sodium rules & ban list**.
+Sub-tabs: **Analysis**, **Mana base**, **Sample hand**, **Low Sodium check**, **Low Sodium rules & ban list**.
 
 **Mana base optimizer:** after you analyze a deck, the Mana base tab compares the colored symbols your spells need with your lands and mana rocks, gives a target number of sources per color (rules of thumb), suggests a land count, the best split of your basic lands, flags tapped and colorless lands, and lists dual lands, triomes and other fixing you could add.
+
+**Sample hand & goldfish:** the Sample hand tab loads the list from the Analysis tab, shuffles it and deals 7 with card art. Keep or mulligan (London mulligan with the Commander free first mulligan, choosing what goes on the bottom), then goldfish: Next turn draws, and each card can be played, discarded or moved between hand, battlefield and graveyard. It shows turn, library size, lands in hand and in play, and the chance the next draw is a land. If card data cannot load it falls back to names only.
 
 Paste a commander and a decklist to get:
 - Legality, singleton, and color-identity checks (official Commander rules, or a stricter "Low Sodium 2.0" house ban list you can toggle on — results come with a compliant / not-compliant verdict, a per-rule tally, and the exact reason each card is banned)
