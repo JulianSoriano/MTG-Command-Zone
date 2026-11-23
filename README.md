@@ -39,7 +39,7 @@ A full-screen Commander table for phones, tablets and desktops, modeled on apps 
 - The dice, coin and mana pool also open from the setup screen without starting a game.
 
 
-The cEDH guide has a **Sync card data** button that re-checks every card in the guide against Scryfall, refreshes the art, and reports any legality changes such as a new ban. The metagame tier numbers (from cedhstats.org) are built into the guide and are updated by editing the data, because that site does not allow other websites to read its data from a browser.
+The cEDH guide has a **Sync card data** button that re-checks every card in the guide against Scryfall, refreshes the art, and reports any legality changes such as a new ban. On the Meta & tier list tab, **Update from cedhstats.org** rebuilds the top ten commanders: copy the table from cedhstats.org/commanders, paste it in and press Update (the site does not allow other websites to read its data directly, so a paste is required). The result is remembered in this browser. The built-in numbers were last read 2026-11-23.
 
 ### Mana Guide
 Dual lands by cycle (original duals, shock, fast, slow, check, pain, temples, surveil, verge, bounce, filter, gain, Guildgates) with card images from Scryfall, filterable by color pair and cycle, plus rules of thumb for land counts, sources per color, pip counting, kinds of fixing and the triomes. Modeled on the [Mana Gathering](https://managathering.com/) dual lands guide.

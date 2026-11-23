@@ -934,6 +934,10 @@
   .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .cc-inline input[type=text] { flex: 1 1 220px; }
+  .ce-update { margin: 10px 0 14px; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+  .ce-update summary { cursor: pointer; font-weight: 600; }
+  .ce-update ol { margin: 8px 0; padding-left: 20px; }
+  .ce-update textarea { margin: 6px 0 8px; }
   .ce-sync { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; }
   .ce-sync button { min-height: 0; padding: 8px 14px; }
   .ce-sync .hint { margin: 0; flex: 1 1 260px; }
@@ -1089,7 +1093,7 @@
       <p class="hint">Competitive EDH (cEDH) is Commander played to win: optimized 100-card singleton decks, four-player pods, and games that routinely end in a few turns. This guide covers the metagame, combos, staples, and the vocabulary. Metagame numbers are a dated snapshot; card legality is checked live against Scryfall.</p>
       <div class="ce-sync">
         <button type="button" class="secondary" id="ceSyncBtn">Sync card data</button>
-        <span class="hint" id="ceSyncInfo" role="status" aria-live="polite">Re-checks every card in this guide against Scryfall for new bans and legality changes, and refreshes the art. The tier numbers on the Metagame tab are built into the guide.</span>
+        <span class="hint" id="ceSyncInfo" role="status" aria-live="polite">Re-checks every card in this guide against Scryfall for new bans and legality changes, and refreshes the art. The tier numbers are updated separately, on the Meta &amp; tier list tab.</span>
       </div>
       <div class="ce-tabs" role="tablist" id="ceTabs">
         <button type="button" class="active" data-ce="start">Start here</button>
@@ -1129,6 +1133,16 @@
       <div class="ce-panel" id="ce-meta">
         <h3>Metagame snapshot</h3>
         <p class="ce-asof" id="ceMetaAsOf"></p>
+        <details class="ce-update" id="ceUpdate">
+          <summary>Update from cedhstats.org</summary>
+          <ol class="hint">
+            <li>Open <a href="https://cedhstats.org/commanders" target="_blank" rel="noopener">cedhstats.org/commanders</a>.</li>
+            <li>Select the commanders table, from the "#" heading down to the last row, and copy it.</li>
+            <li>Paste it here and press Update. The ten most-played commanders replace the list below.</li>
+          </ol>
+          <textarea id="ceUpdateText" rows="5" spellcheck="false" style="min-height:0" placeholder="Paste the copied table here" aria-label="Pasted commanders table"></textarea>
+          <div class="ce-sync"><button type="button" id="ceUpdateBtn">Update tier list</button><span class="hint" id="ceUpdateInfo" role="status" aria-live="polite">cedhstats.org doesn't let other websites read it directly, so the table has to be pasted in.</span></div>
+        </details>
         <p>Entries show how often a commander is played; <strong>PPG</strong> (points per game) shows how well it does: 5 points for a win, 1 for a draw, 0 for a loss, divided by games. A neutral deck sits near the baseline marked on each bar. Tiers below are drawn from PPG relative to that baseline.</p>
         <div id="ceTiers"></div>
         <div class="ce-note ls-note">Read these numbers carefully. PPG is not adjusted for player skill, pod makeup, or sample size, so a commander with fewer entries can look better or worse than it really is. Popular commanders attract many different pilots, which pulls PPG toward the baseline. Use tiers as a guide to what you will face, not a verdict on which deck to buy.</div>
@@ -4579,20 +4593,25 @@
     try {
       // Snapshot from cedhstats.org (Topdeck.gg tournament data), read 2026-10-17.
       const META = {
-        asOf: "2026-10-17", baseline: 1.194, source: "https://cedhstats.org",
+        asOf: "2026-11-23", baseline: 1.193, source: "https://cedhstats.org",
         rows: [
-          { names: ["Kraum, Ludevic's Opus", "Tymna the Weaver"], label: "Kraum / Tymna", entries: 2965, ppg: 1.37 },
-          { names: ["Kinnan, Bonder Prodigy"], label: "Kinnan, Bonder Prodigy", entries: 2908, ppg: 1.33 },
-          { names: ["Rograkh, Son of Rohgahh", "Thrasios, Triton Hero"], label: "Rograkh / Thrasios", entries: 2118, ppg: 1.34 },
-          { names: ["Rograkh, Son of Rohgahh", "Silas Renn, Seeker Adept"], label: "Rograkh / Silas Renn", entries: 1871, ppg: 1.25 },
-          { names: ["Sisay, Weatherlight Captain"], label: "Sisay, Weatherlight Captain", entries: 1591, ppg: 1.35 },
-          { names: ["Thrasios, Triton Hero", "Tymna the Weaver"], label: "Thrasios / Tymna", entries: 1169, ppg: 1.28 },
-          { names: ["Ral, Monsoon Mage // Ral, Leyline Prodigy"], label: "Ral, Monsoon Mage", entries: 908, ppg: 1.26 },
-          { names: ["Dargo, the Shipwrecker", "Tymna the Weaver"], label: "Dargo / Tymna", entries: 892, ppg: 1.19 },
-          { names: ["Ishai, Ojutai Dragonspeaker", "Rograkh, Son of Rohgahh"], label: "Ishai / Rograkh", entries: 844, ppg: 1.35 },
-          { names: ["Vivi Ornitier"], label: "Vivi Ornitier", entries: 843, ppg: 1.17 }
+          { names: ["Kraum, Ludevic's Opus", "Tymna the Weaver"], label: "Kraum / Tymna", entries: 3152, ppg: 1.37 },
+          { names: ["Kinnan, Bonder Prodigy"], label: "Kinnan, Bonder Prodigy", entries: 3064, ppg: 1.33 },
+          { names: ["Rograkh, Son of Rohgahh", "Thrasios, Triton Hero"], label: "Rograkh / Thrasios", entries: 2221, ppg: 1.34 },
+          { names: ["Rograkh, Son of Rohgahh", "Silas Renn, Seeker Adept"], label: "Rograkh / Silas Renn", entries: 1921, ppg: 1.23 },
+          { names: ["Sisay, Weatherlight Captain"], label: "Sisay, Weatherlight Captain", entries: 1805, ppg: 1.36 },
+          { names: ["Thrasios, Triton Hero", "Tymna the Weaver"], label: "Thrasios / Tymna", entries: 1282, ppg: 1.29 },
+          { names: ["Vivi Ornitier"], label: "Vivi Ornitier", entries: 926, ppg: 1.14 },
+          { names: ["Ral, Monsoon Mage // Ral, Leyline Prodigy"], label: "Ral, Monsoon Mage", entries: 855, ppg: 1.24 },
+          { names: ["Dargo, the Shipwrecker", "Tymna the Weaver"], label: "Dargo / Tymna", entries: 852, ppg: 1.17 },
+          { names: ["Magda, Brazen Outlaw"], label: "Magda, Brazen Outlaw", entries: 828, ppg: 1.38 }
         ]
       };
+      // A table pasted by the Update button is remembered in this browser and used while it is newer than the built-in snapshot.
+      try {
+        const saved = JSON.parse(localStorage.getItem("mtgCedhMeta") || "null");
+        if (saved && Array.isArray(saved.rows) && saved.rows.length && saved.asOf >= META.asOf) { META.rows = saved.rows; META.asOf = saved.asOf; META.baseline = saved.baseline || META.baseline; }
+      } catch (e) { /* storage unavailable */ }
       const TIER_RULES = [
         { id: "t1", label: "Tier 1", min: 1.33, blurb: "Clearly above baseline in the sample." },
         { id: "t2", label: "Tier 2", min: 1.25, blurb: "Above baseline; solid and well represented." },
@@ -4880,6 +4899,55 @@
         }
       }
       $("#ceSyncBtn").addEventListener("click", sync);
+
+      // Update from cedhstats.org: parse a pasted copy of its commanders table and rebuild the top ten by entries.
+      const NAME_HINTS = { "ishai / rograkh": ["Ishai, Ojutai Dragonspeaker", "Rograkh, Son of Rohgahh"] };
+      function parseCedhTable(text) {
+        const out = [];
+        text.split(/\r?\n/).forEach(line => {
+          const m = line.replace(/\t/g, "  ").match(/^\s*(\d+)\s+(.+?)\s{1,}([\d,]+)\s+[\d.]+\s*%\s+[\d.]+\s*%\s+(\d\.\d+)\b/);
+          if (m) out.push({ label: m[2].replace(/\s+/g, " ").trim(), entries: parseInt(m[3].replace(/,/g, ""), 10), ppg: parseFloat(m[4]) });
+        });
+        return out;
+      }
+      const keyOf = l => l.split(" // ")[0].trim().toLowerCase(); // the site spells double-faced commanders "Front // Back"; the guide shows the front name
+      async function resolveNames(label) {
+        const known = META.rows.find(r => keyOf(r.label) === keyOf(label));
+        if (known) return known.names;
+        const hint = NAME_HINTS[label.toLowerCase()];
+        if (hint) return hint;
+        const parts = label.includes(" // ") ? [label] : label.split(" / ").map(x => x.trim());
+        const names = [];
+        for (const part of parts) {
+          try {
+            const r = await fetch("https://api.scryfall.com/cards/named?fuzzy=" + encodeURIComponent(part));
+            const c = r.ok ? await r.json() : null;
+            names.push(c && c.name ? c.name : part);
+          } catch (e) { names.push(part); }
+        }
+        return names;
+      }
+      async function updateFromPaste() {
+        const info = $("#ceUpdateInfo"), btn = $("#ceUpdateBtn");
+        info.style.color = "";
+        const text = $("#ceUpdateText").value;
+        const parsed = parseCedhTable(text);
+        if (parsed.length < 3) { info.textContent = "I couldn't find the commanders table in what you pasted. Copy the whole table, including the rank numbers, and try again."; info.style.color = "var(--bad)"; return; }
+        btn.disabled = true; btn.textContent = "Updating...";
+        const top = parsed.sort((a, b) => b.entries - a.entries).slice(0, 10);
+        const rows = [];
+        for (const r of top) rows.push({ names: await resolveNames(r.label), label: r.label.split(" // ")[0].trim(), entries: r.entries, ppg: r.ppg });
+        const was = new Set(META.rows.map(r => r.label)), now = new Set(rows.map(r => r.label));
+        const added = rows.filter(r => !was.has(r.label)).map(r => r.label), dropped = [...was].filter(l => !now.has(l));
+        META.rows = rows; META.asOf = new Date().toLocaleDateString("en-CA");
+        const bl = text.match(/baseline[^\d]{0,30}(\d\.\d+)/i); if (bl) META.baseline = parseFloat(bl[1]);
+        try { localStorage.setItem("mtgCedhMeta", JSON.stringify({ asOf: META.asOf, baseline: META.baseline, rows })); } catch (e) {}
+        renderTiers();
+        info.textContent = `Updated to ${rows.length} commanders, read ${META.asOf}.` + (added.length ? ` New: ${added.join(", ")}.` : "") + (dropped.length ? ` Dropped out: ${dropped.join(", ")}.` : "") + (!added.length && !dropped.length ? " The same ten commanders, with new numbers." : "");
+        btn.disabled = false; btn.textContent = "Update tier list";
+        sync(); // fetch art and legality for any new commanders
+      }
+      $("#ceUpdateBtn").addEventListener("click", updateFromPaste);
 
       renderAll();
       $("#ceTabs").addEventListener("click", ev => {
