@@ -934,6 +934,9 @@
   .cc-template { margin: 6px 0 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   .cc-inline { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .cc-inline input[type=text] { flex: 1 1 220px; }
+  .ce-sync { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 0 0 12px; }
+  .ce-sync button { min-height: 0; padding: 8px 14px; }
+  .ce-sync .hint { margin: 0; flex: 1 1 260px; }
   /* Saved deck library */
   .deck-lib { padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
   .dl-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: stretch; }
@@ -1084,6 +1087,10 @@
     <div class="panel">
       <h2>cEDH guide</h2>
       <p class="hint">Competitive EDH (cEDH) is Commander played to win: optimized 100-card singleton decks, four-player pods, and games that routinely end in a few turns. This guide covers the metagame, combos, staples, and the vocabulary. Metagame numbers are a dated snapshot; card legality is checked live against Scryfall.</p>
+      <div class="ce-sync">
+        <button type="button" class="secondary" id="ceSyncBtn">Sync card data</button>
+        <span class="hint" id="ceSyncInfo" role="status" aria-live="polite">Re-checks every card in this guide against Scryfall for new bans and legality changes, and refreshes the art. The tier numbers on the Metagame tab are built into the guide.</span>
+      </div>
       <div class="ce-tabs" role="tablist" id="ceTabs">
         <button type="button" class="active" data-ce="start">Start here</button>
         <button type="button" data-ce="meta">Meta &amp; tier list</button>
@@ -4837,6 +4844,42 @@
           loading = false;
         }
       }
+
+      // Sync: re-pull every card from Scryfall and report what changed (new bans, legality changes).
+      let syncing = false;
+      async function sync() {
+        if (syncing || loading) return;
+        syncing = true;
+        const btn = $("#ceSyncBtn"), info = $("#ceSyncInfo");
+        btn.disabled = true; btn.textContent = "Syncing..."; info.style.color = "";
+        info.textContent = "Checking cards against Scryfall...";
+        try {
+          const names = all();
+          const before = new Map(names.map(n => { const c = lookup(n); return [n, c && c.legalities ? c.legalities.commander : null]; }));
+          const { found, notFound } = await fetchCollection(names);
+          const changes = [];
+          names.forEach(n => {
+            const c = found.get(n.toLowerCase()) || found.get(primaryLookupName(n).toLowerCase()) || null;
+            const was = before.get(n), now = c && c.legalities ? c.legalities.commander : null;
+            if (was && now && was !== now) changes.push(`${n}: ${was.replace("_", " ")} to ${now.replace("_", " ")}`);
+            cache.set(n.toLowerCase(), c);
+          });
+          loaded = true;
+          renderAll();
+          const time = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+          const miss = notFound.length ? ` ${notFound.length} name${notFound.length === 1 ? "" : "s"} not found on Scryfall.` : "";
+          info.textContent = changes.length
+            ? `Synced at ${time}. ${changes.length} legality change${changes.length === 1 ? "" : "s"}: ${changes.join("; ")}.${miss}`
+            : `Synced at ${time}. ${names.length} cards checked, no legality changes since this page loaded.${miss}`;
+          if (changes.length) info.style.color = "var(--warn)";
+        } catch (err) {
+          info.textContent = "Couldn't reach Scryfall, so nothing was changed. Check your connection and try again.";
+          info.style.color = "var(--bad)";
+        } finally {
+          syncing = false; btn.disabled = false; btn.textContent = "Sync card data";
+        }
+      }
+      $("#ceSyncBtn").addEventListener("click", sync);
 
       renderAll();
       $("#ceTabs").addEventListener("click", ev => {
